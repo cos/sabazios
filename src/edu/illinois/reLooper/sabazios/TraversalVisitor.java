@@ -1,4 +1,4 @@
-package edu.illinois.reLooper.suggest;
+package edu.illinois.reLooper.sabazios;
 
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ssa.SSAInstruction;

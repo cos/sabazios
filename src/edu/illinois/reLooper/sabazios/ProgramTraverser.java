@@ -1,4 +1,4 @@
-package edu.illinois.reLooper.suggest;
+package edu.illinois.reLooper.sabazios;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -50,6 +50,7 @@ public class ProgramTraverser {
 			if (cgNode.getIR() != null)
 				visit(cgNode.getIR().getControlFlowGraph().entry());
 			
+//			System.out.println("<--");
 			visitor.visitAfter(cgNode);
 		}
 

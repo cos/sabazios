@@ -1,4 +1,4 @@
-package edu.illinois.reLooper.suggest;
+package edu.illinois.reLooper.sabazios;
 
 import java.util.HashSet;
 
@@ -22,7 +22,7 @@ public class BeforeInAfterVisitor extends TraversalVisitor {
 
 	@Override
 	public void visitBefore(CGNode cgNode) {
-		if (cgNode.getMethod().toString().contains("parOp("))
+		if (cgNode.getMethod().toString().contains("op("))
 		{
 			if(getParOpCGNode() == null)
 				this.parOpCGNode = cgNode;
@@ -32,7 +32,7 @@ public class BeforeInAfterVisitor extends TraversalVisitor {
 
 	@Override
 	public void visitAfter(CGNode cgNode) {
-		if (cgNode.getMethod().toString().contains("parOp("))
+		if (cgNode.getMethod().toString().contains("op("))
 			state = State.AFTER;
 	}
 

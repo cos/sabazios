@@ -1,4 +1,4 @@
-package edu.illinois.reLooper.suggest;
+package edu.illinois.reLooper.sabazios;
 
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.ShrikeBTMethod;

@@ -1,4 +1,4 @@
-package sabazios;
+package edu.illinois.reLooper.sabazios;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
