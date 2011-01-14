@@ -6,6 +6,6 @@ com\/sun\/.*
 sun\/.*
 apple\/.*
 javax\/.*
-com\/apple\/.*
+com\/apple\/.* 
 org\/eclipse\/.*
 apache\/.*
