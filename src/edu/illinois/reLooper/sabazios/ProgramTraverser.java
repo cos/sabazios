@@ -5,11 +5,8 @@ import java.util.Iterator;
 import java.util.Set;
 
 import com.ibm.wala.classLoader.CallSiteReference;
-import com.ibm.wala.classLoader.ShrikeBTMethod;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
-import com.ibm.wala.ipa.slicer.NormalStatement;
-import com.ibm.wala.ipa.slicer.Statement;
 import com.ibm.wala.ssa.ISSABasicBlock;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSAInvokeInstruction;
@@ -26,9 +23,8 @@ public class ProgramTraverser {
 		this.visitor = cgNodeVisitor;
 	}
 
-	HashSet<CGNode> visitedNodes = new HashSet<CGNode>();
-
 	public void traverse() {
+		visitor.startVisiting();
 		CGNodeTraverser cgNodeTraverser = new CGNodeTraverser(entryNode);
 		cgNodeTraverser.traverse();
 	}
@@ -43,14 +39,14 @@ public class ProgramTraverser {
 		}
 
 		public void traverse() {
-//			System.out.println(cgNode);
+			System.out.println(cgNode);
 //			System.out.println(cgNode.getMethod());
 			visitor.visitBefore(cgNode);
 			
 			if (cgNode.getIR() != null)
 				visit(cgNode.getIR().getControlFlowGraph().entry());
 			
-//			System.out.println("<--");
+			System.out.println("<--");
 			visitor.visitAfter(cgNode);
 		}
 
@@ -72,8 +68,8 @@ public class ProgramTraverser {
 					Set<CGNode> possibleTargets = callGraph.getPossibleTargets(
 							cgNode, callSite);
 					for (CGNode childNode : possibleTargets)
-						if (!visitedNodes.contains(childNode)) {
-							visitedNodes.add(childNode);
+						if (visitor.shouldVisit(childNode)) {
+							visitor.beganVisiting(childNode);
 							CGNodeTraverser cgNodeTraverser = new CGNodeTraverser(
 									childNode);
 							cgNodeTraverser.traverse();

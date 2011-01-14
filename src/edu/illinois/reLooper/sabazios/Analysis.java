@@ -5,12 +5,15 @@ import java.util.Iterator;
 import com.ibm.wala.analysis.pointers.HeapGraph;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
+import com.ibm.wala.ipa.callgraph.propagation.AllocationSiteInNode;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
+import com.ibm.wala.ipa.callgraph.propagation.PropagationCallGraphBuilder;
 import com.ibm.wala.ipa.slicer.NormalStatement;
 import com.ibm.wala.ipa.slicer.StatementWithInstructionIndex;
 import com.ibm.wala.ssa.SSAInstruction;
+import com.ibm.wala.ssa.SSANewInstruction;
 import com.ibm.wala.ssa.SSAPutInstruction;
 
 public class Analysis {
@@ -19,17 +22,19 @@ public class Analysis {
 	final PointerAnalysis pointerAnalysis;
 	private HeapGraph heapGraph;
 	private final BeforeInAfterVisitor beforeInAfter;
+	final PropagationCallGraphBuilder builder;
 
-	public Analysis(CallGraph callGraph, PointerAnalysis pointerAnalysis, BeforeInAfterVisitor beforeInAfter) {
+	public Analysis(CallGraph callGraph, PointerAnalysis pointerAnalysis, PropagationCallGraphBuilder builder, BeforeInAfterVisitor beforeInAfter) {
 		this.callGraph = callGraph;
 		this.pointerAnalysis = pointerAnalysis;
+		this.builder = builder;
 		this.beforeInAfter = beforeInAfter;
 		this.heapGraph = this.pointerAnalysis.getHeapGraph();
 	}
 	
 	// TODO: ssa write to array index instruction
 
-	public Iterator<Object> getInstanceKeys(CGNode cgNode, int value) {
+	public LocalPointerKey getLocalPointerKey(CGNode cgNode, int value) {
 		LocalPointerKey localPK = null;
 		for (Object o : heapGraph) {
 			if (!(o instanceof LocalPointerKey))
@@ -39,7 +44,7 @@ public class Analysis {
 			if (!localPK.getNode().equals(cgNode))
 				continue;
 			if (localPK.getValueNumber() == value)
-				return heapGraph.getSuccNodes(localPK);
+				return localPK;
 		}
 //		System.out.println("Couldn't find heap Instance Key for " + cgNode
 //				+ "   value " + value);
@@ -55,8 +60,10 @@ public class Analysis {
 		if(predInstruction instanceof SSAPutInstruction)
 			return false;
 		for (int i = 0; i < predInstruction.getNumberOfUses(); i++) {
-			Iterator<Object> instanceKeys = getInstanceKeys(cgNode,
+			LocalPointerKey localPointerKey = getLocalPointerKey(cgNode,
 					predInstruction.getUse(i));
+			
+			Iterator<Object> instanceKeys = heapGraph.getSuccNodes(localPointerKey);
 			if (instanceKeys == null)
 				continue;
 			while (instanceKeys.hasNext()) {
@@ -70,5 +77,21 @@ public class Analysis {
 
 	public BeforeInAfterVisitor getBeforeInAfter() {
 		return beforeInAfter;
+	}
+	
+	public static NormalStatement getNormalStatement(AllocationSiteInNode instanceKey) {
+		SSANewInstruction allocationSiteInstruction = getInstruction(instanceKey);
+		int allocationSiteInstructionIndex = CodeLocation.getSSAInstructionNo(
+				instanceKey.getNode(), allocationSiteInstruction);
+		NormalStatement allocationSiteStatement = new NormalStatement(
+				instanceKey.getNode(), allocationSiteInstructionIndex);
+		return allocationSiteStatement;
+	}
+
+	public static SSANewInstruction getInstruction(AllocationSiteInNode p) {
+		if (p.getNode().getIR() != null)
+			return p.getNode().getIR().getNew(p.getSite());
+		else
+			return null;
 	}
 }

@@ -45,33 +45,57 @@ public class RaceFinder {
 			CGNode cgNode = statement.getNode();
 			SSAInstruction instruction = cgNode.getIR().getInstructions()[statement
 					.getInstructionIndex()];
+
+			// we only check put instructions for now. should also include
+			// array, etc. in the future
 			if (instruction instanceof SSAPutInstruction) {
 				SSAPutInstruction putI = (SSAPutInstruction) instruction;
+
+				// if it is not static, we do the more involved check
 				if (!putI.isStatic()) {
 					int ref = putI.getRef();
-					Iterator<Object> instanceKeys = analysis.getInstanceKeys(cgNode, ref);
+
+					// the local pointer key the statement writes to
+					LocalPointerKey localPointerKey = analysis
+							.getLocalPointerKey(cgNode, ref);
+
+					// the actual instance keys for this pointer key
+					Iterator<Object> instanceKeys = heapGraph
+							.getSuccNodes(localPointerKey);
+
+					boolean racing = false;
+
+					AllocationSiteInNode allocationSite = null;
 
 					while (instanceKeys.hasNext()) {
-						Object object = (Object) instanceKeys.next();
-						if (object instanceof AllocationSiteInNode) {
+						allocationSite = (AllocationSiteInNode) instanceKeys
+								.next();
+						NormalStatement allocationSiteStatement = Analysis
+								.getNormalStatement(allocationSite);
 
-							NormalStatement allocationSiteStatement = getNormalStatement((AllocationSiteInNode) object);
+						if (beforeInAfter.before
+								.contains(allocationSiteStatement))
+							racing = true;
+					}
 
-							if (beforeInAfter.before
-									.contains(allocationSiteStatement)) {
+					// do a demand driven confirmation of the race
+//					if (racing) {
+//						DemandDrivenRaceConfirmer raceConfirmer = new DemandDrivenRaceConfirmer(
+//								analysis);
+//						racing = raceConfirmer.confirm(localPointerKey,
+//								beforeInAfter);
+//					}
 
-								boolean loopCarryDependency = checkLoopCarryDependency(statement, (AllocationSiteInNode) object, beforeInAfter);
+					// report race if it still stands
+					if (racing) {
+						Race race = new Race((NormalStatement) statement,
+								allocationSite, false);
 
-								Race race = new Race(
-										(NormalStatement) statement,
-										(AllocationSiteInNode) object, loopCarryDependency);
-								races.add(race);
-							}
-						}
+						races.add(race);
 					}
 
 				} else {
-					System.out.println("HERE "+statement);
+					// System.out.println("HERE "+statement);
 					// TODO: replace false with the true value of
 					// isLoopCarriedDependency
 					races.add(new Race((NormalStatement) statement, null, false));
@@ -82,32 +106,20 @@ public class RaceFinder {
 	}
 
 	private boolean checkLoopCarryDependency(
-			final StatementWithInstructionIndex statement, final AllocationSiteInNode instanceKey, final BeforeInAfterVisitor beforeInAfter) throws CancelException {
-//		Collection<Statement> backwordSlice = Slicer.computeBackwardSlice(
-//				statement, callGraph, pointerAnalysis,
-//				DataDependenceOptions.FULL,
-//				ControlDependenceOptions.NO_EXCEPTIONAL_EDGES);
-		
-		PredUseVisitor predUseVisitor = new PredUseVisitor(analysis, beforeInAfter, instanceKey, statement);
+			final StatementWithInstructionIndex statement,
+			final AllocationSiteInNode instanceKey,
+			final BeforeInAfterVisitor beforeInAfter) throws CancelException {
+		// Collection<Statement> backwordSlice = Slicer.computeBackwardSlice(
+		// statement, callGraph, pointerAnalysis,
+		// DataDependenceOptions.FULL,
+		// ControlDependenceOptions.NO_EXCEPTIONAL_EDGES);
 
-		(new ProgramTraverser(callGraph, callGraph.getFakeRootNode(),predUseVisitor)).traverse();
-		
+		PredUseVisitor predUseVisitor = new PredUseVisitor(analysis,
+				beforeInAfter, instanceKey, statement);
+
+		(new ProgramTraverser(callGraph, callGraph.getFakeRootNode(),
+				predUseVisitor)).traverse();
+
 		return predUseVisitor.foundUse;
-	}
-
-	private NormalStatement getNormalStatement(AllocationSiteInNode instanceKey) {
-		SSANewInstruction allocationSiteInstruction = getInstruction(instanceKey);
-		int allocationSiteInstructionIndex = CodeLocation.getSSAInstructionNo(
-				instanceKey.getNode(), allocationSiteInstruction);
-		NormalStatement allocationSiteStatement = new NormalStatement(
-				instanceKey.getNode(), allocationSiteInstructionIndex);
-		return allocationSiteStatement;
-	}
-
-	public SSANewInstruction getInstruction(AllocationSiteInNode p) {
-		if (p.getNode().getIR() != null)
-			return p.getNode().getIR().getNew(p.getSite());
-		else
-			return null;
 	}
 }

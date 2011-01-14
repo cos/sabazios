@@ -8,5 +8,4 @@ apple\/.*
 javax\/.*
 com\/apple\/.*
 org\/eclipse\/.*
-edu\/.*
 apache\/.*

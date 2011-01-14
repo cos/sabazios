@@ -27,8 +27,10 @@ public class Race {
 
 	@Override
 	public String toString() {
+		AllocationSiteInNode allocationSite = (AllocationSiteInNode) instanceKey;
+		CodeLocation allocationLocation = CodeLocation.make(allocationSite.getNode(), allocationSite.getSite().getProgramCounter());
 		return (isStatic()?"STATIC ":"")+"RACE "+(isLoopCarriedDependency?" with LCD ":"")+CodeLocation.make(getStatement())+" : "+ getStatement()
-				+ " write to " + getInstanceKey();
+				+ " write to " + allocationLocation;
 	}
 	
 	public boolean isStatic() {

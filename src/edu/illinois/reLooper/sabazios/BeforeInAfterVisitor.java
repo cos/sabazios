@@ -1,5 +1,6 @@
 package edu.illinois.reLooper.sabazios;
 
+import java.util.EnumMap;
 import java.util.HashSet;
 
 import com.ibm.wala.ipa.callgraph.CGNode;
@@ -15,6 +16,14 @@ public class BeforeInAfterVisitor extends TraversalVisitor {
 	public HashSet<StatementWithInstructionIndex> after = new HashSet<StatementWithInstructionIndex>();
 
 	private CGNode parOpCGNode; // the CG node that contains the parallel operation
+	
+	@Override
+	public void startVisiting()
+	{
+		for (State st : State.values()) {
+			nodesSeenBy.put(st, new HashSet<CGNode>());
+		}
+	}
 	
 	private enum State {
 		BEFORE, IN, AFTER
@@ -54,5 +63,23 @@ public class BeforeInAfterVisitor extends TraversalVisitor {
 
 	public CGNode getParOpCGNode() {
 		return parOpCGNode;
+	}
+	
+	
+	// Visiting logic
+	@Override
+	public boolean controlVisiting() {
+		return true;
+	}
+	
+	EnumMap<State, HashSet<CGNode>> nodesSeenBy = new EnumMap<BeforeInAfterVisitor.State, HashSet<CGNode>>(State.class);
+	@Override
+	public void beganVisiting(CGNode node) {
+		this.nodesSeenBy.get(state).add(node);
+	}
+	
+	@Override
+	public boolean shouldVisit(CGNode node) {
+		return !nodesSeenBy.get(state).contains(node);
 	}
 }
