@@ -50,19 +50,17 @@ public abstract class DataRaceAnalysisTest {
 	protected Entrypoint entrypoint;
 	protected PointerAnalysis pointerAnalysis;
 	protected CallGraph callGraph;
-	private String entryClass;
-	private String entryMethod;
-	private final List<String> binaryDependencies = new ArrayList<String>();
-	private final List<String> sourceDependencies = new ArrayList<String>();
-	private final List<String> jarDependencies = new ArrayList<String>();
-	private PropagationCallGraphBuilder builder;
+	protected String entryClass;
+	protected String entryMethod;
+	protected final List<String> binaryDependencies = new ArrayList<String>();
+	protected final List<String> sourceDependencies = new ArrayList<String>();
+	protected final List<String> jarDependencies = new ArrayList<String>();
+	protected PropagationCallGraphBuilder builder;
 	
 	public Set<Race> findRaces(String entryClass, String entryMethod)
 	{
-		this.entryClass = entryClass;
-		this.entryMethod = entryMethod;
 		try {
-			setup();
+			setup(entryClass, entryMethod);
 		
 		BeforeInAfterVisitor beforeInAfter = new BeforeInAfterVisitor();
 		ProgramTraverser programTraverser = new ProgramTraverser(callGraph,
@@ -94,8 +92,10 @@ public abstract class DataRaceAnalysisTest {
 		this.jarDependencies.add(file);
 	}
 
-	public void setup() throws ClassHierarchyException,
+	public void setup(String entryClass, String entryMethod) throws ClassHierarchyException,
 			IllegalArgumentException, CancelException, IOException {
+		this.entryClass = entryClass;
+		this.entryMethod = entryMethod;
 		AnalysisScope scope = getAnalysisScope();
 		scope.setExclusions(FileOfClasses.createFileOfClasses(new File(
 				"walaExclusions.txt")));
