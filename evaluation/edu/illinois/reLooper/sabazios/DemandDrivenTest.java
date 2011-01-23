@@ -47,21 +47,40 @@ public class DemandDrivenTest extends DataRaceAnalysisTest {
 			
 			demandRefinementPointsTo.setRefinementPolicyFactory(new TunedRefinementPolicy.Factory(cha));
 
-			LocalPointerKey localPointerKey = null;
-			
-			Pair<PointsToResult, Collection<InstanceKey>> result = demandRefinementPointsTo
-					.getPointsTo(localPointerKey,
-							Predicate.<InstanceKey> falsePred());
-
-			System.out.println(result.fst);
-
-			Collection<InstanceKey> pointsTo = result.snd;
-
-			for (InstanceKey instanceKey : pointsTo) {
-				System.out.println(instanceKey);
-			}
+			executeFor(demandRefinementPointsTo, "main", 4);
+			executeFor(demandRefinementPointsTo, "main", 8);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	private void executeFor(DemandRefinementPointsTo demandRefinementPointsTo,
+			String nodeHint, int value) {
+		LocalPointerKey localPointerKey = getInterestingPointerKey(nodeHint,value);
+		
+		Pair<PointsToResult, Collection<InstanceKey>> result = demandRefinementPointsTo
+				.getPointsTo(localPointerKey,
+						Predicate.<InstanceKey> falsePred());
+		System.out.println(result.fst);
+		Collection<InstanceKey> pointsTo = result.snd;
+		for (InstanceKey instanceKey : pointsTo) {
+			System.out.println(instanceKey);
+		}
+	}
+
+	private LocalPointerKey getInterestingPointerKey(CharSequence nodeHint, int value) {
+		LocalPointerKey localPointerKey;
+		
+		Collection<PointerKey> pointerKeys = pointerAnalysis.getPointerKeys();
+		
+		for (PointerKey pointerKey : pointerKeys) {
+			if(pointerKey instanceof LocalPointerKey)
+			{
+				localPointerKey = (LocalPointerKey) pointerKey;
+				if(localPointerKey.getNode().toString().contains(nodeHint) && localPointerKey.getValueNumber() == value)
+				return localPointerKey;
+			}
+		}
+		return null;
 	}
 }
