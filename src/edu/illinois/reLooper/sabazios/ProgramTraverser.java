@@ -39,14 +39,14 @@ public class ProgramTraverser {
 		}
 
 		public void traverse() {
-			System.out.println(cgNode);
+//			System.out.println(cgNode);
 //			System.out.println(cgNode.getMethod());
 			visitor.visitBefore(cgNode);
 			
 			if (cgNode.getIR() != null)
 				visit(cgNode.getIR().getControlFlowGraph().entry());
 			
-			System.out.println("<--");
+//			System.out.println("<--");
 			visitor.visitAfter(cgNode);
 		}
 

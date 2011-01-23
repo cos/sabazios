@@ -73,7 +73,7 @@ public abstract class DataRaceAnalysisTest {
 				beforeInAfter);
 		RaceFinder raceFinder = new RaceFinder(analysis);
 		
-		return raceFinder.findRaces(beforeInAfter);
+		return raceFinder.findRaces();
 		} catch (ClassHierarchyException e) {
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
@@ -161,7 +161,7 @@ public abstract class DataRaceAnalysisTest {
 		    Util.addDefaultSelectors(options, cha);
 		    Util.addDefaultBypassLogic(options, scope, Util.class.getClassLoader(), cha);
 		    
-//		    return new nCFABuilder(0, cha, options, cache, new DefaultContextSelector(options), new DefaultSSAInterpreter(options, cache));
+//		    return new nCFABuilder(1, cha, options, cache, new DefaultContextSelector(options), new DefaultSSAInterpreter(options, cache));
 
 		    return ZeroXCFABuilder.make(cha, options, cache, null, null, ZeroXInstanceKeys.ALLOCATIONS | ZeroXInstanceKeys.SMUSH_MANY | ZeroXInstanceKeys.SMUSH_PRIMITIVE_HOLDERS
 		        | ZeroXInstanceKeys.SMUSH_STRINGS | ZeroXInstanceKeys.SMUSH_THROWABLES);

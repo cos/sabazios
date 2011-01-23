@@ -28,23 +28,27 @@ public class RaceFinder {
 	private final CallGraph callGraph;
 	private HeapGraph heapGraph;
 	private final Analysis analysis;
+	private BeforeInAfterVisitor beforeInAfter;
 
 	public RaceFinder(Analysis analysis) {
 		this.analysis = analysis;
 		this.pointerAnalysis = analysis.pointerAnalysis;
 		this.callGraph = analysis.callGraph;
 		this.heapGraph = pointerAnalysis.getHeapGraph();
+		this.beforeInAfter = analysis.getBeforeInAfter();
 	}
 
-	public Set<Race> findRaces(BeforeInAfterVisitor beforeInAfter)
-			throws CancelException {
-
+	public Set<Race> findRaces() throws CancelException {
 		HashSet<Race> races = new HashSet<Race>();
 
+		// for each statement in the parallel for
 		for (StatementWithInstructionIndex statement : beforeInAfter.in) {
-			CGNode cgNode = statement.getNode();
-			SSAInstruction instruction = cgNode.getIR().getInstructions()[statement
-					.getInstructionIndex()];
+			SSAInstruction instruction;
+			try {
+				instruction = Analysis.getInstruction(statement);
+			} catch (ArrayIndexOutOfBoundsException e) {
+				continue;
+			}
 
 			// we only check put instructions for now. should also include
 			// array, etc. in the future
@@ -57,7 +61,7 @@ public class RaceFinder {
 
 					// the local pointer key the statement writes to
 					LocalPointerKey localPointerKey = analysis
-							.getLocalPointerKey(cgNode, ref);
+							.getLocalPointerKey(statement.getNode(), ref);
 
 					// the actual instance keys for this pointer key
 					Iterator<Object> instanceKeys = heapGraph
@@ -79,12 +83,12 @@ public class RaceFinder {
 					}
 
 					// do a demand driven confirmation of the race
-//					if (racing) {
-//						DemandDrivenRaceConfirmer raceConfirmer = new DemandDrivenRaceConfirmer(
-//								analysis);
-//						racing = raceConfirmer.confirm(localPointerKey,
-//								beforeInAfter);
-//					}
+					if (racing) {
+						DemandDrivenRaceConfirmer raceConfirmer = new DemandDrivenRaceConfirmer(
+								analysis);
+						racing = raceConfirmer.confirm(localPointerKey,
+								beforeInAfter);
+					}
 
 					// report race if it still stands
 					if (racing) {

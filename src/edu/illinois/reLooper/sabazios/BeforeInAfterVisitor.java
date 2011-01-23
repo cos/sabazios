@@ -6,6 +6,7 @@ import java.util.HashSet;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.slicer.NormalStatement;
 import com.ibm.wala.ipa.slicer.StatementWithInstructionIndex;
+import com.ibm.wala.ipa.slicer.StatementWithInstructionIndex;
 import com.ibm.wala.ssa.SSAInstruction;
 
 public class BeforeInAfterVisitor extends TraversalVisitor {
