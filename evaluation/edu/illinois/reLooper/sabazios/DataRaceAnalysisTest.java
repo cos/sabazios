@@ -19,6 +19,7 @@ import com.ibm.wala.ipa.callgraph.AnalysisScope;
 import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.ContextSelector;
 import com.ibm.wala.ipa.callgraph.Entrypoint;
+import com.ibm.wala.ipa.callgraph.impl.ContextInsensitiveSelector;
 import com.ibm.wala.ipa.callgraph.impl.DefaultContextSelector;
 import com.ibm.wala.ipa.callgraph.impl.DefaultEntrypoint;
 import com.ibm.wala.ipa.callgraph.impl.Util;
@@ -30,6 +31,7 @@ import com.ibm.wala.ipa.callgraph.propagation.cfa.DefaultSSAInterpreter;
 import com.ibm.wala.ipa.callgraph.propagation.cfa.ZeroXCFABuilder;
 import com.ibm.wala.ipa.callgraph.propagation.cfa.ZeroXInstanceKeys;
 import com.ibm.wala.ipa.callgraph.propagation.cfa.nCFABuilder;
+import com.ibm.wala.ipa.callgraph.propagation.cfa.nCFAContextSelector;
 import com.ibm.wala.ipa.cha.ClassHierarchy;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
@@ -101,7 +103,7 @@ public abstract class DataRaceAnalysisTest {
 				"walaExclusions.txt")));
 
 		IClassHierarchy cha = ClassHierarchy.make(scope);
-		System.out.println(scope);
+//		System.out.println(scope);
 
 		Set<Entrypoint> entrypoints = new HashSet<Entrypoint>();
 		TypeReference typeReference = TypeReference.findOrCreate(
@@ -161,7 +163,8 @@ public abstract class DataRaceAnalysisTest {
 		    Util.addDefaultSelectors(options, cha);
 		    Util.addDefaultBypassLogic(options, scope, Util.class.getClassLoader(), cha);
 		    
-//		    return new nCFABuilder(1, cha, options, cache, new DefaultContextSelector(options), new DefaultSSAInterpreter(options, cache));
+//		    ContextSelector appContextSelector = new ContextInsensitiveSelector();
+//			return new nCFABuilder(0, cha, options, cache, appContextSelector, new DefaultSSAInterpreter(options, cache));
 
 		    return ZeroXCFABuilder.make(cha, options, cache, null, null, ZeroXInstanceKeys.ALLOCATIONS | ZeroXInstanceKeys.SMUSH_MANY | ZeroXInstanceKeys.SMUSH_PRIMITIVE_HOLDERS
 		        | ZeroXInstanceKeys.SMUSH_STRINGS | ZeroXInstanceKeys.SMUSH_THROWABLES);

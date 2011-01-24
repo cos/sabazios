@@ -122,6 +122,11 @@ public class CodeLocation {
 		
 		int ssaInstructionNo = CodeLocation.getSSAInstructionNo(cgNode,
 				instruction);
+		return variableName(destValue, cgNode, ssaInstructionNo);
+	}
+
+	public static String variableName(Integer destValue, CGNode cgNode,
+			int ssaInstructionNo) {
 		String[] localNames;
 		try {
 			localNames = cgNode.getIR().getLocalNames(ssaInstructionNo,

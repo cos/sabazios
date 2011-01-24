@@ -5,10 +5,22 @@ import java.util.Collection;
 
 import org.junit.Test;
 
+import com.ibm.wala.classLoader.IField;
+import com.ibm.wala.demandpa.alg.CallStack;
 import com.ibm.wala.demandpa.alg.ContextSensitiveStateMachine;
 import com.ibm.wala.demandpa.alg.DemandRefinementPointsTo;
 import com.ibm.wala.demandpa.alg.DemandRefinementPointsTo.PointsToResult;
+import com.ibm.wala.demandpa.alg.InstanceKeyAndState;
+import com.ibm.wala.demandpa.alg.refinepolicy.AbstractRefinementPolicy;
+import com.ibm.wala.demandpa.alg.refinepolicy.AlwaysRefineCGPolicy;
+import com.ibm.wala.demandpa.alg.refinepolicy.AlwaysRefineFieldsPolicy;
+import com.ibm.wala.demandpa.alg.refinepolicy.CallGraphRefinePolicy;
+import com.ibm.wala.demandpa.alg.refinepolicy.FieldRefinePolicy;
+import com.ibm.wala.demandpa.alg.refinepolicy.RefinementPolicy;
+import com.ibm.wala.demandpa.alg.refinepolicy.RefinementPolicyFactory;
 import com.ibm.wala.demandpa.alg.refinepolicy.TunedRefinementPolicy;
+import com.ibm.wala.demandpa.alg.statemachine.StateMachine.State;
+import com.ibm.wala.demandpa.flowgraph.IFlowLabel;
 import com.ibm.wala.demandpa.util.MemoryAccessMap;
 import com.ibm.wala.demandpa.util.PABasedMemoryAccessMap;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;
@@ -18,6 +30,7 @@ import com.ibm.wala.ipa.callgraph.propagation.HeapModel;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
+import com.ibm.wala.ipa.callgraph.propagation.cfa.CallerSiteContext;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.util.CancelException;
@@ -25,6 +38,27 @@ import com.ibm.wala.util.Predicate;
 import com.ibm.wala.util.collections.Pair;
 
 public class DemandDrivenTest extends DataRaceAnalysisTest {
+
+	private final class MyRefinementPolicyFactory implements
+			RefinementPolicyFactory {
+		@Override
+		public RefinementPolicy make() {
+			return new MyRefinementPolicy();
+		}
+	}
+
+	private final class MyRefinementPolicy extends AbstractRefinementPolicy {
+		public MyRefinementPolicy() {
+			super(new AlwaysRefineFieldsPolicy(), new AlwaysRefineCGPolicy());
+		}
+	}
+
+	private final class MyPredicate extends Predicate<InstanceKey> {
+		@Override
+		public boolean test(InstanceKey t) {
+			return false;
+		}
+	}
 
 	public DemandDrivenTest() {
 		this.addBinaryDependency("subjects");
@@ -34,51 +68,62 @@ public class DemandDrivenTest extends DataRaceAnalysisTest {
 	public void doTest() {
 		try {
 			setup("Lsubjects/DemandTest", "main()V");
-			
+
 			MemoryAccessMap mam = new PABasedMemoryAccessMap(callGraph,
 					pointerAnalysis);
 			IClassHierarchy cha = pointerAnalysis.getClassHierarchy();
 			AnalysisOptions options = builder.getOptions();
 			ContextSensitiveStateMachine.Factory stateMachineFactory = new ContextSensitiveStateMachine.Factory();
+			
 
 			DemandRefinementPointsTo demandRefinementPointsTo = DemandRefinementPointsTo
-					.makeWithDefaultFlowGraph(callGraph, pointerAnalysis.getHeapModel(), mam, cha, options,
+					.makeWithDefaultFlowGraph(callGraph,
+							pointerAnalysis.getHeapModel(), mam, cha, options,
 							stateMachineFactory);
-			
-			demandRefinementPointsTo.setRefinementPolicyFactory(new TunedRefinementPolicy.Factory(cha));
 
-			executeFor(demandRefinementPointsTo, "main", 4);
-			executeFor(demandRefinementPointsTo, "main", 8);
+			demandRefinementPointsTo
+					.setRefinementPolicyFactory(new MyRefinementPolicyFactory());
+
+			// executeFor(demandRefinementPointsTo, "main", 4);
+			executeFor(demandRefinementPointsTo, "main", "y");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
 	private void executeFor(DemandRefinementPointsTo demandRefinementPointsTo,
-			String nodeHint, int value) {
-		LocalPointerKey localPointerKey = getInterestingPointerKey(nodeHint,value);
-		
-		Pair<PointsToResult, Collection<InstanceKey>> result = demandRefinementPointsTo
-				.getPointsTo(localPointerKey,
-						Predicate.<InstanceKey> falsePred());
+			String nodeHint, CharSequence value) {
+		LocalPointerKey localPointerKey = getInterestingPointerKey(nodeHint,
+				value);
+
+		System.out.println("Start");
+		Pair<PointsToResult, Collection<InstanceKeyAndState>> result = demandRefinementPointsTo
+				.getPointsToWithStates(localPointerKey, new MyPredicate());
 		System.out.println(result.fst);
-		Collection<InstanceKey> pointsTo = result.snd;
-		for (InstanceKey instanceKey : pointsTo) {
+		Collection<InstanceKeyAndState> pointsTo = result.snd;
+		for (InstanceKeyAndState instanceKey : pointsTo) {
+			CallStack callStack = (CallStack) instanceKey.getState();
 			System.out.println(instanceKey);
 		}
 	}
 
-	private LocalPointerKey getInterestingPointerKey(CharSequence nodeHint, int value) {
+	private LocalPointerKey getInterestingPointerKey(CharSequence nodeHint,
+			CharSequence variableHint) {
 		LocalPointerKey localPointerKey;
-		
+
 		Collection<PointerKey> pointerKeys = pointerAnalysis.getPointerKeys();
-		
+
 		for (PointerKey pointerKey : pointerKeys) {
-			if(pointerKey instanceof LocalPointerKey)
-			{
+			if (pointerKey instanceof LocalPointerKey) {
 				localPointerKey = (LocalPointerKey) pointerKey;
-				if(localPointerKey.getNode().toString().contains(nodeHint) && localPointerKey.getValueNumber() == value)
-				return localPointerKey;
+				String variableName = CodeLocation.variableName(
+						localPointerKey.getValueNumber(),
+						localPointerKey.getNode(), localPointerKey.getNode()
+								.getIR().getInstructions().length - 1);
+
+				if (localPointerKey.getNode().toString().contains(nodeHint)
+						&& variableName != null && variableName.equals(variableHint))
+					return localPointerKey;
 			}
 		}
 		return null;
