@@ -68,6 +68,7 @@ public class RaceFinder {
 							.getSuccNodes(localPointerKey);
 
 					boolean racing = false;
+//					boolean needsDemandDrivenConfirmation = true;
 
 					AllocationSiteInNode allocationSite = null;
 
@@ -79,11 +80,15 @@ public class RaceFinder {
 
 						if (beforeInAfter.before
 								.contains(allocationSiteStatement))
+						{
 							racing = true;
+//							if(!beforeInAfter.in.contains(allocationSiteStatement))
+//								needsDemandDrivenConfirmation = false;
+						}
 					}
 
 					// do a demand driven confirmation of the race
-					if (racing) {
+					if (racing ){
 						DemandDrivenRaceConfirmer raceConfirmer = new DemandDrivenRaceConfirmer(
 								analysis);
 						racing = raceConfirmer.confirm(localPointerKey,

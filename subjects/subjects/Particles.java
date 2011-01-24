@@ -5,7 +5,7 @@ import extra166y.ParallelArray;
 
 public class Particles {
 	
-	class Particle {
+	static class Particle {
 		double x, y; Particle origin;
 		public void moveTo(double x, double y) {
 			this.x = x;

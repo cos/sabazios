@@ -163,10 +163,10 @@ public abstract class DataRaceAnalysisTest {
 		    Util.addDefaultSelectors(options, cha);
 		    Util.addDefaultBypassLogic(options, scope, Util.class.getClassLoader(), cha);
 		    
-//		    ContextSelector appContextSelector = new ContextInsensitiveSelector();
-//			return new nCFABuilder(0, cha, options, cache, appContextSelector, new DefaultSSAInterpreter(options, cache));
+		    ContextSelector appContextSelector = new ContextInsensitiveSelector();
+			return new nCFABuilder(2, cha, options, cache, appContextSelector, new DefaultSSAInterpreter(options, cache));
 
-		    return ZeroXCFABuilder.make(cha, options, cache, null, null, ZeroXInstanceKeys.ALLOCATIONS | ZeroXInstanceKeys.SMUSH_MANY | ZeroXInstanceKeys.SMUSH_PRIMITIVE_HOLDERS
-		        | ZeroXInstanceKeys.SMUSH_STRINGS | ZeroXInstanceKeys.SMUSH_THROWABLES);
+//		    return ZeroXCFABuilder.make(cha, options, cache, null, null, ZeroXInstanceKeys.ALLOCATIONS | ZeroXInstanceKeys.SMUSH_MANY | ZeroXInstanceKeys.SMUSH_PRIMITIVE_HOLDERS
+//		        | ZeroXInstanceKeys.SMUSH_STRINGS | ZeroXInstanceKeys.SMUSH_THROWABLES);
 		  }
 }
