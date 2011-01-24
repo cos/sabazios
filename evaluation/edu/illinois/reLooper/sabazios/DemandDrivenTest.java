@@ -11,13 +11,8 @@ import com.ibm.wala.demandpa.alg.ContextSensitiveStateMachine;
 import com.ibm.wala.demandpa.alg.DemandRefinementPointsTo;
 import com.ibm.wala.demandpa.alg.DemandRefinementPointsTo.PointsToResult;
 import com.ibm.wala.demandpa.alg.InstanceKeyAndState;
-import com.ibm.wala.demandpa.alg.refinepolicy.AbstractRefinementPolicy;
-import com.ibm.wala.demandpa.alg.refinepolicy.AlwaysRefineCGPolicy;
-import com.ibm.wala.demandpa.alg.refinepolicy.AlwaysRefineFieldsPolicy;
 import com.ibm.wala.demandpa.alg.refinepolicy.CallGraphRefinePolicy;
 import com.ibm.wala.demandpa.alg.refinepolicy.FieldRefinePolicy;
-import com.ibm.wala.demandpa.alg.refinepolicy.RefinementPolicy;
-import com.ibm.wala.demandpa.alg.refinepolicy.RefinementPolicyFactory;
 import com.ibm.wala.demandpa.alg.refinepolicy.TunedRefinementPolicy;
 import com.ibm.wala.demandpa.alg.statemachine.StateMachine.State;
 import com.ibm.wala.demandpa.flowgraph.IFlowLabel;
@@ -38,20 +33,6 @@ import com.ibm.wala.util.Predicate;
 import com.ibm.wala.util.collections.Pair;
 
 public class DemandDrivenTest extends DataRaceAnalysisTest {
-
-	private final class MyRefinementPolicyFactory implements
-			RefinementPolicyFactory {
-		@Override
-		public RefinementPolicy make() {
-			return new MyRefinementPolicy();
-		}
-	}
-
-	private final class MyRefinementPolicy extends AbstractRefinementPolicy {
-		public MyRefinementPolicy() {
-			super(new AlwaysRefineFieldsPolicy(), new AlwaysRefineCGPolicy());
-		}
-	}
 
 	private final class MyPredicate extends Predicate<InstanceKey> {
 		@Override
@@ -82,7 +63,7 @@ public class DemandDrivenTest extends DataRaceAnalysisTest {
 							stateMachineFactory);
 
 			demandRefinementPointsTo
-					.setRefinementPolicyFactory(new MyRefinementPolicyFactory());
+					.setRefinementPolicyFactory(new MyRefinementPolicy.Factory());
 
 			// executeFor(demandRefinementPointsTo, "main", 4);
 			executeFor(demandRefinementPointsTo, "main", "y");
