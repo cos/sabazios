@@ -31,7 +31,7 @@ public class HighCFA {
 			@Override
 			public void op(Particle b) {
 				Particle p = new Particle();
-//				p.origin = origin;
+				p.origin = origin;
 				compute(p);
 			}
 
@@ -39,8 +39,8 @@ public class HighCFA {
 				p.moveTo(17, 21);
 				double newX = p.origin.x + p.x * delta.x;
 				double newY = p.origin.y + p.y * delta.y;
-//				p.move();
-//				p.origin.moveTo(newX, newY);
+				p.move();
+				p.origin.moveTo(newX, newY);
 			}
 		});
 	}

@@ -9,12 +9,15 @@ import com.ibm.wala.ipa.slicer.StatementWithInstructionIndex;
 import com.ibm.wala.ipa.slicer.StatementWithInstructionIndex;
 import com.ibm.wala.ssa.SSAInstruction;
 
-public class BeforeInAfterVisitor extends TraversalVisitor {
-	private State state = State.BEFORE;
+import extra166y.ParallelArray;
+
+public class InOutVisitor extends TraversalVisitor {
+	private State state = State.OUT;
 	
-	public HashSet<StatementWithInstructionIndex> before = new HashSet<StatementWithInstructionIndex>();
+	private final boolean DEBUG = false;
+	
+	public HashSet<StatementWithInstructionIndex> out = new HashSet<StatementWithInstructionIndex>();
 	public HashSet<StatementWithInstructionIndex> in = new HashSet<StatementWithInstructionIndex>();
-	public HashSet<StatementWithInstructionIndex> after = new HashSet<StatementWithInstructionIndex>();
 
 	private CGNode parOpCGNode; // the CG node that contains the parallel operation
 	
@@ -27,37 +30,47 @@ public class BeforeInAfterVisitor extends TraversalVisitor {
 	}
 	
 	private enum State {
-		BEFORE, IN, AFTER
+		IN, OUT
 	}
 
 	@Override
 	public void visitBefore(CGNode cgNode) {
-		if (cgNode.getMethod().toString().contains("op("))
+		if (cgNode.getMethod().toString().contains(ParallelArray.OP_STRING))
 		{
 			if(getParOpCGNode() == null)
 				this.parOpCGNode = cgNode;
 			state = State.IN;
+			log("Entered IN state");
 		}
 	}
 
 	@Override
 	public void visitAfter(CGNode cgNode) {
-		if (cgNode.getMethod().toString().contains("op("))
-			state = State.AFTER;
+		if (cgNode.getMethod().toString().contains(ParallelArray.OP_STRING))
+		{
+			state = State.OUT;
+			log("Exited IN state");
+		}
+		
+	}
+
+	private void log(String message) {
+		if(DEBUG)
+			System.out.println(message);
 	}
 
 	@Override
 	public void visit(CGNode cgNode, SSAInstruction i) {
 		int instructionIndex = CodeLocation.getSSAInstructionNo(cgNode, i);
+		NormalStatement normalStatement = new NormalStatement(cgNode, instructionIndex);
 		switch (state) {
-			case BEFORE:
-				before.add(new NormalStatement(cgNode, instructionIndex));
+			case OUT:
+				out.add(normalStatement);
+				log("OUT: "+CodeLocation.make(normalStatement));
 				break;
 			case IN:
-				in.add(new NormalStatement(cgNode, instructionIndex));
-				break;
-			case AFTER:
-				after.add(new NormalStatement(cgNode, instructionIndex));
+				in.add(normalStatement);
+				log("IN: "+CodeLocation.make(normalStatement));
 				break;
 		}
 	}
@@ -73,7 +86,7 @@ public class BeforeInAfterVisitor extends TraversalVisitor {
 		return true;
 	}
 	
-	EnumMap<State, HashSet<CGNode>> nodesSeenBy = new EnumMap<BeforeInAfterVisitor.State, HashSet<CGNode>>(State.class);
+	EnumMap<State, HashSet<CGNode>> nodesSeenBy = new EnumMap<InOutVisitor.State, HashSet<CGNode>>(State.class);
 	@Override
 	public void beganVisiting(CGNode node) {
 		this.nodesSeenBy.get(state).add(node);

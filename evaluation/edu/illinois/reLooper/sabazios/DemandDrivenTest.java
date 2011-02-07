@@ -42,7 +42,7 @@ public class DemandDrivenTest extends DataRaceAnalysisTest {
 	}
 
 	public DemandDrivenTest() {
-		this.addBinaryDependency("subjects");
+		this.setBinaryDependency("subjects");
 	}
 
 	@Test

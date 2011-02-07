@@ -13,7 +13,7 @@ public class SuccUseVisitor extends TraversalVisitor {
 	/**
 	 * 
 	 */
-	private final BeforeInAfterVisitor beforeInAfter;
+	private final InOutVisitor beforeInAfter;
 	private final AllocationSiteInNode instanceKey;
 	private final StatementWithInstructionIndex statement;
 	boolean after = false;
@@ -21,7 +21,7 @@ public class SuccUseVisitor extends TraversalVisitor {
 	private final HashSet<StatementWithInstructionIndex> uses;
 	private final Analysis analysis;
 
-	public SuccUseVisitor(Analysis analysis, BeforeInAfterVisitor beforeInAfter,
+	public SuccUseVisitor(Analysis analysis, InOutVisitor beforeInAfter,
 			AllocationSiteInNode instanceKey,
 			StatementWithInstructionIndex statement) {
 		this.analysis = analysis;

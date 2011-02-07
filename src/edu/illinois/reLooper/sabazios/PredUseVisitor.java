@@ -14,13 +14,13 @@ final class PredUseVisitor extends TraversalVisitor {
 	 * 
 	 */
 	private final Analysis analysis;
-	private final BeforeInAfterVisitor beforeInAfter;
+	private final InOutVisitor beforeInAfter;
 	private final AllocationSiteInNode instanceKey;
 	private final StatementWithInstructionIndex statement;
 	boolean before = true;
 	boolean foundUse = false;
 
-	PredUseVisitor(Analysis analysis, BeforeInAfterVisitor beforeInAfter,
+	PredUseVisitor(Analysis analysis, InOutVisitor beforeInAfter,
 			AllocationSiteInNode instanceKey,
 			StatementWithInstructionIndex statement) {
 		this.analysis = analysis;

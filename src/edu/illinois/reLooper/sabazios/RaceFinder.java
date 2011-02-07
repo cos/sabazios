@@ -24,11 +24,12 @@ import com.ibm.wala.util.CancelException;
 
 public class RaceFinder {
 
+	private final boolean DEBUG = false;
 	private final PointerAnalysis pointerAnalysis;
 	private final CallGraph callGraph;
 	private HeapGraph heapGraph;
 	private final Analysis analysis;
-	private BeforeInAfterVisitor beforeInAfter;
+	private InOutVisitor beforeInAfter;
 
 	public RaceFinder(Analysis analysis) {
 		this.analysis = analysis;
@@ -41,9 +42,15 @@ public class RaceFinder {
 	public Set<Race> findRaces() throws CancelException {
 		HashSet<Race> races = new HashSet<Race>();
 
+		int i = 0;
+		if(DEBUG)
+			System.err.println("Number of statement inside: "+beforeInAfter.in.size());
 		// for each statement in the parallel for
 		for (StatementWithInstructionIndex statement : beforeInAfter.in) {
 			SSAInstruction instruction;
+			i++;
+			if(i % 1000 == 0)
+				System.err.println(i);
 			try {
 				instruction = Analysis.getInstruction(statement);
 			} catch (ArrayIndexOutOfBoundsException e) {
@@ -55,6 +62,9 @@ public class RaceFinder {
 			if (instruction instanceof SSAPutInstruction) {
 				SSAPutInstruction putI = (SSAPutInstruction) instruction;
 
+				if(DEBUG)
+					System.out.println(instruction);
+				
 				// if it is not static, we do the more involved check
 				if (!putI.isStatic()) {
 					int ref = putI.getRef();
@@ -73,12 +83,17 @@ public class RaceFinder {
 					AllocationSiteInNode allocationSite = null;
 
 					while (instanceKeys.hasNext()) {
-						allocationSite = (AllocationSiteInNode) instanceKeys
+						Object iK = instanceKeys
 								.next();
+						if(!(iK instanceof AllocationSiteInNode))
+							continue;
+						
+						allocationSite = (AllocationSiteInNode) iK;
+						
 						NormalStatement allocationSiteStatement = Analysis
 								.getNormalStatement(allocationSite);
 
-						if (beforeInAfter.before
+						if (beforeInAfter.out
 								.contains(allocationSiteStatement))
 						{
 							racing = true;
@@ -89,10 +104,10 @@ public class RaceFinder {
 
 					// do a demand driven confirmation of the race
 					if (racing ){
-						DemandDrivenRaceConfirmer raceConfirmer = new DemandDrivenRaceConfirmer(
-								analysis);
-						racing = raceConfirmer.confirm(localPointerKey,
-								beforeInAfter);
+//						DemandDrivenRaceConfirmer raceConfirmer = new DemandDrivenRaceConfirmer(
+//								analysis);
+//						racing = raceConfirmer.confirm(localPointerKey,
+//								beforeInAfter);
 					}
 
 					// report race if it still stands
@@ -104,10 +119,12 @@ public class RaceFinder {
 					}
 
 				} else {
-					// System.out.println("HERE "+statement);
 					// TODO: replace false with the true value of
 					// isLoopCarriedDependency
-					races.add(new Race((NormalStatement) statement, null, false));
+					Race race = new Race((NormalStatement) statement, null, false);
+					races.add(race);
+					if(DEBUG)
+						System.out.println(race);
 				}
 			}
 		}
@@ -117,7 +134,7 @@ public class RaceFinder {
 	private boolean checkLoopCarryDependency(
 			final StatementWithInstructionIndex statement,
 			final AllocationSiteInNode instanceKey,
-			final BeforeInAfterVisitor beforeInAfter) throws CancelException {
+			final InOutVisitor beforeInAfter) throws CancelException {
 		// Collection<Statement> backwordSlice = Slicer.computeBackwardSlice(
 		// statement, callGraph, pointerAnalysis,
 		// DataDependenceOptions.FULL,

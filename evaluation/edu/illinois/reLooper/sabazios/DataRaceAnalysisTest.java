@@ -4,12 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.jar.JarFile;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.ComparisonFailure;
 
 import com.ibm.wala.classLoader.BinaryDirectoryTreeModule;
 import com.ibm.wala.classLoader.Module;
@@ -17,21 +17,15 @@ import com.ibm.wala.ipa.callgraph.AnalysisCache;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;
 import com.ibm.wala.ipa.callgraph.AnalysisScope;
 import com.ibm.wala.ipa.callgraph.CallGraph;
-import com.ibm.wala.ipa.callgraph.ContextSelector;
 import com.ibm.wala.ipa.callgraph.Entrypoint;
 import com.ibm.wala.ipa.callgraph.impl.ContextInsensitiveSelector;
-import com.ibm.wala.ipa.callgraph.impl.DefaultContextSelector;
 import com.ibm.wala.ipa.callgraph.impl.DefaultEntrypoint;
 import com.ibm.wala.ipa.callgraph.impl.Util;
 import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
 import com.ibm.wala.ipa.callgraph.propagation.PropagationCallGraphBuilder;
-import com.ibm.wala.ipa.callgraph.propagation.SSAContextInterpreter;
 import com.ibm.wala.ipa.callgraph.propagation.SSAPropagationCallGraphBuilder;
 import com.ibm.wala.ipa.callgraph.propagation.cfa.DefaultSSAInterpreter;
-import com.ibm.wala.ipa.callgraph.propagation.cfa.ZeroXCFABuilder;
 import com.ibm.wala.ipa.callgraph.propagation.cfa.ZeroXInstanceKeys;
-import com.ibm.wala.ipa.callgraph.propagation.cfa.nCFABuilder;
-import com.ibm.wala.ipa.callgraph.propagation.cfa.nCFAContextSelector;
 import com.ibm.wala.ipa.cha.ClassHierarchy;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
@@ -43,6 +37,8 @@ import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.config.FileOfClasses;
 import com.ibm.wala.util.io.FileProvider;
+
+import static junit.framework.Assert.*;
 
 public abstract class DataRaceAnalysisTest {
 
@@ -58,22 +54,24 @@ public abstract class DataRaceAnalysisTest {
 	protected final List<String> sourceDependencies = new ArrayList<String>();
 	protected final List<String> jarDependencies = new ArrayList<String>();
 	protected PropagationCallGraphBuilder builder;
-	
-	public Set<Race> findRaces(String entryClass, String entryMethod)
-	{
+
+	public Set<Race> findRaces(String entryClass, String entryMethod) {
 		try {
 			setup(entryClass, entryMethod);
-		
-		BeforeInAfterVisitor beforeInAfter = new BeforeInAfterVisitor();
-		ProgramTraverser programTraverser = new ProgramTraverser(callGraph,
-				callGraph.getFakeRootNode(), beforeInAfter);
-		programTraverser.traverse();
 
-		Analysis analysis = new Analysis(callGraph, pointerAnalysis, builder,
-				beforeInAfter);
-		RaceFinder raceFinder = new RaceFinder(analysis);
-		
-		return raceFinder.findRaces();
+			System.out.println("Initial setup");
+
+			InOutVisitor beforeInAfter = new InOutVisitor();
+			ProgramTraverser programTraverser = new ProgramTraverser(callGraph, callGraph.getFakeRootNode(),
+					beforeInAfter);
+			programTraverser.traverse();
+
+			System.out.println("before in after done");
+
+			Analysis analysis = new Analysis(callGraph, pointerAnalysis, builder, beforeInAfter);
+			RaceFinder raceFinder = new RaceFinder(analysis);
+
+			return raceFinder.findRaces();
 		} catch (ClassHierarchyException e) {
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
@@ -86,7 +84,7 @@ public abstract class DataRaceAnalysisTest {
 		return null;
 	}
 
-	public void addBinaryDependency(String path) {
+	public void setBinaryDependency(String path) {
 		this.binaryDependencies.add(path);
 	}
 
@@ -94,33 +92,27 @@ public abstract class DataRaceAnalysisTest {
 		this.jarDependencies.add(file);
 	}
 
-	public void setup(String entryClass, String entryMethod) throws ClassHierarchyException,
-			IllegalArgumentException, CancelException, IOException {
+	public void setup(String entryClass, String entryMethod) throws ClassHierarchyException, IllegalArgumentException,
+			CancelException, IOException {
 		this.entryClass = entryClass;
 		this.entryMethod = entryMethod;
 		AnalysisScope scope = getAnalysisScope();
-		scope.setExclusions(FileOfClasses.createFileOfClasses(new File(
-				"walaExclusions.txt")));
+		scope.setExclusions(FileOfClasses.createFileOfClasses(new File("walaExclusions.txt")));
 
 		IClassHierarchy cha = ClassHierarchy.make(scope);
-//		System.out.println(scope);
 
 		Set<Entrypoint> entrypoints = new HashSet<Entrypoint>();
-		TypeReference typeReference = TypeReference.findOrCreate(
-				scope.getLoader(AnalysisScope.APPLICATION),
+		TypeReference typeReference = TypeReference.findOrCreate(scope.getLoader(AnalysisScope.APPLICATION),
 				TypeName.string2TypeName(entryClass));
-		MethodReference methodReference = MethodReference.findOrCreate(
-				typeReference,
-				entryMethod.substring(0, entryMethod.indexOf('(')),
-				entryMethod.substring(entryMethod.indexOf('(')));
+		MethodReference methodReference = MethodReference.findOrCreate(typeReference,
+				entryMethod.substring(0, entryMethod.indexOf('(')), entryMethod.substring(entryMethod.indexOf('(')));
 
 		entrypoint = new DefaultEntrypoint(methodReference, cha);
 		entrypoints.add(entrypoint);
 
 		AnalysisOptions options = new AnalysisOptions(scope, entrypoints);
 		AnalysisCache cache = new AnalysisCache();
-		builder = makeZeroOneCFABuilder(
-				options, cache, cha, scope);
+		builder = makeCFABuilder(options, cache, cha, scope);
 
 		callGraph = builder.makeCallGraph(options);
 		pointerAnalysis = builder.getPointerAnalysis();
@@ -128,15 +120,13 @@ public abstract class DataRaceAnalysisTest {
 
 	private AnalysisScope getAnalysisScope() throws IOException {
 		AnalysisScope scope = AnalysisScope.createJavaAnalysisScope();
-		ClassLoaderReference loaderReference = scope
-				.getLoader(AnalysisScope.APPLICATION);
+		ClassLoaderReference loaderReference = scope.getLoader(AnalysisScope.APPLICATION);
 		ClassLoader loader = DataRaceAnalysisTest.class.getClassLoader();
 
 		// Add the the j2se jar files
 		String[] stdlibs = WalaProperties.getJ2SEJarFiles();
 		for (int i = 0; i < stdlibs.length; i++) {
-			scope.addToScope(scope.getLoader(AnalysisScope.PRIMORDIAL),
-					new JarFile(stdlibs[i]));
+			scope.addToScope(scope.getLoader(AnalysisScope.PRIMORDIAL), new JarFile(stdlibs[i]));
 		}
 
 		for (String directory : binaryDependencies) {
@@ -150,23 +140,97 @@ public abstract class DataRaceAnalysisTest {
 			scope.addToScope(loaderReference, M);
 		}
 
-		// System.out.println(scope);
 		return scope;
 	}
-	
-	  public static SSAPropagationCallGraphBuilder makeZeroOneCFABuilder(AnalysisOptions options, AnalysisCache cache,
-		      IClassHierarchy cha, AnalysisScope scope) {
 
-		    if (options == null) {
-		      throw new IllegalArgumentException("options is null");
-		    }
-		    Util.addDefaultSelectors(options, cha);
-		    Util.addDefaultBypassLogic(options, scope, Util.class.getClassLoader(), cha);
-		    
-		    ContextSelector appContextSelector = new ContextInsensitiveSelector();
-			return new nCFABuilder(2, cha, options, cache, appContextSelector, new DefaultSSAInterpreter(options, cache));
+	protected void printDetailedRaces(Set<Race> races) {
+		System.out.println("Number of races: " + races.size());
+		for (Iterator<Race> iterator = races.iterator(); iterator.hasNext();) {
+			Race race = (Race) iterator.next();
+			System.out.println(race);
+			System.out.println(race.getRaceStackTrace(callGraph));
+			System.out.println("Allocation site");
+			System.out.println(race.getAllocationStackTrace(callGraph));
+			System.out.println();
+		}
+	}
 
-//		    return ZeroXCFABuilder.make(cha, options, cache, null, null, ZeroXInstanceKeys.ALLOCATIONS | ZeroXInstanceKeys.SMUSH_MANY | ZeroXInstanceKeys.SMUSH_PRIMITIVE_HOLDERS
-//		        | ZeroXInstanceKeys.SMUSH_STRINGS | ZeroXInstanceKeys.SMUSH_THROWABLES);
-		  }
+	protected void printRaces(Set<Race> races) {
+		System.out.println("Number of races: " + races.size());
+		for (Iterator<Race> iterator = races.iterator(); iterator.hasNext();) {
+			Race race = (Race) iterator.next();
+			System.out.println(race);
+		}
+	}
+
+	public void assertRaces(Set<String> expectedRaces) {
+		String testClassName = this.getClass().getSimpleName();
+		String className = testClassName.substring(0, testClassName.length()-4);
+		Set<Race> foundRaces = findRaces("Lsubjects/"+className, getCurrentlyExecutingMethodNameAtDepth(2) + "()V");
+		// printDetailedRaces(foundRaces);
+		if (foundRaces.size() == 0 && expectedRaces == null)
+			return;
+		if (expectedRaces != null && expectedRaces.size() == foundRaces.size())
+			return;
+		else {
+			if (expectedRaces != null)
+				for (Race r : foundRaces) {
+					if (!expectedRaces.contains(r.getStatement().toString()))
+						break;
+				}
+		}
+
+		fail(expectedRaces, foundRaces);
+	}
+
+	private void fail(Set<String> expectedRaces, Set<Race> foundRaces) throws ComparisonFailure {
+		String expected = "";
+		if (expectedRaces != null)
+			for (String s : expectedRaces)
+				expected += s + "\n";
+
+		System.err.println("Expected: \n"+expected+"Found:");
+		String actual = "";
+		for (Race r : foundRaces)
+		{
+			actual += CodeLocation.make(r.getStatement()) + "\n";
+			System.err.println(r);
+		}
+		
+		throw new ComparisonFailure("Different data races", expected, actual);
+	}
+
+	public static SSAPropagationCallGraphBuilder makeCFABuilder(AnalysisOptions options, AnalysisCache cache,
+			IClassHierarchy cha, AnalysisScope scope) {
+
+		if (options == null) {
+			throw new IllegalArgumentException("options is null");
+		}
+		Util.addDefaultSelectors(options, cha);
+		Util.addDefaultBypassLogic(options, scope, Util.class.getClassLoader(), cha);
+
+		VariableCFAContextSelector appContextSelector = new VariableCFAContextSelector(new ContextInsensitiveSelector());
+		return new VariableCFABuilder(cha, options, cache, appContextSelector,
+				new DefaultSSAInterpreter(options, cache),
+//				 ZeroXInstanceKeys.SMUSH_MANY |
+//				 ZeroXInstanceKeys.SMUSH_STRINGS |
+//				 ZeroXInstanceKeys.SMUSH_THROWABLES |
+				 ZeroXInstanceKeys.ALLOCATIONS
+		);
+	}
+
+	protected static String getCurrentlyExecutingMethodName() {
+		return getCurrentlyExecutingMethodNameAtDepth(1);
+	}
+
+	protected static String getCurrentlyExecutingMethodNameAtDepth(int x) {
+		Throwable t = new Throwable();
+		StackTraceElement[] elements = t.getStackTrace();
+		if (elements.length <= 0)
+			return "[No Stack Information Available]";
+		// elements[0] is this method
+		if (elements.length < 2)
+			return null;
+		return elements[x].getMethodName();
+	}
 }

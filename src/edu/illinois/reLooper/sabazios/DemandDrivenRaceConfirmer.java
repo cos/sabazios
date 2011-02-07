@@ -6,7 +6,6 @@ import com.ibm.wala.demandpa.alg.CallStack;
 import com.ibm.wala.demandpa.alg.ContextSensitiveStateMachine;
 import com.ibm.wala.demandpa.alg.DemandRefinementPointsTo;
 import com.ibm.wala.demandpa.alg.InstanceKeyAndState;
-import com.ibm.wala.demandpa.alg.ThisFilteringHeapModel;
 import com.ibm.wala.demandpa.alg.DemandRefinementPointsTo.PointsToResult;
 import com.ibm.wala.demandpa.alg.refinepolicy.TunedRefinementPolicy;
 import com.ibm.wala.demandpa.alg.statemachine.StateMachine.State;
@@ -35,7 +34,7 @@ public class DemandDrivenRaceConfirmer {
 	}
 
 	public boolean confirm(LocalPointerKey localPointerKey,
-			BeforeInAfterVisitor beforeInAfter) {
+			InOutVisitor beforeInAfter) {
 		CallGraph cg = analysis.callGraph;
 		MemoryAccessMap mam = new PABasedMemoryAccessMap(cg,
 				analysis.pointerAnalysis);
@@ -54,18 +53,16 @@ public class DemandDrivenRaceConfirmer {
 				.getPointsToWithStates(localPointerKey,
 						Predicate.<InstanceKey> falsePred());
 
-		System.out.println(result.fst);
-
 		Collection<InstanceKeyAndState> pointsTo = result.snd;
+		
+		if(pointsTo == null)
+			return true;
 
 		for (InstanceKeyAndState instanceKey : pointsTo) {
 			CallStack state = (CallStack) instanceKey.getState();
-			System.out.println(instanceKey);
 			for (CallerSiteContext callerSiteContext : state) {
 				NormalStatement s = new NormalStatement(callerSiteContext.getCaller(), callerSiteContext.getCallSite().getProgramCounter());
-				System.out.println(beforeInAfter.in.contains(s));
-				System.out.println(beforeInAfter.before.contains(s));
-				if(beforeInAfter.in.contains(s) && !beforeInAfter.before.contains(s))
+				if(beforeInAfter.in.contains(s) && !beforeInAfter.out.contains(s))
 					return false;
 			}
 		}

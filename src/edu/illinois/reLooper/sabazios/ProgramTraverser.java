@@ -13,6 +13,7 @@ import com.ibm.wala.ssa.SSAInvokeInstruction;
 
 public class ProgramTraverser {
 
+	private static final boolean DEBUG = false;
 	private CallGraph callGraph;
 	private final CGNode entryNode;
 	private final TraversalVisitor visitor;
@@ -60,7 +61,9 @@ public class ProgramTraverser {
 //					System.out.println(" --> "
 //							+ CodeLocation.make(cgNode, instr)
 //							+ " : " + instr);
-				
+
+				if(DEBUG)
+					System.out.println(instr);
 
 				if (instr instanceof SSAInvokeInstruction) {
 					SSAInvokeInstruction invokeInstr = (SSAInvokeInstruction) instr;

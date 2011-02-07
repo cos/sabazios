@@ -26,13 +26,13 @@ public class Analysis {
 	final CallGraph callGraph;
 	final PointerAnalysis pointerAnalysis;
 	private HeapGraph heapGraph;
-	private final BeforeInAfterVisitor beforeInAfter;
+	private final InOutVisitor beforeInAfter;
 	final PropagationCallGraphBuilder builder;
 	private IClassHierarchy cha;
 
 	public Analysis(CallGraph callGraph, PointerAnalysis pointerAnalysis,
 			PropagationCallGraphBuilder builder,
-			BeforeInAfterVisitor beforeInAfter) {
+			InOutVisitor beforeInAfter) {
 		this.callGraph = callGraph;
 		this.pointerAnalysis = pointerAnalysis;
 		this.builder = builder;
@@ -109,7 +109,7 @@ public class Analysis {
 		return false;
 	}
 
-	public BeforeInAfterVisitor getBeforeInAfter() {
+	public InOutVisitor getBeforeInAfter() {
 		return beforeInAfter;
 	}
 

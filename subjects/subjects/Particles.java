@@ -33,7 +33,7 @@ public class Particles {
 				p.moveTo(17, 21);
 				double newX = p.origin.x + p.x * delta.x;
 				double newY = p.origin.y + p.y * delta.y;
-				p.origin.moveTo(newX, newY);
+				p.origin.moveTo(2, 3);
 			}
 		});
 	}
