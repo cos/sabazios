@@ -19,6 +19,7 @@ import com.ibm.wala.ipa.callgraph.AnalysisScope;
 import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.Entrypoint;
 import com.ibm.wala.ipa.callgraph.impl.ContextInsensitiveSelector;
+import com.ibm.wala.ipa.callgraph.impl.DefaultContextSelector;
 import com.ibm.wala.ipa.callgraph.impl.DefaultEntrypoint;
 import com.ibm.wala.ipa.callgraph.impl.Util;
 import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
@@ -45,6 +46,7 @@ public abstract class DataRaceAnalysisTest {
 	// what files/classes to include?
 	// what are the entrypoints?
 
+	protected static String testClassName;
 	protected Entrypoint entrypoint;
 	protected PointerAnalysis pointerAnalysis;
 	protected CallGraph callGraph;
@@ -54,6 +56,10 @@ public abstract class DataRaceAnalysisTest {
 	protected final List<String> sourceDependencies = new ArrayList<String>();
 	protected final List<String> jarDependencies = new ArrayList<String>();
 	protected PropagationCallGraphBuilder builder;
+
+	public DataRaceAnalysisTest() {
+		testClassName = this.getClass().getName();
+	}
 
 	public Set<Race> findRaces(String entryClass, String entryMethod) {
 		try {
@@ -163,24 +169,34 @@ public abstract class DataRaceAnalysisTest {
 		}
 	}
 
+	public void assertNoRaces() {
+		assertRaces(null);
+	}
+
 	public void assertRaces(Set<String> expectedRaces) {
-		String testClassName = this.getClass().getSimpleName();
-		String className = testClassName.substring(0, testClassName.length()-4);
-		Set<Race> foundRaces = findRaces("Lsubjects/"+className, getCurrentlyExecutingMethodNameAtDepth(2) + "()V");
+		Set<Race> foundRaces = findRaces(getTestClassName(), getCurrentlyExecutingTestName() + "()V");
 		// printDetailedRaces(foundRaces);
 		if (foundRaces.size() == 0 && expectedRaces == null)
 			return;
 		if (expectedRaces != null && expectedRaces.size() == foundRaces.size())
-			return;
-		else {
-			if (expectedRaces != null)
-				for (Race r : foundRaces) {
-					if (!expectedRaces.contains(r.getStatement().toString()))
-						break;
+		{
+			for (Race r : foundRaces) {
+				if (!expectedRaces.contains(CodeLocation.make(r.getStatement()).toString())) {
+					System.out.println(CodeLocation.make(r.getStatement()).toString());
+					break;
 				}
+			}
+			return;
 		}
 
 		fail(expectedRaces, foundRaces);
+	}
+
+	protected String getTestClassName() {
+		String testClassName = this.getClass().getSimpleName();
+		String className = testClassName.substring(0, testClassName.length() - 4);
+		String classNameForWala = "Lsubjects/" + className;
+		return classNameForWala;
 	}
 
 	private void fail(Set<String> expectedRaces, Set<Race> foundRaces) throws ComparisonFailure {
@@ -189,15 +205,20 @@ public abstract class DataRaceAnalysisTest {
 			for (String s : expectedRaces)
 				expected += s + "\n";
 
-		System.err.println("Expected: \n"+expected+"Found:");
+		System.err.println("Expected: \n" + expected + "Found:");
 		String actual = "";
-		for (Race r : foundRaces)
-		{
+		for (Race r : foundRaces) {
 			actual += CodeLocation.make(r.getStatement()) + "\n";
 			System.err.println(r);
 		}
-		
+
 		throw new ComparisonFailure("Different data races", expected, actual);
+	}
+
+	protected void assertRace(String location) {
+		HashSet<String> races = new HashSet<String>();
+		races.add(location);
+		assertRaces(races);
 	}
 
 	public static SSAPropagationCallGraphBuilder makeCFABuilder(AnalysisOptions options, AnalysisCache cache,
@@ -209,21 +230,17 @@ public abstract class DataRaceAnalysisTest {
 		Util.addDefaultSelectors(options, cha);
 		Util.addDefaultBypassLogic(options, scope, Util.class.getClassLoader(), cha);
 
-		VariableCFAContextSelector appContextSelector = new VariableCFAContextSelector(new ContextInsensitiveSelector());
+		DefaultContextSelector appContextSelector = new DefaultContextSelector(options) ;
+			// new VariableCFAContextSelector(new ContextInsensitiveSelector());
 		return new VariableCFABuilder(cha, options, cache, appContextSelector,
 				new DefaultSSAInterpreter(options, cache),
-//				 ZeroXInstanceKeys.SMUSH_MANY |
-//				 ZeroXInstanceKeys.SMUSH_STRINGS |
-//				 ZeroXInstanceKeys.SMUSH_THROWABLES |
-				 ZeroXInstanceKeys.ALLOCATIONS
-		);
+				// ZeroXInstanceKeys.SMUSH_MANY |
+				// ZeroXInstanceKeys.SMUSH_STRINGS |
+				// ZeroXInstanceKeys.SMUSH_THROWABLES |
+				ZeroXInstanceKeys.ALLOCATIONS);
 	}
 
-	protected static String getCurrentlyExecutingMethodName() {
-		return getCurrentlyExecutingMethodNameAtDepth(1);
-	}
-
-	protected static String getCurrentlyExecutingMethodNameAtDepth(int x) {
+	protected String getCurrentlyExecutingTestName() {
 		Throwable t = new Throwable();
 		StackTraceElement[] elements = t.getStackTrace();
 		if (elements.length <= 0)
@@ -231,6 +248,11 @@ public abstract class DataRaceAnalysisTest {
 		// elements[0] is this method
 		if (elements.length < 2)
 			return null;
-		return elements[x].getMethodName();
+
+		for (StackTraceElement stackTraceElement : elements) {
+			if (stackTraceElement.getClassName() == testClassName)
+				return stackTraceElement.getMethodName();
+		}
+		return "[Not in a test hierarchy]";
 	}
 }

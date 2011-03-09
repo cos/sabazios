@@ -34,7 +34,7 @@ public class Particle {
 		});
 	}
 	
-	public void noRaceOnParameterInitializedOutside() {
+	public void noRaceOnParameterInitializedBefore() {
 		ParallelArray<Particle> particles = ParallelArray.create(10,
 				Particle.class, ParallelArray.defaultExecutor());
 
@@ -52,4 +52,43 @@ public class Particle {
 			}
 		});
 	}
+
+	public void raceOnParameterInitializedBefore() {
+		ParallelArray<Particle> particles = ParallelArray.create(10,
+				Particle.class, ParallelArray.defaultExecutor());
+		
+		final Particle shared = new Particle();
+		
+		particles.replaceWithGeneratedValue(new Ops.Generator<Particle>(){
+			@Override
+			public Particle op() {
+				Particle particle = new Particle();
+				particle.origin = shared;
+				return particle;
+			}
+		});
+		
+		particles.apply(new Ops.Procedure<Particle>() {
+			@Override
+			public void op(Particle b) {
+				b.origin.x = 10;
+			}
+		});
+	}
+
+	public void verySimpleRace() {
+		ParallelArray<Particle> particles = ParallelArray.create(10,
+				Particle.class, ParallelArray.defaultExecutor());
+		
+		final Particle shared = new Particle();
+		
+		particles.replaceWithGeneratedValue(new Ops.Generator<Particle>(){
+			@Override
+			public Particle op() {
+				shared.x = 10;
+				return new Particle();
+			}
+		});
+	}
+
 }

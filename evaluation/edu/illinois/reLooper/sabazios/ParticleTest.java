@@ -9,23 +9,33 @@ import com.ibm.wala.util.CancelException;
 public class ParticleTest extends DataRaceAnalysisTest {
 
 	public ParticleTest() {
+		super();
 		this.setBinaryDependency("subjects");
 		this.setBinaryDependency("../ParallelArrayMock/bin");
 	}
 
 	@Test
 	public void vacuouslyNoRace() throws CancelException {
-		assertRaces(null);
+		assertNoRaces();
 	}
 
 	@Test
 	public void noRaceOnParameter() throws CancelException {
-		assertRaces(null);
+		assertNoRaces();
 	}
 	
 	@Test
-	public void noRaceOnParameterInitializedOutside() throws CancelException {
-		assertRaces(null);
-		System.out.println("bla");
+	public void noRaceOnParameterInitializedBefore() throws CancelException {
+		assertNoRaces();
+	}
+	
+	@Test
+	public void verySimpleRace() {
+		assertRace("subjects.Particle$5.op(Particle.java:65)");
+	}
+	
+	@Test
+	public void raceOnParameterInitializedBefore() {
+		assertRace("subjects.Particle$6.op(Particle.java:73)");
 	}
 }
