@@ -159,17 +159,20 @@ public class Analysis {
 				continue;
 			
 			AllocationSiteInNode allocationSite = (AllocationSiteInNode) iK;
-			
-			NormalStatement allocationSiteStatement = Analysis
-					.getNormalStatement(allocationSite);
 
-			if (Analysis.instance.inOut.out
-					.contains(allocationSiteStatement))
-			{
+			if(!(allocationSite.getNode().getContext() instanceof SmartContextSelector.InsideParOpContext))
 				allocSites.add(allocationSite);
-//				if(!beforeInAfter.in.contains(allocationSiteStatement))
-//					needsDemandDrivenConfirmation = false;
-			}
+			
+//			NormalStatement allocationSiteStatement = Analysis
+//					.getNormalStatement(allocationSite);
+//
+//			if (Analysis.instance.inOut.out
+//					.contains(allocationSiteStatement))
+//			{
+//				allocSites.add(allocationSite);
+////				if(!beforeInAfter.in.contains(allocationSiteStatement))
+////					needsDemandDrivenConfirmation = false;
+//			}
 		}
 		return allocSites;
 	}

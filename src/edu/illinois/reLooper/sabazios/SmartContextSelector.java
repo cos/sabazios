@@ -15,7 +15,7 @@ final class SmartContextSelector implements ContextSelector {
 	private static final ContextKey INSIDE_PAR_OP = new ContextKey() {
 	};
 
-	private static final class InsideParOpContext implements Context {
+	public static final class InsideParOpContext implements Context {
 
 		/**
 		 * Don't use default hashCode (java.lang.Object) as it's
