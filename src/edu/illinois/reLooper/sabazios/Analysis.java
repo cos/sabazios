@@ -1,6 +1,8 @@
 package edu.illinois.reLooper.sabazios;
 
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import com.ibm.wala.analysis.pointers.HeapGraph;
 import com.ibm.wala.ipa.callgraph.CGNode;
@@ -23,10 +25,11 @@ import com.ibm.wala.ssa.SSAPutInstruction;
 
 public class Analysis {
 
+	public static Analysis instance;
 	final CallGraph callGraph;
 	final PointerAnalysis pointerAnalysis;
-	private HeapGraph heapGraph;
-	private final InOutVisitor beforeInAfter;
+	public HeapGraph heapGraph;
+	public final InOutVisitor inOut;
 	final PropagationCallGraphBuilder builder;
 	private IClassHierarchy cha;
 
@@ -36,7 +39,7 @@ public class Analysis {
 		this.callGraph = callGraph;
 		this.pointerAnalysis = pointerAnalysis;
 		this.builder = builder;
-		this.beforeInAfter = beforeInAfter;
+		this.inOut = beforeInAfter;
 		this.heapGraph = this.pointerAnalysis.getHeapGraph();
 		this.cha = this.pointerAnalysis.getClassHierarchy();
 	}
@@ -110,7 +113,7 @@ public class Analysis {
 	}
 
 	public InOutVisitor getBeforeInAfter() {
-		return beforeInAfter;
+		return inOut;
 	}
 
 	public static NormalStatement getNormalStatement(
@@ -134,5 +137,40 @@ public class Analysis {
 			StatementWithInstructionIndex statement) {
 		CGNode cgNode = statement.getNode();
 		return cgNode.getIR().getInstructions()[statement.getInstructionIndex()];
+	}
+	
+	public static Set<AllocationSiteInNode> getOutsideAllocationSites(CGNode node,int ref) {
+		// the local pointer key the statement writes to
+		LocalPointerKey localPointerKey = Analysis.instance
+				.getLocalPointerKey(node, ref);
+		
+		// the actual instance keys for this pointer key
+		Iterator<Object> instanceKeys = Analysis.instance.heapGraph
+				.getSuccNodes(localPointerKey);
+
+//		boolean needsDemandDrivenConfirmation = true;
+
+		Set<AllocationSiteInNode> allocSites = new HashSet<AllocationSiteInNode>();
+
+		while (instanceKeys.hasNext()) {
+			Object iK = instanceKeys
+					.next();
+			if(!(iK instanceof AllocationSiteInNode))
+				continue;
+			
+			AllocationSiteInNode allocationSite = (AllocationSiteInNode) iK;
+			
+			NormalStatement allocationSiteStatement = Analysis
+					.getNormalStatement(allocationSite);
+
+			if (Analysis.instance.inOut.out
+					.contains(allocationSiteStatement))
+			{
+				allocSites.add(allocationSite);
+//				if(!beforeInAfter.in.contains(allocationSiteStatement))
+//					needsDemandDrivenConfirmation = false;
+			}
+		}
+		return allocSites;
 	}
 }

@@ -69,51 +69,20 @@ public class RaceFinder {
 				if (!putI.isStatic()) {
 					int ref = putI.getRef();
 
-					// the local pointer key the statement writes to
-					LocalPointerKey localPointerKey = analysis
-							.getLocalPointerKey(statement.getNode(), ref);
-
-					// the actual instance keys for this pointer key
-					Iterator<Object> instanceKeys = heapGraph
-							.getSuccNodes(localPointerKey);
-
-					boolean racing = false;
-//					boolean needsDemandDrivenConfirmation = true;
-
-					AllocationSiteInNode allocationSite = null;
-
-					while (instanceKeys.hasNext()) {
-						Object iK = instanceKeys
-								.next();
-						if(!(iK instanceof AllocationSiteInNode))
-							continue;
-						
-						allocationSite = (AllocationSiteInNode) iK;
-						
-						NormalStatement allocationSiteStatement = Analysis
-								.getNormalStatement(allocationSite);
-
-						if (beforeInAfter.out
-								.contains(allocationSiteStatement))
-						{
-							racing = true;
-//							if(!beforeInAfter.in.contains(allocationSiteStatement))
-//								needsDemandDrivenConfirmation = false;
-						}
-					}
+					Set<AllocationSiteInNode> allocSites = Analysis.getOutsideAllocationSites(statement.getNode(),ref);
 
 					// do a demand driven confirmation of the race
-					if (racing ){
+//					if (allocSites ){
 //						DemandDrivenRaceConfirmer raceConfirmer = new DemandDrivenRaceConfirmer(
 //								analysis);
 //						racing = raceConfirmer.confirm(localPointerKey,
 //								beforeInAfter);
-					}
+//					}
 
 					// report race if it still stands
-					if (racing) {
+					if (!allocSites.isEmpty()) {
 						Race race = new Race((NormalStatement) statement,
-								allocationSite, false);
+								allocSites.iterator().next(), false);
 
 						races.add(race);
 					}

@@ -176,9 +176,9 @@ public class CodeLocation {
 					System.err.println(e.getMessage());
 				}
 			} catch (Exception e) {
-				System.err
-						.println("it's probably not a BT method (e.g. it's a fakeroot method)");
-				System.err.println(e.getMessage());
+//				System.err
+//						.println("it's probably not a BT method (e.g. it's a fakeroot method)");
+//				System.err.println(e.getMessage());
 			}
 		}
 		return -1;

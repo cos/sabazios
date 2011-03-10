@@ -27,7 +27,7 @@ public class LBJPOSEvaluation extends DataRaceAnalysisTest{
 	public void bla() throws CancelException {
 		Set<Race> races = findRaces("Ledu/illinois/cs/cogcomp/lbj/pos/POSTag", "main([Ljava/lang/String;)V");
 		
-		printRaces(races);
+		System.out.println(races.iterator().next().toDetailedString(callGraph));
 	}
 
 }

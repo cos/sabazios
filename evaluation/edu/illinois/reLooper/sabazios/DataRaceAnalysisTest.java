@@ -56,6 +56,8 @@ public abstract class DataRaceAnalysisTest {
 	protected final List<String> sourceDependencies = new ArrayList<String>();
 	protected final List<String> jarDependencies = new ArrayList<String>();
 	protected PropagationCallGraphBuilder builder;
+	protected static boolean DEBUG = false;
+	protected Analysis analysis;
 
 	public DataRaceAnalysisTest() {
 		testClassName = this.getClass().getName();
@@ -74,10 +76,13 @@ public abstract class DataRaceAnalysisTest {
 
 			System.out.println("before in after done");
 
-			Analysis analysis = new Analysis(callGraph, pointerAnalysis, builder, beforeInAfter);
+			analysis = new Analysis(callGraph, pointerAnalysis, builder, beforeInAfter);
+			Analysis.instance = analysis;
 			RaceFinder raceFinder = new RaceFinder(analysis);
 
-			return raceFinder.findRaces();
+			Set<Race> races = raceFinder.findRaces();
+
+			return races;
 		} catch (ClassHierarchyException e) {
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
@@ -153,11 +158,7 @@ public abstract class DataRaceAnalysisTest {
 		System.out.println("Number of races: " + races.size());
 		for (Iterator<Race> iterator = races.iterator(); iterator.hasNext();) {
 			Race race = (Race) iterator.next();
-			System.out.println(race);
-			System.out.println(race.getRaceStackTrace(callGraph));
-			System.out.println("Allocation site");
-			System.out.println(race.getAllocationStackTrace(callGraph));
-			System.out.println();
+			System.out.println(race.toDetailedString(callGraph));
 		}
 	}
 
@@ -175,11 +176,13 @@ public abstract class DataRaceAnalysisTest {
 
 	public void assertRaces(Set<String> expectedRaces) {
 		Set<Race> foundRaces = findRaces(getTestClassName(), getCurrentlyExecutingTestName() + "()V");
-		// printDetailedRaces(foundRaces);
+		if (DEBUG) {
+			System.err.println(getCurrentlyExecutingTestName());
+			printDetailedRaces(foundRaces);
+		}
 		if (foundRaces.size() == 0 && expectedRaces == null)
 			return;
-		if (expectedRaces != null && expectedRaces.size() == foundRaces.size())
-		{
+		if (expectedRaces != null && expectedRaces.size() == foundRaces.size()) {
 			for (Race r : foundRaces) {
 				if (!expectedRaces.contains(CodeLocation.make(r.getStatement()).toString())) {
 					System.out.println(CodeLocation.make(r.getStatement()).toString());
@@ -230,12 +233,18 @@ public abstract class DataRaceAnalysisTest {
 		Util.addDefaultSelectors(options, cha);
 		Util.addDefaultBypassLogic(options, scope, Util.class.getClassLoader(), cha);
 
-		DefaultContextSelector appContextSelector = new DefaultContextSelector(options) ;
-			// new VariableCFAContextSelector(new ContextInsensitiveSelector());
-		return new VariableCFABuilder(cha, options, cache, appContextSelector,
-				new DefaultSSAInterpreter(options, cache),
+		DefaultContextSelector appContextSelector = new DefaultContextSelector(options);
+		// new VariableCFAContextSelector(new ContextInsensitiveSelector());
+//		return new VariableCFABuilder(cha, options, cache, appContextSelector,
+//				new DefaultSSAInterpreter(options, cache),
+//				// ZeroXInstanceKeys.SMUSH_MANY |
+//				ZeroXInstanceKeys.SMUSH_STRINGS |
+//				// ZeroXInstanceKeys.SMUSH_THROWABLES |
+//				ZeroXInstanceKeys.ALLOCATIONS);
+		
+		return new SmartCFABuilder(cha, options, cache, appContextSelector, new DefaultSSAInterpreter(options, cache), 
 				// ZeroXInstanceKeys.SMUSH_MANY |
-				// ZeroXInstanceKeys.SMUSH_STRINGS |
+				ZeroXInstanceKeys.SMUSH_STRINGS |
 				// ZeroXInstanceKeys.SMUSH_THROWABLES |
 				ZeroXInstanceKeys.ALLOCATIONS);
 	}

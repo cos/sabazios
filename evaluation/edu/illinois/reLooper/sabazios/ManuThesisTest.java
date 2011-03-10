@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 
+import junit.framework.Assert;
+
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.ibm.wala.analysis.pointers.HeapGraph;
@@ -32,7 +35,7 @@ public class ManuThesisTest extends DataRaceAnalysisTest {
 		this.setBinaryDependency("subjects");
 	}
 
-	@Test
+	@Ignore @Test
 	public void main() throws CancelException {
 		try {
 			setup(getTestClassName(), getCurrentlyExecutingTestName() + "()V");
@@ -52,6 +55,8 @@ public class ManuThesisTest extends DataRaceAnalysisTest {
 			
 			Collection<InstanceKey> pointsTo = demandRefinementPointsTo.getPointsTo((PointerKey) pointer);
 			printPointsToSet(pointsTo);
+			
+			Assert.fail("Manu's analysis isn't precise enough yet.");
 
 		} catch (ClassHierarchyException e) {
 			e.printStackTrace();

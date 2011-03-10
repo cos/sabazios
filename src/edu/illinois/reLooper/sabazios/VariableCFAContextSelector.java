@@ -24,6 +24,9 @@ public class VariableCFAContextSelector extends CallStringContextSelector {
 	public VariableCFAContextSelector(ContextSelector base) {
 		super(base);
 	}
+	
+	private final int HIGH_CFA = 10;
+	private final int LOW_CFA = 0;
 
 	@Override
 	protected int getLength(CGNode caller, CallSiteReference site,
@@ -31,7 +34,7 @@ public class VariableCFAContextSelector extends CallStringContextSelector {
 		String string = site.getDeclaredTarget().toString()+caller.getMethod().toString();
 		
 		if(string.contains(ParallelArray.OP_STRING))
-			return 3;
+			return HIGH_CFA;
 		
 		CallString callString = (CallString) caller.getContext().get(
 				CALL_STRING);
@@ -39,9 +42,9 @@ public class VariableCFAContextSelector extends CallStringContextSelector {
 			IMethod[] methods = callString.getMethods();
 			for (IMethod iMethod : methods) {
 				if(iMethod.toString().contains(ParallelArray.OP_STRING))
-					return 3;
+					return HIGH_CFA;
 			}
 		}
-		return 0;
+		return LOW_CFA;
 	}
 }

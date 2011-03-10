@@ -3,6 +3,7 @@ package edu.illinois.reLooper.sabazios;
 import java.io.IOException;
 import java.util.Collection;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.ibm.wala.classLoader.IField;
@@ -45,7 +46,11 @@ public class DemandDrivenTest extends DataRaceAnalysisTest {
 		this.setBinaryDependency("subjects");
 	}
 
-	@Test
+	
+	/**
+	 * This is for playing with the demand driven analysis.
+	 */
+	@Ignore @Test
 	public void doTest() {
 		try {
 			setup("Lsubjects/DemandTest", "main()V");

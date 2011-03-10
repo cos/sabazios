@@ -8,15 +8,17 @@ import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.propagation.AllocationSiteInNode;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
+import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 import com.ibm.wala.ipa.slicer.NormalStatement;
 import com.ibm.wala.ipa.slicer.Statement;
 import com.ibm.wala.ipa.slicer.StatementWithInstructionIndex;
+import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
 
 public class Race {
 	private final NormalStatement statement;
 	private final InstanceKey instanceKey;
 	private final boolean isLoopCarriedDependency;
-	
+
 	/**
 	 * Describes a race.
 	 * 
@@ -35,15 +37,28 @@ public class Race {
 	public String toString() {
 		AllocationSiteInNode allocationSite = (AllocationSiteInNode) instanceKey;
 		CodeLocation allocationLocation;
-		if(instanceKey != null)
-			allocationLocation = CodeLocation.make(allocationSite.getNode(), allocationSite.getSite().getProgramCounter());
+		if (instanceKey != null)
+			allocationLocation = CodeLocation.make(allocationSite.getNode(), allocationSite.getSite()
+					.getProgramCounter());
 		else
 			allocationLocation = null;
-			
-		return (isStatic()?"STATIC ":"")+"RACE "+(isLoopCarriedDependency?" with LCD ":"")+CodeLocation.make(getStatement())+" : "+ getStatement()
-				+ " write to " + allocationLocation;
+
+		return (isStatic() ? "STATIC " : "") + "RACE " + (isLoopCarriedDependency ? " with LCD " : "")
+				+ CodeLocation.make(getStatement()) + " : " + getStatement() + " write to " + allocationLocation;
 	}
-	
+
+	public String toDetailedString(CallGraph callGraph) {
+		StringBuffer s = new StringBuffer();
+		s.append(this);
+		s.append("\n");
+		s.append(this.getRaceStackTrace(callGraph));
+		s.append("\n");
+		s.append("Allocation site\n");
+		s.append(this.getAllocationStackTrace(callGraph));
+		s.append("\n");
+		return s.toString();
+	}
+
 	public boolean isStatic() {
 		return getInstanceKey() == null;
 	}
@@ -59,20 +74,20 @@ public class Race {
 	public InstanceKey getInstanceKey() {
 		return instanceKey;
 	}
-	
-	public String getRaceStackTrace(CallGraph callGraph)
-	{
+
+	public String getRaceStackTrace(CallGraph callGraph) {
 		NormalStatement statement = this.getStatement();
 		return this.getStackTrace(callGraph, statement);
 	}
-	public String getAllocationStackTrace(CallGraph callGraph)
-	{
+
+	public String getAllocationStackTrace(CallGraph callGraph) {
 		AllocationSiteInNode allocationSite = (AllocationSiteInNode) instanceKey;
+		if (instanceKey == null)
+			return "STATIC";
 		return getStackTrace(callGraph, Analysis.getNormalStatement(allocationSite));
 	}
-	
-	private String getStackTrace(CallGraph callGraph, NormalStatement statement)
-	{
+
+	private String getStackTrace(CallGraph callGraph, NormalStatement statement) {
 		StringBuilder s = new StringBuilder();
 		s.append(CodeLocation.make(statement));
 		s.append("\n");
@@ -83,21 +98,33 @@ public class Race {
 	}
 
 	private void getStackTrace(CGNode node, HashSet<CGNode> visitedNodes, CallGraph callGraph, StringBuilder s) {
-		if(visitedNodes.contains(node))
+		if (visitedNodes.contains(node))
 			return;
 		visitedNodes.add(node);
 		Iterator<CGNode> predNodes = callGraph.getPredNodes(node);
 		while (predNodes.hasNext()) {
 			CGNode cgNode = (CGNode) predNodes.next();
-			Iterator<CallSiteReference> possibleSites = callGraph.getPossibleSites(cgNode, node);
-			while (possibleSites.hasNext()) {
-				CallSiteReference callSiteReference = (CallSiteReference) possibleSites
-						.next();
-				CodeLocation cl = CodeLocation.make(cgNode, callSiteReference.getProgramCounter());
-				if(cl != null)
-					s.append(cl.toString()+ "\n");
+			if (!cgNode.toString().contains("Ljava/")) {
+				Iterator<CallSiteReference> possibleSites = callGraph.getPossibleSites(cgNode, node);
+				while (possibleSites.hasNext()) {
+					CallSiteReference callSiteReference = (CallSiteReference) possibleSites.next();
+					CodeLocation cl = CodeLocation.make(cgNode, callSiteReference.getProgramCounter());
+					if (cl != null)
+						s.append(cl.toString());
+					SSAAbstractInvokeInstruction[] calls = cgNode.getIR().getCalls(callSiteReference);
+					for (SSAAbstractInvokeInstruction invoke : calls) {
+						for(int i = 0; i<invoke.getNumberOfUses(); i++)
+						{
+							int use = invoke.getUse(i);
+							LocalPointerKey localPointerKey = Analysis.instance.getLocalPointerKey(cgNode, use);
+							if(!Analysis.getOutsideAllocationSites(cgNode, use).isEmpty())
+								s.append(" : "+CodeLocation.variableName(use, cgNode, invoke));
+						}
+					}
+					s.append("\n");
+				}
 			}
-			getStackTrace(cgNode,visitedNodes, callGraph, s);
+			getStackTrace(cgNode, visitedNodes, callGraph, s);
 		}
 	}
 }
