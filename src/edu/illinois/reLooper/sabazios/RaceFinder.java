@@ -17,6 +17,7 @@ import com.ibm.wala.ipa.slicer.Statement;
 import com.ibm.wala.ipa.slicer.StatementWithInstructionIndex;
 import com.ibm.wala.ipa.slicer.Slicer.ControlDependenceOptions;
 import com.ibm.wala.ipa.slicer.Slicer.DataDependenceOptions;
+import com.ibm.wala.ssa.IR;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSANewInstruction;
 import com.ibm.wala.ssa.SSAPutInstruction;
@@ -44,12 +45,16 @@ public class RaceFinder {
 		HashSet<Race> races = new HashSet<Race>();
 
 		for (CGNode node : callGraph)
-			if (node.getContext() instanceof SmartContextSelector.InsideParOpContext)
-				for (SSAInstruction instruction : node.getIR().getControlFlowGraph().getInstructions()) {
+			if (node.getContext() instanceof SmartContextSelector.InsideParOpContext) {
+				IR ir = node.getIR();
+				if(ir == null)
+					continue;
+				for (SSAInstruction instruction : ir.getControlFlowGraph().getInstructions()) {
 					Race race = getRace(node, instruction);
 					if(race != null)
 						races.add(race);
 				}
+			}
 		return races;
 	}
 
