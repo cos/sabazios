@@ -29,91 +29,76 @@ public class RaceFinder {
 	private final CallGraph callGraph;
 	private HeapGraph heapGraph;
 	private final Analysis analysis;
-	private InOutVisitor beforeInAfter;
 
 	public RaceFinder(Analysis analysis) {
 		this.analysis = analysis;
 		this.pointerAnalysis = analysis.pointerAnalysis;
 		this.callGraph = analysis.callGraph;
 		this.heapGraph = pointerAnalysis.getHeapGraph();
-		this.beforeInAfter = analysis.getBeforeInAfter();
 	}
 
 	public Set<Race> findRaces() throws CancelException {
 		HashSet<Race> races = new HashSet<Race>();
 
-		int i = 0;
-		if(DEBUG)
-			System.err.println("Number of statement inside: "+beforeInAfter.in.size());
 		// for each statement in the parallel for
-		for (StatementWithInstructionIndex statement : beforeInAfter.in) {
-			SSAInstruction instruction;
-			i++;
-			if(i % 1000 == 0)
-				System.err.println(i);
-			try {
-				instruction = Analysis.getInstruction(statement);
-			} catch (ArrayIndexOutOfBoundsException e) {
-				continue;
-			}
+		for (CGNode node : callGraph)
+			if (node.getContext() instanceof SmartContextSelector.InsideParOpContext)
+				for (SSAInstruction instruction : node.getIR().getControlFlowGraph().getInstructions()) {
 
-			// we only check put instructions for now. should also include
-			// array, etc. in the future
-			if (instruction instanceof SSAPutInstruction) {
-				SSAPutInstruction putI = (SSAPutInstruction) instruction;
+					// we only check put instructions for now. should also
+					// include
+					// array, etc. in the future
+					if (instruction instanceof SSAPutInstruction) {
+						SSAPutInstruction putI = (SSAPutInstruction) instruction;
 
-				if(DEBUG)
-					System.out.println(instruction);
-				
-				// if it is not static, we do the more involved check
-				if (!putI.isStatic()) {
-					int ref = putI.getRef();
+						if (DEBUG)
+							System.out.println(instruction);
 
-					Set<AllocationSiteInNode> allocSites = Analysis.getOutsideAllocationSites(statement.getNode(),ref);
+						// if it is not static, we do the more involved check
+						if (!putI.isStatic()) {
+							int ref = putI.getRef();
 
-					// do a demand driven confirmation of the race
-//					if (allocSites ){
-//						DemandDrivenRaceConfirmer raceConfirmer = new DemandDrivenRaceConfirmer(
-//								analysis);
-//						racing = raceConfirmer.confirm(localPointerKey,
-//								beforeInAfter);
-//					}
+							Set<AllocationSiteInNode> allocSites = Analysis.getOutsideAllocationSites(
+									node, ref);
 
-					// report race if it still stands
-					if (!allocSites.isEmpty()) {
-						Race race = new Race((NormalStatement) statement,
-								allocSites.iterator().next(), false);
+							// do a demand driven confirmation of the race
+							// if (allocSites ){
+							// DemandDrivenRaceConfirmer raceConfirmer = new
+							// DemandDrivenRaceConfirmer(
+							// analysis);
+							// racing = raceConfirmer.confirm(localPointerKey,
+							// beforeInAfter);
+							// }
 
-						races.add(race);
+							// report race if it still stands
+							if (!allocSites.isEmpty()) {
+								Race race = new Race(new NormalStatement(node, CodeLocation.getSSAInstructionNo(node, instruction)), allocSites.iterator().next(), false);
+								races.add(race);
+							}
+
+						} else {
+							// TODO: replace false with the true value of
+							// isLoopCarriedDependency
+							Race race = new Race(new NormalStatement(node, CodeLocation.getSSAInstructionNo(node, instruction)), null, false);
+							races.add(race);
+							if (DEBUG)
+								System.out.println(race);
+						}
 					}
-
-				} else {
-					// TODO: replace false with the true value of
-					// isLoopCarriedDependency
-					Race race = new Race((NormalStatement) statement, null, false);
-					races.add(race);
-					if(DEBUG)
-						System.out.println(race);
 				}
-			}
-		}
 		return races;
 	}
 
-	private boolean checkLoopCarryDependency(
-			final StatementWithInstructionIndex statement,
-			final AllocationSiteInNode instanceKey,
-			final InOutVisitor beforeInAfter) throws CancelException {
+	private boolean checkLoopCarryDependency(final StatementWithInstructionIndex statement,
+			final AllocationSiteInNode instanceKey, final InOutVisitor beforeInAfter) throws CancelException {
 		// Collection<Statement> backwordSlice = Slicer.computeBackwardSlice(
 		// statement, callGraph, pointerAnalysis,
 		// DataDependenceOptions.FULL,
 		// ControlDependenceOptions.NO_EXCEPTIONAL_EDGES);
 
-		PredUseVisitor predUseVisitor = new PredUseVisitor(analysis,
-				beforeInAfter, instanceKey, statement);
+		PredUseVisitor predUseVisitor = new PredUseVisitor(analysis, beforeInAfter, instanceKey, statement);
 
-		(new ProgramTraverser(callGraph, callGraph.getFakeRootNode(),
-				predUseVisitor)).traverse();
+		(new ProgramTraverser(callGraph, callGraph.getFakeRootNode(), predUseVisitor)).traverse();
 
 		return predUseVisitor.foundUse;
 	}

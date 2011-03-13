@@ -29,7 +29,6 @@ public class Analysis {
 	final CallGraph callGraph;
 	final PointerAnalysis pointerAnalysis;
 	public HeapGraph heapGraph;
-	public final InOutVisitor inOut;
 	final PropagationCallGraphBuilder builder;
 	private IClassHierarchy cha;
 
@@ -39,7 +38,6 @@ public class Analysis {
 		this.callGraph = callGraph;
 		this.pointerAnalysis = pointerAnalysis;
 		this.builder = builder;
-		this.inOut = beforeInAfter;
 		this.heapGraph = this.pointerAnalysis.getHeapGraph();
 		this.cha = this.pointerAnalysis.getClassHierarchy();
 	}
@@ -110,10 +108,6 @@ public class Analysis {
 			}
 		}
 		return false;
-	}
-
-	public InOutVisitor getBeforeInAfter() {
-		return inOut;
 	}
 
 	public static NormalStatement getNormalStatement(

@@ -24,7 +24,7 @@ public class ParticleTest extends DataRaceAnalysisTest {
 	public void noRaceOnParameter() throws CancelException {
 		assertNoRaces();
 	}
-	
+
 	@Test
 	public void verySimpleRace() {
 		assertRace("subjects.Particle$5.op(Particle.java:65)");

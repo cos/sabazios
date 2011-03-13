@@ -17,7 +17,7 @@ public class BarnesHutEvaluation extends DataRaceAnalysisTest{
 	@Test
 	public void bla() throws CancelException {
 		Set<Race> races = findRaces("LBarnesHut/src/java/ParallelBarneshut", "main([Ljava/lang/String;)V");
-		
+		System.out.println(races.size());
 		System.out.println(races.iterator().next().toDetailedString(callGraph));
 	}
 }
