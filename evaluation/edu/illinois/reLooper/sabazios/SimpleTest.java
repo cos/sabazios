@@ -7,6 +7,9 @@ import org.junit.Test;
 
 import com.ibm.wala.util.CancelException;
 
+import edu.illinois.reLooper.sabazios.race.Race;
+import edu.illinois.reLooper.sabazios.race.RaceOnNonStatic;
+
 public class SimpleTest extends DataRaceAnalysisTest {
 
 	public SimpleTest() {

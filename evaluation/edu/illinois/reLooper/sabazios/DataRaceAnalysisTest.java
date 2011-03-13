@@ -39,6 +39,9 @@ import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.config.FileOfClasses;
 import com.ibm.wala.util.io.FileProvider;
 
+import edu.illinois.reLooper.sabazios.race.Race;
+import edu.illinois.reLooper.sabazios.race.RaceOnNonStatic;
+
 import static junit.framework.Assert.*;
 
 public abstract class DataRaceAnalysisTest {
@@ -69,14 +72,10 @@ public abstract class DataRaceAnalysisTest {
 
 			System.out.println("Initial setup");
 
-			InOutVisitor beforeInAfter = new InOutVisitor();
-			ProgramTraverser programTraverser = new ProgramTraverser(callGraph, callGraph.getFakeRootNode(),
-					beforeInAfter);
-			programTraverser.traverse();
 
 			System.out.println("before in after done");
 
-			analysis = new Analysis(callGraph, pointerAnalysis, builder, beforeInAfter);
+			analysis = new Analysis(callGraph, pointerAnalysis, builder);
 			Analysis.instance = analysis;
 			RaceFinder raceFinder = new RaceFinder(analysis);
 
@@ -154,18 +153,18 @@ public abstract class DataRaceAnalysisTest {
 		return scope;
 	}
 
-	protected void printDetailedRaces(Set<Race> races) {
-		System.out.println("Number of races: " + races.size());
-		for (Iterator<Race> iterator = races.iterator(); iterator.hasNext();) {
-			Race race = (Race) iterator.next();
+	protected void printDetailedRaces(Set<Race> foundRaces) {
+		System.out.println("Number of races: " + foundRaces.size());
+		for (Iterator<Race> iterator = foundRaces.iterator(); iterator.hasNext();) {
+			RaceOnNonStatic race = (RaceOnNonStatic) iterator.next();
 			System.out.println(race.toDetailedString(callGraph));
 		}
 	}
 
-	protected void printRaces(Set<Race> races) {
+	protected void printRaces(Set<RaceOnNonStatic> races) {
 		System.out.println("Number of races: " + races.size());
-		for (Iterator<Race> iterator = races.iterator(); iterator.hasNext();) {
-			Race race = (Race) iterator.next();
+		for (Iterator<RaceOnNonStatic> iterator = races.iterator(); iterator.hasNext();) {
+			RaceOnNonStatic race = (RaceOnNonStatic) iterator.next();
 			System.out.println(race);
 		}
 	}

@@ -14,17 +14,15 @@ final class PredUseVisitor extends TraversalVisitor {
 	 * 
 	 */
 	private final Analysis analysis;
-	private final InOutVisitor beforeInAfter;
 	private final AllocationSiteInNode instanceKey;
 	private final StatementWithInstructionIndex statement;
 	boolean before = true;
 	boolean foundUse = false;
 
-	PredUseVisitor(Analysis analysis, InOutVisitor beforeInAfter,
+	PredUseVisitor(Analysis analysis,
 			AllocationSiteInNode instanceKey,
 			StatementWithInstructionIndex statement) {
 		this.analysis = analysis;
-		this.beforeInAfter = beforeInAfter;
 		this.instanceKey = instanceKey;
 		this.statement = statement;
 	}
@@ -48,10 +46,10 @@ final class PredUseVisitor extends TraversalVisitor {
 		if (normalStatement.equals(statement))
 			before = false;
 
-		if (before && beforeInAfter.in.contains(normalStatement)) {
-			InstanceKey instanceKey = this.instanceKey;
-			foundUse = foundUse
-					|| analysis.doesStatementUseInstanceKey(normalStatement, instanceKey);
-		}
+//		if (before && beforeInAfter.in.contains(normalStatement)) {
+//			InstanceKey instanceKey = this.instanceKey;
+//			foundUse = foundUse
+//					|| analysis.doesStatementUseInstanceKey(normalStatement, instanceKey);
+//		}
 	}
 }

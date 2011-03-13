@@ -7,6 +7,9 @@ import org.junit.Test;
 
 import com.ibm.wala.util.CancelException;
 
+import edu.illinois.reLooper.sabazios.race.Race;
+import edu.illinois.reLooper.sabazios.race.RaceOnNonStatic;
+
 public class BarnesHutEvaluation extends DataRaceAnalysisTest{
 
 	public BarnesHutEvaluation() {

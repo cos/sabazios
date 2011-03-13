@@ -33,8 +33,7 @@ public class Analysis {
 	private IClassHierarchy cha;
 
 	public Analysis(CallGraph callGraph, PointerAnalysis pointerAnalysis,
-			PropagationCallGraphBuilder builder,
-			InOutVisitor beforeInAfter) {
+			PropagationCallGraphBuilder builder) {
 		this.callGraph = callGraph;
 		this.pointerAnalysis = pointerAnalysis;
 		this.builder = builder;

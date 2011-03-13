@@ -13,6 +13,9 @@ import com.ibm.wala.ipa.slicer.Slicer;
 import com.ibm.wala.ipa.slicer.Statement;
 import com.ibm.wala.util.CancelException;
 
+import edu.illinois.reLooper.sabazios.race.Race;
+import edu.illinois.reLooper.sabazios.race.RaceOnNonStatic;
+
 public class LBJPOSEvaluation extends DataRaceAnalysisTest{
 
 	public LBJPOSEvaluation() {

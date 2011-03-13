@@ -22,6 +22,9 @@ import com.ibm.wala.ssa.SSANewInstruction;
 import com.ibm.wala.ssa.SSAPutInstruction;
 import com.ibm.wala.util.CancelException;
 
+import edu.illinois.reLooper.sabazios.race.Race;
+import edu.illinois.reLooper.sabazios.race.RaceOnNonStatic;
+
 public class RaceFinder {
 
 	private final boolean DEBUG = false;
@@ -40,66 +43,43 @@ public class RaceFinder {
 	public Set<Race> findRaces() throws CancelException {
 		HashSet<Race> races = new HashSet<Race>();
 
-		// for each statement in the parallel for
 		for (CGNode node : callGraph)
 			if (node.getContext() instanceof SmartContextSelector.InsideParOpContext)
 				for (SSAInstruction instruction : node.getIR().getControlFlowGraph().getInstructions()) {
-
-					// we only check put instructions for now. should also
-					// include
-					// array, etc. in the future
-					if (instruction instanceof SSAPutInstruction) {
-						SSAPutInstruction putI = (SSAPutInstruction) instruction;
-
-						if (DEBUG)
-							System.out.println(instruction);
-
-						// if it is not static, we do the more involved check
-						if (!putI.isStatic()) {
-							int ref = putI.getRef();
-
-							Set<AllocationSiteInNode> allocSites = Analysis.getOutsideAllocationSites(
-									node, ref);
-
-							// do a demand driven confirmation of the race
-							// if (allocSites ){
-							// DemandDrivenRaceConfirmer raceConfirmer = new
-							// DemandDrivenRaceConfirmer(
-							// analysis);
-							// racing = raceConfirmer.confirm(localPointerKey,
-							// beforeInAfter);
-							// }
-
-							// report race if it still stands
-							if (!allocSites.isEmpty()) {
-								Race race = new Race(new NormalStatement(node, CodeLocation.getSSAInstructionNo(node, instruction)), allocSites.iterator().next(), false);
-								races.add(race);
-							}
-
-						} else {
-							// TODO: replace false with the true value of
-							// isLoopCarriedDependency
-							Race race = new Race(new NormalStatement(node, CodeLocation.getSSAInstructionNo(node, instruction)), null, false);
-							races.add(race);
-							if (DEBUG)
-								System.out.println(race);
-						}
-					}
+					Race race = getRace(node, instruction);
+					if(race != null)
+						races.add(race);
 				}
 		return races;
 	}
 
-	private boolean checkLoopCarryDependency(final StatementWithInstructionIndex statement,
-			final AllocationSiteInNode instanceKey, final InOutVisitor beforeInAfter) throws CancelException {
-		// Collection<Statement> backwordSlice = Slicer.computeBackwardSlice(
-		// statement, callGraph, pointerAnalysis,
-		// DataDependenceOptions.FULL,
-		// ControlDependenceOptions.NO_EXCEPTIONAL_EDGES);
+	private Race getRace(CGNode node, SSAInstruction instruction) {
+		//TODO: we only check put instructions for now. should also include array, etc. in the future
+		if (instruction instanceof SSAPutInstruction) {
+			SSAPutInstruction putI = (SSAPutInstruction) instruction;
 
-		PredUseVisitor predUseVisitor = new PredUseVisitor(analysis, beforeInAfter, instanceKey, statement);
+			if (DEBUG)
+				System.out.println(instruction);
+			
 
-		(new ProgramTraverser(callGraph, callGraph.getFakeRootNode(), predUseVisitor)).traverse();
+			// if it is not static, we do the more involved check
+			if (!putI.isStatic()) {
+				int ref = putI.getRef();
 
-		return predUseVisitor.foundUse;
+				Set<AllocationSiteInNode> allocSites = Analysis.getOutsideAllocationSites(
+						node, ref);
+
+				// report race if it still stands
+				if (!allocSites.isEmpty()) {
+					return new RaceOnNonStatic(new NormalStatement(node, CodeLocation.getSSAInstructionNo(node, instruction)), allocSites.iterator().next(), false);
+				}
+
+			} else {
+				// TODO: replace false with the true value of
+				// isLoopCarriedDependency
+				return new RaceOnNonStatic(new NormalStatement(node, CodeLocation.getSSAInstructionNo(node, instruction)), null, false);				
+			}
+		}
+		return null;
 	}
 }
