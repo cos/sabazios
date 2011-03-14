@@ -137,6 +137,9 @@ public class Analysis {
 		LocalPointerKey localPointerKey = Analysis.instance
 				.getLocalPointerKey(node, ref);
 		
+		if(localPointerKey == null)
+			return new HashSet<AllocationSiteInNode>();
+		
 		// the actual instance keys for this pointer key
 		Iterator<Object> instanceKeys = Analysis.instance.heapGraph
 				.getSuccNodes(localPointerKey);

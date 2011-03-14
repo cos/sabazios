@@ -3,6 +3,8 @@ package edu.illinois.reLooper.sabazios;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -170,10 +172,11 @@ public abstract class DataRaceAnalysisTest {
 	}
 
 	public void assertNoRaces() {
-		assertRaces(null);
+		assertRaces();
 	}
-
-	public void assertRaces(Set<String> expectedRaces) {
+	
+	public void assertRaces(String... expected) {
+		List<String> expectedRaces = Arrays.asList(expected);
 		Set<Race> foundRaces = findRaces(getTestClassName(), getCurrentlyExecutingTestName() + "()V");
 		if (DEBUG) {
 			System.err.println(getCurrentlyExecutingTestName());
@@ -183,6 +186,7 @@ public abstract class DataRaceAnalysisTest {
 			return;
 		if (expectedRaces != null && expectedRaces.size() == foundRaces.size()) {
 			for (Race r : foundRaces) {
+				
 				if (!expectedRaces.contains(CodeLocation.make(r.getStatement()).toString())) {
 					System.out.println(CodeLocation.make(r.getStatement()).toString());
 					break;
@@ -197,11 +201,11 @@ public abstract class DataRaceAnalysisTest {
 	protected String getTestClassName() {
 		String testClassName = this.getClass().getSimpleName();
 		String className = testClassName.substring(0, testClassName.length() - 4);
-		String classNameForWala = "Lsubjects/" + className;
+		String classNameForWala = "Lsynthetic/" + className;
 		return classNameForWala;
 	}
 
-	private void fail(Set<String> expectedRaces, Set<Race> foundRaces) throws ComparisonFailure {
+	private void fail(Collection<String> expectedRaces, Set<Race> foundRaces) throws ComparisonFailure {
 		String expected = "";
 		if (expectedRaces != null)
 			for (String s : expectedRaces)
@@ -218,9 +222,7 @@ public abstract class DataRaceAnalysisTest {
 	}
 
 	protected void assertRace(String location) {
-		HashSet<String> races = new HashSet<String>();
-		races.add(location);
-		assertRaces(races);
+		assertRaces(location);
 	}
 
 	public static SSAPropagationCallGraphBuilder makeCFABuilder(AnalysisOptions options, AnalysisCache cache,

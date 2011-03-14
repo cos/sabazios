@@ -1,4 +1,4 @@
-package subjects;
+package synthetic;
 
 public class ManuThesis {
 	static class A {

@@ -1,4 +1,4 @@
-package edu.illinois.reLooper.sabazios;
+package edu.illinois.reLooper.sabazios.tests.synthetic;
 
 import java.util.Iterator;
 
@@ -6,15 +6,17 @@ import org.junit.Test;
 
 import com.ibm.wala.util.CancelException;
 
+import edu.illinois.reLooper.sabazios.DataRaceAnalysisTest;
+
 public class ParticleTest extends DataRaceAnalysisTest {
 
 	public ParticleTest() {
 		super();
 		DEBUG = true;
-		this.setBinaryDependency("subjects");
+		this.setBinaryDependency("synthetic");
 		this.setBinaryDependency("../ParallelArrayMock/bin");
 	}
-
+	
 	@Test
 	public void vacuouslyNoRace() throws CancelException {
 		assertNoRaces();
@@ -27,7 +29,7 @@ public class ParticleTest extends DataRaceAnalysisTest {
 
 	@Test
 	public void verySimpleRace() {
-		assertRace("subjects.Particle$5.op(Particle.java:65)");
+		assertRace("synthetic.Particle$5.op(Particle.java:65)");
 	}
 	
 	/**
@@ -43,7 +45,7 @@ public class ParticleTest extends DataRaceAnalysisTest {
 	 */
 	@Test
 	public void raceOnParameterInitializedBefore() throws CancelException  {
-		assertRace("subjects.Particle$6.op(Particle.java:73)");
+		assertRace("synthetic.Particle$6.op(Particle.java:73)");
 	}
 	
 	/**
@@ -76,11 +78,21 @@ public class ParticleTest extends DataRaceAnalysisTest {
 	
 	/**
 	 * How context sensitive is it?
-	 * Fails on any CFA
+	 * Fails on any CFA due to recursivity
 	 * Might work on smarter analyses
 	 */
 	@Test
-	public void HighCFANeeded() throws CancelException {
+	public void recursive() throws CancelException {
+		assertNoRaces();
+	}
+	
+	/**
+	 * How context sensitive is it?
+	 * Fails on any CFA due to recursivity
+	 * Might work on smarter analyses
+	 */
+	@Test
+	public void disambiguateFalseRace() throws CancelException {
 		assertNoRaces();
 	}
 }

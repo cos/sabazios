@@ -46,7 +46,7 @@ public class RaceOnNonStatic extends Race {
 		StringBuffer s = new StringBuffer();
 		s.append(this);
 		s.append("\n");
-		s.append(this.getRaceStackTrace(callGraph));
+		s.append(this.toStackTraceString(callGraph));
 		s.append("\n");
 		s.append("Allocation site\n");
 		s.append(this.getAllocationStackTrace(callGraph));

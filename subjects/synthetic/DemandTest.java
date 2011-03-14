@@ -1,4 +1,4 @@
-package subjects;
+package synthetic;
 
 public class DemandTest {
 	class Foo {

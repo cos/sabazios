@@ -1,4 +1,4 @@
-package subjects;
+package synthetic;
 
 import extra166y.Ops.Procedure;
 import extra166y.ParallelArray;
