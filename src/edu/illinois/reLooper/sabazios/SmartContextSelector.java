@@ -12,6 +12,13 @@ import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import extra166y.ParallelArray;
 
 final class SmartContextSelector implements ContextSelector {
+	
+	private final OpSelector opSelector;
+
+	public SmartContextSelector(OpSelector opSelector) {
+		this.opSelector = opSelector;
+	}
+	
 	private static final ContextKey INSIDE_PAR_OP = new ContextKey() {
 	};
 
@@ -41,8 +48,8 @@ final class SmartContextSelector implements ContextSelector {
 
 	@Override
 	public Context getCalleeTarget(CGNode caller, CallSiteReference site, IMethod callee, InstanceKey receiver) {
-		String string = site.getDeclaredTarget().toString()+caller.getMethod().toString();
-		if(string.contains(ParallelArray.OP_STRING))
+		String string = site.getDeclaredTarget().toString();
+		if(opSelector.accepts(caller, site, callee, receiver))
 		{
 			System.err.println("Found the operator string.");
 			return INSIDE_CONTEXT;

@@ -33,7 +33,7 @@ import com.ibm.wala.ipa.cha.IClassHierarchy;
 public class SmartCFABuilder extends SSAPropagationCallGraphBuilder {
 
   public SmartCFABuilder(IClassHierarchy cha, AnalysisOptions options, AnalysisCache cache, ContextSelector appContextSelector,
-      SSAContextInterpreter appContextInterpreter, int instancePolicy) {
+      SSAContextInterpreter appContextInterpreter, int instancePolicy, OpSelector opSelector) {
 
     super(cha, options, cache, new DefaultPointerKeyFactory());
     if (options == null) {
@@ -41,7 +41,7 @@ public class SmartCFABuilder extends SSAPropagationCallGraphBuilder {
     }
 
     ContextSelector def = new DefaultContextSelector(options);
-    setContextSelector(new SmartContextSelector());
+    setContextSelector(new SmartContextSelector(opSelector));
 
     SSAContextInterpreter defI = new DefaultSSAInterpreter(options, cache);
     defI = new DelegatingSSAContextInterpreter(ReflectionContextInterpreter.createReflectionContextInterpreter(cha, options, getAnalysisCache()), defI);

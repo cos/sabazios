@@ -63,6 +63,7 @@ public abstract class DataRaceAnalysisTest {
 	protected PropagationCallGraphBuilder builder;
 	protected static boolean DEBUG = false;
 	protected Analysis analysis;
+	protected OpSelector opSelector;
 
 	public DataRaceAnalysisTest() {
 		testClassName = this.getClass().getName();
@@ -124,7 +125,7 @@ public abstract class DataRaceAnalysisTest {
 
 		AnalysisOptions options = new AnalysisOptions(scope, entrypoints);
 		AnalysisCache cache = new AnalysisCache();
-		builder = makeCFABuilder(options, cache, cha, scope);
+		builder = makeCFABuilder(options, cache, cha, scope, opSelector);
 
 		callGraph = builder.makeCallGraph(options);
 		pointerAnalysis = builder.getPointerAnalysis();
@@ -226,7 +227,7 @@ public abstract class DataRaceAnalysisTest {
 	}
 
 	public static SSAPropagationCallGraphBuilder makeCFABuilder(AnalysisOptions options, AnalysisCache cache,
-			IClassHierarchy cha, AnalysisScope scope) {
+			IClassHierarchy cha, AnalysisScope scope, OpSelector opSelector) {
 
 		if (options == null) {
 			throw new IllegalArgumentException("options is null");
@@ -247,7 +248,8 @@ public abstract class DataRaceAnalysisTest {
 				// ZeroXInstanceKeys.SMUSH_MANY |
 				ZeroXInstanceKeys.SMUSH_STRINGS |
 				// ZeroXInstanceKeys.SMUSH_THROWABLES |
-				ZeroXInstanceKeys.ALLOCATIONS);
+				ZeroXInstanceKeys.ALLOCATIONS, 
+				opSelector);
 	}
 
 	protected String getCurrentlyExecutingTestName() {

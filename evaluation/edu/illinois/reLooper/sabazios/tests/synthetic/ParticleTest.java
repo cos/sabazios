@@ -4,9 +4,15 @@ import java.util.Iterator;
 
 import org.junit.Test;
 
+import com.ibm.wala.classLoader.CallSiteReference;
+import com.ibm.wala.classLoader.IMethod;
+import com.ibm.wala.ipa.callgraph.CGNode;
+import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.util.CancelException;
 
 import edu.illinois.reLooper.sabazios.DataRaceAnalysisTest;
+import edu.illinois.reLooper.sabazios.OpSelector;
+import extra166y.ParallelArray;
 
 public class ParticleTest extends DataRaceAnalysisTest {
 
@@ -15,6 +21,14 @@ public class ParticleTest extends DataRaceAnalysisTest {
 		DEBUG = true;
 		this.setBinaryDependency("synthetic");
 		this.setBinaryDependency("../ParallelArrayMock/bin");
+		
+		this.opSelector = new OpSelector() {
+			@Override
+			public boolean accepts(CGNode caller, CallSiteReference site, IMethod callee, InstanceKey receiver) {
+				String string = site.getDeclaredTarget().toString()+caller.getMethod().toString();
+				return string.contains(ParallelArray.OP_STRING);
+			}
+		};
 	}
 	
 	@Test
