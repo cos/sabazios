@@ -70,8 +70,22 @@ public abstract class DataRaceAnalysisTest {
 	}
 
 	public Set<Race> findRaces(String entryClass, String entryMethod) {
-		try {
-			setup(entryClass, entryMethod);
+		
+			try {
+				setup(entryClass, entryMethod);
+			} catch (ClassHierarchyException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (CancelException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
 			System.out.println("Initial setup");
 
@@ -82,19 +96,16 @@ public abstract class DataRaceAnalysisTest {
 			Analysis.instance = analysis;
 			RaceFinder raceFinder = new RaceFinder(analysis);
 
-			Set<Race> races = raceFinder.findRaces();
+			Set<Race> races = null;
+			try {
+				races = raceFinder.findRaces();
+			} catch (CancelException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
 			return races;
-		} catch (ClassHierarchyException e) {
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} catch (CancelException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
+		
 	}
 
 	public void setBinaryDependency(String path) {
@@ -178,7 +189,7 @@ public abstract class DataRaceAnalysisTest {
 	
 	public void assertRaces(String... expected) {
 		List<String> expectedRaces = Arrays.asList(expected);
-		Set<Race> foundRaces = findRaces(getTestClassName(), getCurrentlyExecutingTestName() + "()V");
+		Set<Race> foundRaces = findRaces(getTestClassName(), getEntryMethod());
 		if (DEBUG) {
 			System.err.println(getCurrentlyExecutingTestName());
 			printDetailedRaces(foundRaces);
@@ -197,6 +208,10 @@ public abstract class DataRaceAnalysisTest {
 		}
 
 		fail(expectedRaces, foundRaces);
+	}
+
+	protected String getEntryMethod() {
+		return getCurrentlyExecutingTestName() + "()V";
 	}
 
 	protected String getTestClassName() {

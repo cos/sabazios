@@ -101,12 +101,12 @@ public class ParticleTest extends DataRaceAnalysisTest {
 	}
 	
 	/**
-	 * How context sensitive is it?
-	 * Fails on any CFA due to recursivity
-	 * Might work on smarter analyses
+	 * Disambiguate the trace for a race.
+	 * The trace should contain "shared.moveTo(5, 7);" but not
+	 * "particle.moveTo(2, 3);"
 	 */
 	@Test
 	public void disambiguateFalseRace() throws CancelException {
-		assertNoRaces();
+		assertRaces("synthetic.Particle.moveTo(Particle.java:12)","synthetic.Particle.moveTo(Particle.java:13)");
 	}
 }
