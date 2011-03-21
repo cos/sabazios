@@ -13,7 +13,6 @@ import edu.illinois.reLooper.sabazios.CodeLocation;
 
 public class RaceOnNonStatic extends Race {
 	private final InstanceKey instanceKey;
-	private final boolean isLoopCarriedDependency;
 
 	/**
 	 * Describes a race.
@@ -23,10 +22,9 @@ public class RaceOnNonStatic extends Race {
 	 * @param statement
 	 * @param instanceKey
 	 */
-	public RaceOnNonStatic(NormalStatement statement, InstanceKey instanceKey, boolean isLoopCarriedDependency) {
+	public RaceOnNonStatic(NormalStatement statement, InstanceKey instanceKey) {
 		super(statement);
 		this.instanceKey = instanceKey;
-		this.isLoopCarriedDependency = isLoopCarriedDependency;
 	}
 
 	@Override
@@ -52,10 +50,6 @@ public class RaceOnNonStatic extends Race {
 		s.append(this.getAllocationStackTrace(callGraph));
 		s.append("\n");
 		return s.toString();
-	}
-
-	public boolean isLoopCarriedDependency() {
-		return isLoopCarriedDependency;
 	}
 
 	public InstanceKey getInstanceKey() {

@@ -32,8 +32,7 @@ public class Analysis {
 	final PropagationCallGraphBuilder builder;
 	private IClassHierarchy cha;
 
-	public Analysis(CallGraph callGraph, PointerAnalysis pointerAnalysis,
-			PropagationCallGraphBuilder builder) {
+	public Analysis(CallGraph callGraph, PointerAnalysis pointerAnalysis, PropagationCallGraphBuilder builder) {
 		this.callGraph = callGraph;
 		this.pointerAnalysis = pointerAnalysis;
 		this.builder = builder;
@@ -43,23 +42,22 @@ public class Analysis {
 
 	public AbstractPointerKey getLocalPointerKey(StatementWithInstructionIndex s) {
 		SSAInstruction instruction = Analysis.getInstruction(s);
-		if(instruction instanceof SSAPutInstruction) {
+		if (instruction instanceof SSAPutInstruction) {
 			SSAPutInstruction putI = (SSAPutInstruction) instruction;
-			if(putI.isStatic())
-			{
+			if (putI.isStatic()) {
 				for (Object o : heapGraph) {
 					if (!(o instanceof StaticFieldKey))
 						continue;
 
 					StaticFieldKey staticPK = (StaticFieldKey) o;
 					putI.getDeclaredField();
-					if(cha.resolveField(putI.getDeclaredField()).equals(staticPK.getField()))
+					if (cha.resolveField(putI.getDeclaredField()).equals(staticPK.getField()))
 						return staticPK;
 				}
-				throw new RuntimeException("Could not find the static field pointer key in the heap graph. probably the code abobe is wrong");
-			} else
-			{
-				 //remained here
+				throw new RuntimeException(
+						"Could not find the static field pointer key in the heap graph. probably the code abobe is wrong");
+			} else {
+				// remained here
 			}
 		}
 		return null; // delete this
@@ -83,21 +81,16 @@ public class Analysis {
 		return null;
 	}
 
-	public boolean doesStatementUseInstanceKey(
-			StatementWithInstructionIndex normalStatement,
-			InstanceKey instanceKey) {
+	public boolean doesStatementUseInstanceKey(StatementWithInstructionIndex normalStatement, InstanceKey instanceKey) {
 		int instructionIndex = normalStatement.getInstructionIndex();
 		CGNode cgNode = normalStatement.getNode();
-		SSAInstruction predInstruction = cgNode.getIR().getControlFlowGraph()
-				.getInstructions()[instructionIndex];
+		SSAInstruction predInstruction = cgNode.getIR().getControlFlowGraph().getInstructions()[instructionIndex];
 		if (predInstruction instanceof SSAPutInstruction)
 			return false;
 		for (int i = 0; i < predInstruction.getNumberOfUses(); i++) {
-			LocalPointerKey localPointerKey = getLocalPointerKey(cgNode,
-					predInstruction.getUse(i));
+			LocalPointerKey localPointerKey = getLocalPointerKey(cgNode, predInstruction.getUse(i));
 
-			Iterator<Object> instanceKeys = heapGraph
-					.getSuccNodes(localPointerKey);
+			Iterator<Object> instanceKeys = heapGraph.getSuccNodes(localPointerKey);
 			if (instanceKeys == null)
 				continue;
 			while (instanceKeys.hasNext()) {
@@ -109,13 +102,12 @@ public class Analysis {
 		return false;
 	}
 
-	public static NormalStatement getNormalStatement(
-			AllocationSiteInNode instanceKey) {
+	public static NormalStatement getNormalStatement(AllocationSiteInNode instanceKey) {
 		SSANewInstruction allocationSiteInstruction = getInstruction(instanceKey);
-		int allocationSiteInstructionIndex = CodeLocation.getSSAInstructionNo(
-				instanceKey.getNode(), allocationSiteInstruction);
-		NormalStatement allocationSiteStatement = new NormalStatement(
-				instanceKey.getNode(), allocationSiteInstructionIndex);
+		int allocationSiteInstructionIndex = CodeLocation.getSSAInstructionNo(instanceKey.getNode(),
+				allocationSiteInstruction);
+		NormalStatement allocationSiteStatement = new NormalStatement(instanceKey.getNode(),
+				allocationSiteInstructionIndex);
 		return allocationSiteStatement;
 	}
 
@@ -126,49 +118,46 @@ public class Analysis {
 			return null;
 	}
 
-	public static SSAInstruction getInstruction(
-			StatementWithInstructionIndex statement) {
+	public static SSAInstruction getInstruction(StatementWithInstructionIndex statement) {
 		CGNode cgNode = statement.getNode();
 		return cgNode.getIR().getInstructions()[statement.getInstructionIndex()];
 	}
-	
-	public static Set<AllocationSiteInNode> getOutsideAllocationSites(CGNode node,int ref) {
-		// the local pointer key the statement writes to
-		LocalPointerKey localPointerKey = Analysis.instance
-				.getLocalPointerKey(node, ref);
-		
-		if(localPointerKey == null)
-			return new HashSet<AllocationSiteInNode>();
-		
-		// the actual instance keys for this pointer key
-		Iterator<Object> instanceKeys = Analysis.instance.heapGraph
-				.getSuccNodes(localPointerKey);
 
-//		boolean needsDemandDrivenConfirmation = true;
+	public static Set<AllocationSiteInNode> getOutsideAllocationSites(CGNode node, int ref) {
+		// the local pointer key the statement writes to
+		LocalPointerKey localPointerKey = Analysis.instance.getLocalPointerKey(node, ref);
+
+		if (localPointerKey == null)
+			return new HashSet<AllocationSiteInNode>();
+
+		// the actual instance keys for this pointer key
+		Iterator<Object> instanceKeys = Analysis.instance.heapGraph.getSuccNodes(localPointerKey);
+
+		// boolean needsDemandDrivenConfirmation = true;
 
 		Set<AllocationSiteInNode> allocSites = new HashSet<AllocationSiteInNode>();
 
 		while (instanceKeys.hasNext()) {
-			Object iK = instanceKeys
-					.next();
-			if(!(iK instanceof AllocationSiteInNode))
+			Object iK = instanceKeys.next();
+			if (!(iK instanceof AllocationSiteInNode))
 				continue;
-			
+
 			AllocationSiteInNode allocationSite = (AllocationSiteInNode) iK;
 
-			if(!(allocationSite.getNode().getContext() instanceof SmartContextSelector.InsideParOpContext))
+			if (!(allocationSite.getNode().getContext().equals(SmartContextSelector.PAROP_CONTEXT) || allocationSite
+					.getNode().getContext().equals(SmartContextSelector.SEQOP_CONTEXT)))
 				allocSites.add(allocationSite);
-			
-//			NormalStatement allocationSiteStatement = Analysis
-//					.getNormalStatement(allocationSite);
-//
-//			if (Analysis.instance.inOut.out
-//					.contains(allocationSiteStatement))
-//			{
-//				allocSites.add(allocationSite);
-////				if(!beforeInAfter.in.contains(allocationSiteStatement))
-////					needsDemandDrivenConfirmation = false;
-//			}
+
+			// NormalStatement allocationSiteStatement = Analysis
+			// .getNormalStatement(allocationSite);
+			//
+			// if (Analysis.instance.inOut.out
+			// .contains(allocationSiteStatement))
+			// {
+			// allocSites.add(allocationSite);
+			// // if(!beforeInAfter.in.contains(allocationSiteStatement))
+			// // needsDemandDrivenConfirmation = false;
+			// }
 		}
 		return allocSites;
 	}

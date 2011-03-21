@@ -25,9 +25,14 @@ public class JChordExampleTest extends DataRaceAnalysisTest {
 		
 		this.opSelector = new OpSelector() {
 			@Override
-			public boolean accepts(CGNode caller, CallSiteReference site, IMethod callee, InstanceKey receiver) {
+			public boolean isParOp(CGNode caller, CallSiteReference site, IMethod callee, InstanceKey receiver) {
 				String string = site.getDeclaredTarget().toString()+caller.getMethod().toString();
 				return string.contains("run");
+			}
+
+			@Override
+			public boolean isSeqOp(CGNode caller, CallSiteReference site, IMethod callee, InstanceKey receiver) {
+				return false;
 			}
 		};
 	}

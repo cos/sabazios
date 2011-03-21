@@ -25,6 +25,7 @@ import com.ibm.wala.util.CancelException;
 
 import edu.illinois.reLooper.sabazios.race.Race;
 import edu.illinois.reLooper.sabazios.race.RaceOnNonStatic;
+import edu.illinois.reLooper.sabazios.race.RaceOnStatic;
 
 public class RaceFinder {
 
@@ -45,7 +46,7 @@ public class RaceFinder {
 		HashSet<Race> races = new HashSet<Race>();
 
 		for (CGNode node : callGraph)
-			if (node.getContext() instanceof SmartContextSelector.InsideParOpContext) {
+			if (node.getContext().equals(SmartContextSelector.PAROP_CONTEXT)) {
 				IR ir = node.getIR();
 				if(ir == null)
 					continue;
@@ -76,13 +77,13 @@ public class RaceFinder {
 
 				// report race if it still stands
 				if (!allocSites.isEmpty()) {
-					return new RaceOnNonStatic(new NormalStatement(node, CodeLocation.getSSAInstructionNo(node, instruction)), allocSites.iterator().next(), false);
+					return new RaceOnNonStatic(new NormalStatement(node, CodeLocation.getSSAInstructionNo(node, instruction)), allocSites.iterator().next());
 				}
 
 			} else {
 				// TODO: replace false with the true value of
 				// isLoopCarriedDependency
-				return new RaceOnNonStatic(new NormalStatement(node, CodeLocation.getSSAInstructionNo(node, instruction)), null, false);				
+				return new RaceOnStatic(new NormalStatement(node, CodeLocation.getSSAInstructionNo(node, instruction)));				
 			}
 		}
 		return null;

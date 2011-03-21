@@ -183,4 +183,28 @@ public class Particle {
 			}
 		});
 	}
+	
+	public void ignoreFalseRacesInSeqOp() {
+		ParallelArray<Particle> particles = ParallelArray.create(10, Particle.class, ParallelArray.defaultExecutor());
+
+		final Particle shared = new Particle();
+
+		
+		particles.replaceWithGeneratedValueSeq(new Ops.Generator<Particle>() {
+			@Override
+			public Particle op() {
+				Particle particle = new Particle();
+				shared.moveTo(2, 3);
+				particle.origin.y = 10;
+				return particle;
+			}
+		});
+
+		particles.apply(new Ops.Procedure<Particle>() {
+			@Override
+			public void op(Particle b) {
+				b.x = 10;
+			}
+		});
+	}
 }

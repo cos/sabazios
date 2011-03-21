@@ -12,47 +12,49 @@ import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import extra166y.ParallelArray;
 
 final class SmartContextSelector implements ContextSelector {
-	
+
 	private final OpSelector opSelector;
 
 	public SmartContextSelector(OpSelector opSelector) {
 		this.opSelector = opSelector;
 	}
-	
-	private static final ContextKey INSIDE_PAR_OP = new ContextKey() {
-	};
 
-	public static final class InsideParOpContext implements Context {
+	public static final class UniqueContext implements Context {
 
-		/**
-		 * Don't use default hashCode (java.lang.Object) as it's
-		 * nondeterministic.
-		 */
+		private int hashCode;
+
+		public UniqueContext() {
+			this.hashCode = (int) (Math.random() * 10000);
+		}
+
 		@Override
 		public int hashCode() {
-			return 345134;
+			return hashCode;
 		}
 
 		@Override
 		public ContextItem get(ContextKey name) {
 			return null;
 		}
-		
+
 		@Override
 		public String toString() {
 			return "Inside par-op";
 		}
 	}
-	
-	private final static InsideParOpContext INSIDE_CONTEXT = new InsideParOpContext(); 
+
+	public final static UniqueContext PAROP_CONTEXT = new UniqueContext();
+	public final static UniqueContext SEQOP_CONTEXT = new UniqueContext();
 
 	@Override
 	public Context getCalleeTarget(CGNode caller, CallSiteReference site, IMethod callee, InstanceKey receiver) {
 		String string = site.getDeclaredTarget().toString();
-		if(opSelector.accepts(caller, site, callee, receiver))
-		{
-			System.err.println("Found the operator string.");
-			return INSIDE_CONTEXT;
+		if (opSelector.isParOp(caller, site, callee, receiver)) {
+			System.err.println("Found par operator string.");
+			return PAROP_CONTEXT;
+		} else if (opSelector.isSeqOp(caller, site, callee, receiver)){
+			System.err.println("Found seq operator string.");
+			return SEQOP_CONTEXT;
 		}
 		else
 			return caller.getContext();

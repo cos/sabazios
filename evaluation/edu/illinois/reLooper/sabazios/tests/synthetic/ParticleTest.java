@@ -18,31 +18,27 @@ public class ParticleTest extends DataRaceAnalysisTest {
 
 	public ParticleTest() {
 		super();
+		
 		DEBUG = true;
 		this.setBinaryDependency("synthetic");
 		this.setBinaryDependency("../ParallelArrayMock/bin");
-		
-		this.opSelector = new OpSelector() {
-			@Override
-			public boolean accepts(CGNode caller, CallSiteReference site, IMethod callee, InstanceKey receiver) {
-				String string = site.getDeclaredTarget().toString()+caller.getMethod().toString();
-				return string.contains(ParallelArray.OP_STRING);
-			}
-		};
 	}
 	
 	@Test
 	public void vacuouslyNoRace() throws CancelException {
+		findRaces();
 		assertNoRaces();
 	}
 
 	@Test
 	public void noRaceOnParameter() throws CancelException {
+		findRaces();
 		assertNoRaces();
 	}
 
 	@Test
 	public void verySimpleRace() {
+		findRaces();
 		assertRace("synthetic.Particle$5.op(Particle.java:65)");
 	}
 	
@@ -51,6 +47,7 @@ public class ParticleTest extends DataRaceAnalysisTest {
 	 */
 	@Test
 	public void noRaceOnParameterInitializedBefore() throws CancelException  {
+		findRaces();
 		assertNoRaces();
 	}
 	
@@ -59,6 +56,7 @@ public class ParticleTest extends DataRaceAnalysisTest {
 	 */
 	@Test
 	public void raceOnParameterInitializedBefore() throws CancelException  {
+		findRaces();
 		assertRace("synthetic.Particle$6.op(Particle.java:73)");
 	}
 	
@@ -67,6 +65,7 @@ public class ParticleTest extends DataRaceAnalysisTest {
 	 */
 	@Test
 	public void noRaceOnANonSharedField() throws CancelException {
+		findRaces();
 		assertNoRaces();
 	}
 	
@@ -77,6 +76,7 @@ public class ParticleTest extends DataRaceAnalysisTest {
 	 */
 	@Test
 	public void OneCFANeeded() throws CancelException {
+		findRaces();
 		assertNoRaces();
 	}
 	
@@ -87,6 +87,7 @@ public class ParticleTest extends DataRaceAnalysisTest {
 	 */
 	@Test
 	public void TwoCFANeeded() throws CancelException {
+		findRaces();
 		assertNoRaces();
 	}
 	
@@ -97,6 +98,7 @@ public class ParticleTest extends DataRaceAnalysisTest {
 	 */
 	@Test
 	public void recursive() throws CancelException {
+		findRaces();
 		assertNoRaces();
 	}
 	
@@ -107,6 +109,13 @@ public class ParticleTest extends DataRaceAnalysisTest {
 	 */
 	@Test
 	public void disambiguateFalseRace() throws CancelException {
+		findRaces();
 		assertRaces("synthetic.Particle.moveTo(Particle.java:12)","synthetic.Particle.moveTo(Particle.java:13)");
+	}
+	
+	@Test
+	public void ignoreFalseRacesInSeqOp() {
+		findRaces();
+		assertNoRaces();
 	}
 }

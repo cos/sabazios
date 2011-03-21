@@ -14,16 +14,20 @@ import java.util.jar.JarFile;
 import org.junit.ComparisonFailure;
 
 import com.ibm.wala.classLoader.BinaryDirectoryTreeModule;
+import com.ibm.wala.classLoader.CallSiteReference;
+import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.classLoader.Module;
 import com.ibm.wala.ipa.callgraph.AnalysisCache;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;
 import com.ibm.wala.ipa.callgraph.AnalysisScope;
+import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.Entrypoint;
 import com.ibm.wala.ipa.callgraph.impl.ContextInsensitiveSelector;
 import com.ibm.wala.ipa.callgraph.impl.DefaultContextSelector;
 import com.ibm.wala.ipa.callgraph.impl.DefaultEntrypoint;
 import com.ibm.wala.ipa.callgraph.impl.Util;
+import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
 import com.ibm.wala.ipa.callgraph.propagation.PropagationCallGraphBuilder;
 import com.ibm.wala.ipa.callgraph.propagation.SSAPropagationCallGraphBuilder;
@@ -43,6 +47,7 @@ import com.ibm.wala.util.io.FileProvider;
 
 import edu.illinois.reLooper.sabazios.race.Race;
 import edu.illinois.reLooper.sabazios.race.RaceOnNonStatic;
+import extra166y.ParallelArray;
 
 import static junit.framework.Assert.*;
 
@@ -64,9 +69,24 @@ public abstract class DataRaceAnalysisTest {
 	protected static boolean DEBUG = false;
 	protected Analysis analysis;
 	protected OpSelector opSelector;
+	protected Set<Race> foundRaces;
 
 	public DataRaceAnalysisTest() {
 		testClassName = this.getClass().getName();
+		
+		this.opSelector = new OpSelector() {
+			@Override
+			public boolean isParOp(CGNode caller, CallSiteReference site, IMethod callee, InstanceKey receiver) {
+				String string = site.getDeclaredTarget().toString()+caller.getMethod().toString();
+				return string.contains(ParallelArray.PAROP_STRING);
+			}
+
+			@Override
+			public boolean isSeqOp(CGNode caller, CallSiteReference site, IMethod callee, InstanceKey receiver) {
+				String string = site.getDeclaredTarget().toString()+caller.getMethod().toString();
+				return string.contains(ParallelArray.SEQOP_STRING);
+			}
+		};
 	}
 
 	public Set<Race> findRaces(String entryClass, String entryMethod) {
@@ -187,9 +207,12 @@ public abstract class DataRaceAnalysisTest {
 		assertRaces();
 	}
 	
+	public void findRaces() {
+		foundRaces = findRaces(getTestClassName(), getEntryMethod());
+	}
+	
 	public void assertRaces(String... expected) {
 		List<String> expectedRaces = Arrays.asList(expected);
-		Set<Race> foundRaces = findRaces(getTestClassName(), getEntryMethod());
 		if (DEBUG) {
 			System.err.println(getCurrentlyExecutingTestName());
 			printDetailedRaces(foundRaces);

@@ -13,14 +13,14 @@ import edu.illinois.reLooper.sabazios.race.RaceOnNonStatic;
 public class BarnesHutEvaluation extends DataRaceAnalysisTest{
 
 	public BarnesHutEvaluation() {
+		super();
 		this.setBinaryDependency("../evaluation/Lonestar-2.1/bin/BarnesHut");
 		this.setBinaryDependency("../ParallelArrayMock/bin");
 	}
 	
 	@Test
 	public void bla() throws CancelException {
-		Set<Race> races = findRaces("LBarnesHut/src/java/ParallelBarneshut", "main([Ljava/lang/String;)V");
-		System.out.println(races.size());
-		System.out.println(races.iterator().next().toDetailedString(callGraph));
+		foundRaces = findRaces("LBarnesHut/src/java/ParallelBarneshut", "main([Ljava/lang/String;)V");
+		assertNoRaces();
 	}
 }
