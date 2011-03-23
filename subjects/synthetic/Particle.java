@@ -207,4 +207,46 @@ public class Particle {
 			}
 		});
 	}
+	
+	public void raceBecauseOfOutsideInterference() {
+		ParallelArray<Particle> particles = ParallelArray.create(10,
+				Particle.class, ParallelArray.defaultExecutor());
+		
+		final Particle shared = new Particle();
+		shared.moveTo(3,4);
+		
+		particles.replaceWithGeneratedValue(new Ops.Generator<Particle>(){
+			@Override
+			public Particle op() {
+				shared.origin = new Particle();
+				shared.origin.moveTo(2, 3);
+				return shared.origin;
+			}
+		});
+	}
+	
+	public void raceOnSharedObjectCarriedByArray() {
+		ParallelArray<Particle> particles = ParallelArray.create(10,
+				Particle.class, ParallelArray.defaultExecutor());
+		
+		final Particle shared = new Particle();
+		shared.moveTo(3,4);
+		
+		particles.replaceWithGeneratedValueSeq(new Ops.Generator<Particle>(){
+			@Override
+			public Particle op() {
+				Particle p = new Particle();
+				shared.origin = new Particle();
+				p.origin = shared;
+				return p;
+			}
+		});
+		
+		particles.apply(new Ops.Procedure<Particle>() {
+			@Override
+			public void op(Particle p) {
+				p.origin.origin.moveTo(2,3);
+			}
+		});
+	}
 }

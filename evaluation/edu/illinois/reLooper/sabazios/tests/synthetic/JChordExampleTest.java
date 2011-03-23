@@ -22,19 +22,6 @@ public class JChordExampleTest extends DataRaceAnalysisTest {
 		super();
 		DEBUG = true;
 		this.setBinaryDependency("synthetic");
-		
-		this.opSelector = new OpSelector() {
-			@Override
-			public boolean isParOp(CGNode caller, CallSiteReference site, IMethod callee, InstanceKey receiver) {
-				String string = site.getDeclaredTarget().toString()+caller.getMethod().toString();
-				return string.contains("run");
-			}
-
-			@Override
-			public boolean isSeqOp(CGNode caller, CallSiteReference site, IMethod callee, InstanceKey receiver) {
-				return false;
-			}
-		};
 	}
 	
 	@Test

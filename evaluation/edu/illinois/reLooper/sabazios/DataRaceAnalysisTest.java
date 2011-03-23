@@ -68,25 +68,10 @@ public abstract class DataRaceAnalysisTest {
 	protected PropagationCallGraphBuilder builder;
 	protected static boolean DEBUG = false;
 	protected Analysis analysis;
-	protected OpSelector opSelector;
 	protected Set<Race> foundRaces;
 
 	public DataRaceAnalysisTest() {
 		testClassName = this.getClass().getName();
-		
-		this.opSelector = new OpSelector() {
-			@Override
-			public boolean isParOp(CGNode caller, CallSiteReference site, IMethod callee, InstanceKey receiver) {
-				String string = site.getDeclaredTarget().toString()+caller.getMethod().toString();
-				return string.contains(ParallelArray.PAROP_STRING);
-			}
-
-			@Override
-			public boolean isSeqOp(CGNode caller, CallSiteReference site, IMethod callee, InstanceKey receiver) {
-				String string = site.getDeclaredTarget().toString()+caller.getMethod().toString();
-				return string.contains(ParallelArray.SEQOP_STRING);
-			}
-		};
 	}
 
 	public Set<Race> findRaces(String entryClass, String entryMethod) {
@@ -142,6 +127,8 @@ public abstract class DataRaceAnalysisTest {
 		this.entryMethod = entryMethod;
 		AnalysisScope scope = getAnalysisScope();
 		scope.setExclusions(FileOfClasses.createFileOfClasses(new File("walaExclusions.txt")));
+		
+//		System.out.println(scope);
 
 		IClassHierarchy cha = ClassHierarchy.make(scope);
 
@@ -156,7 +143,7 @@ public abstract class DataRaceAnalysisTest {
 
 		AnalysisOptions options = new AnalysisOptions(scope, entrypoints);
 		AnalysisCache cache = new AnalysisCache();
-		builder = makeCFABuilder(options, cache, cha, scope, opSelector);
+		builder = makeCFABuilder(options, cache, cha, scope);
 
 		callGraph = builder.makeCallGraph(options);
 		pointerAnalysis = builder.getPointerAnalysis();
@@ -265,7 +252,7 @@ public abstract class DataRaceAnalysisTest {
 	}
 
 	public static SSAPropagationCallGraphBuilder makeCFABuilder(AnalysisOptions options, AnalysisCache cache,
-			IClassHierarchy cha, AnalysisScope scope, OpSelector opSelector) {
+			IClassHierarchy cha, AnalysisScope scope) {
 
 		if (options == null) {
 			throw new IllegalArgumentException("options is null");
@@ -286,8 +273,7 @@ public abstract class DataRaceAnalysisTest {
 				// ZeroXInstanceKeys.SMUSH_MANY |
 				ZeroXInstanceKeys.SMUSH_STRINGS |
 				// ZeroXInstanceKeys.SMUSH_THROWABLES |
-				ZeroXInstanceKeys.ALLOCATIONS, 
-				opSelector);
+				ZeroXInstanceKeys.ALLOCATIONS);
 	}
 
 	protected String getCurrentlyExecutingTestName() {

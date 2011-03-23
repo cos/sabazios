@@ -72,7 +72,7 @@ public abstract class Race {
 						for (int i = 0; i < invoke.getNumberOfUses(); i++) {
 							int use = invoke.getUse(i);
 							LocalPointerKey localPointerKey = Analysis.instance.getLocalPointerKey(predNode, use);
-							if (!Analysis.getOutsideAllocationSites(predNode, use).isEmpty())
+							if (!(Analysis.instance.getSharedObjectThisIsReachableFrom(predNode, use) == null))
 								s.append(" : " + CodeLocation.variableName(use, predNode, invoke));
 						}
 					}
@@ -96,5 +96,18 @@ public abstract class Race {
 
 	public String toDetailedString(CallGraph callGraph) {
 		return this.toString();
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(!(obj instanceof Race))
+			return false;
+		Race race = (Race) obj;
+		return this.toString().equals(race.toString());
+	}
+	
+	@Override
+	public int hashCode() {
+		return 7057;
 	}
 }

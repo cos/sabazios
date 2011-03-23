@@ -2,11 +2,14 @@ package edu.illinois.reLooper.sabazios;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import com.ibm.wala.analysis.pointers.HeapGraph;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
+import com.ibm.wala.ipa.callgraph.Context;
+import com.ibm.wala.ipa.callgraph.impl.Everywhere;
 import com.ibm.wala.ipa.callgraph.propagation.AbstractPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.AllocationSiteInNode;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
@@ -22,6 +25,12 @@ import com.ibm.wala.shrikeBT.Instruction;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSANewInstruction;
 import com.ibm.wala.ssa.SSAPutInstruction;
+import com.ibm.wala.util.collections.Filter;
+import com.ibm.wala.util.graph.Graph;
+import com.ibm.wala.util.graph.impl.GraphInverter;
+import com.ibm.wala.util.graph.traverse.BFSPathFinder;
+
+import edu.illinois.reLooper.sabazios.ArrayOperatorContext.Element;
 
 public class Analysis {
 
@@ -123,42 +132,86 @@ public class Analysis {
 		return cgNode.getIR().getInstructions()[statement.getInstructionIndex()];
 	}
 
-	public static Set<AllocationSiteInNode> getOutsideAllocationSites(CGNode node, int ref) {
+	public AllocationSiteInNode getSharedObjectThisIsReachableFrom(CGNode node, int ref) {
+		
+		if(node.getContext().equals(Everywhere.EVERYWHERE))
+			return null;
 		// the local pointer key the statement writes to
 		LocalPointerKey localPointerKey = Analysis.instance.getLocalPointerKey(node, ref);
 
 		if (localPointerKey == null)
-			return new HashSet<AllocationSiteInNode>();
+			return null;
 
 		// the actual instance keys for this pointer key
 		Iterator<Object> instanceKeys = Analysis.instance.heapGraph.getSuccNodes(localPointerKey);
+		
+		final Context currentContext = localPointerKey.getNode().getContext();
+		final ArrayOperatorContext.Element currentElementContextItem = (Element) currentContext.get(ArrayOperatorContext.ELEMENT);
+		final Set<InstanceKey> currentElement = new HashSet<InstanceKey>();
+		if(currentElementContextItem.element != -1)
+		{
+			int elementValue = currentElementContextItem.element;
+			CGNode elementNode = currentElementContextItem.cgNode;
+			LocalPointerKey elementPK = getLocalPointerKey(elementNode, elementValue);
+			Iterator<Object> succNodes = heapGraph.getSuccNodes(elementPK);
+			while (succNodes.hasNext()) {
+				Object object = (Object) succNodes.next();
+				currentElement.add((InstanceKey) object);
+			}
+		}
+
+		final Graph<Object> revertedHeap = GraphInverter.invert(Analysis.instance.heapGraph);
+		BFSPathFinder<Object> find = new BFSPathFinder<Object>(revertedHeap, instanceKeys, new Filter<Object>() {
+			@Override
+			public boolean accepts(Object iK) {
+				if (!(iK instanceof AllocationSiteInNode))
+					return false;
+
+				AllocationSiteInNode allocationSite = (AllocationSiteInNode) iK;
+
+				Context instanceAllocationContext = allocationSite.getNode().getContext();
+				
+				if (instanceAllocationContext.equals(Everywhere.EVERYWHERE))
+					return true;
+				
+				return false;
+			}
+		}) {
+			@Override
+			protected Iterator<? extends Object> getConnected(Object n) {
+				// stop traversing when reaching a current element
+				if(currentElement.contains(n))
+					return (new HashSet()).iterator();
+				else
+					return super.getConnected(n);
+			}
+		};
+
+		List<Object> listOfSharedObjects = find.find();
+
+		if (listOfSharedObjects == null)
+			return null;
+		else
+			return (AllocationSiteInNode) listOfSharedObjects.get(0);
 
 		// boolean needsDemandDrivenConfirmation = true;
 
-		Set<AllocationSiteInNode> allocSites = new HashSet<AllocationSiteInNode>();
-
-		while (instanceKeys.hasNext()) {
-			Object iK = instanceKeys.next();
-			if (!(iK instanceof AllocationSiteInNode))
-				continue;
-
-			AllocationSiteInNode allocationSite = (AllocationSiteInNode) iK;
-
-			if (!(allocationSite.getNode().getContext().equals(SmartContextSelector.PAROP_CONTEXT) || allocationSite
-					.getNode().getContext().equals(SmartContextSelector.SEQOP_CONTEXT)))
-				allocSites.add(allocationSite);
-
-			// NormalStatement allocationSiteStatement = Analysis
-			// .getNormalStatement(allocationSite);
-			//
-			// if (Analysis.instance.inOut.out
-			// .contains(allocationSiteStatement))
-			// {
-			// allocSites.add(allocationSite);
-			// // if(!beforeInAfter.in.contains(allocationSiteStatement))
-			// // needsDemandDrivenConfirmation = false;
-			// }
-		}
-		return allocSites;
+		// Set<AllocationSiteInNode> allocSites = new
+		// HashSet<AllocationSiteInNode>();
+		//
+		// while (instanceKeys.hasNext()) {
+		// Object iK = instanceKeys.next();
+		// if (!(iK instanceof AllocationSiteInNode))
+		// continue;
+		//
+		// AllocationSiteInNode allocationSite = (AllocationSiteInNode) iK;
+		//
+		// if
+		// (!(allocationSite.getNode().getContext().equals(SmartContextSelector.PAROP_CONTEXT)
+		// || allocationSite
+		// .getNode().getContext().equals(SmartContextSelector.SEQOP_CONTEXT)))
+		// allocSites.add(allocationSite);
+		// }
+		// return allocSites;
 	}
 }

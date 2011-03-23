@@ -8,6 +8,7 @@ import java.util.Set;
 import com.ibm.wala.analysis.pointers.HeapGraph;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
+import com.ibm.wala.ipa.callgraph.impl.Everywhere;
 import com.ibm.wala.ipa.callgraph.propagation.AllocationSiteInNode;
 import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
@@ -46,7 +47,7 @@ public class RaceFinder {
 		HashSet<Race> races = new HashSet<Race>();
 
 		for (CGNode node : callGraph)
-			if (node.getContext().equals(SmartContextSelector.PAROP_CONTEXT)) {
+			if (!node.getContext().equals(Everywhere.EVERYWHERE)) {
 				IR ir = node.getIR();
 				if(ir == null)
 					continue;
@@ -66,19 +67,18 @@ public class RaceFinder {
 
 			if (DEBUG)
 				System.out.println(instruction);
-			
 
 			// if it is not static, we do the more involved check
 			if (!putI.isStatic()) {
 				int ref = putI.getRef();
 
-				Set<AllocationSiteInNode> allocSites = Analysis.getOutsideAllocationSites(
+				AllocationSiteInNode sharedObject = Analysis.instance.getSharedObjectThisIsReachableFrom(
 						node, ref);
 
 				// report race if it still stands
-				if (!allocSites.isEmpty()) {
-					return new RaceOnNonStatic(new NormalStatement(node, CodeLocation.getSSAInstructionNo(node, instruction)), allocSites.iterator().next());
-				}
+				if (!(sharedObject == null)) 
+					return new RaceOnNonStatic(new NormalStatement(node, CodeLocation.getSSAInstructionNo(node, instruction)), sharedObject);
+				
 
 			} else {
 				// TODO: replace false with the true value of

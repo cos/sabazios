@@ -118,4 +118,16 @@ public class ParticleTest extends DataRaceAnalysisTest {
 		findRaces();
 		assertNoRaces();
 	}
+	
+	@Test
+	public void raceBecauseOfOutsideInterference()  {
+		findRaces();
+		assertRaces("synthetic.Particle$15.op(Particle.java:221)","synthetic.Particle.moveTo(Particle.java:12)","synthetic.Particle.moveTo(Particle.java:13)");
+	}
+	
+	@Test
+	public void raceOnSharedObjectCarriedByArray() {
+		findRaces();
+		assertRaces("synthetic.Particle.moveTo(Particle.java:12)","synthetic.Particle.moveTo(Particle.java:13)");
+	}
 }
