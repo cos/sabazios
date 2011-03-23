@@ -167,13 +167,12 @@ public class Particle {
 	}
 
 	public void disambiguateFalseRace() {
-		ParallelArray<Particle> particles = ParallelArray.create(10,
-				Particle.class, ParallelArray.defaultExecutor());
-		
+		ParallelArray<Particle> particles = ParallelArray.create(10, Particle.class, ParallelArray.defaultExecutor());
+
 		final Particle shared = new Particle();
-		shared.moveTo(3,4);
-		
-		particles.replaceWithGeneratedValue(new Ops.Generator<Particle>(){
+		shared.moveTo(3, 4);
+
+		particles.replaceWithGeneratedValue(new Ops.Generator<Particle>() {
 			@Override
 			public Particle op() {
 				Particle particle = new Particle();
@@ -183,18 +182,18 @@ public class Particle {
 			}
 		});
 	}
-	
+
 	public void ignoreFalseRacesInSeqOp() {
 		ParallelArray<Particle> particles = ParallelArray.create(10, Particle.class, ParallelArray.defaultExecutor());
 
 		final Particle shared = new Particle();
 
-		
 		particles.replaceWithGeneratedValueSeq(new Ops.Generator<Particle>() {
 			@Override
 			public Particle op() {
 				Particle particle = new Particle();
-				shared.moveTo(2, 3);
+				shared.x = 10;
+				particle.origin = shared;
 				particle.origin.y = 10;
 				return particle;
 			}
@@ -207,32 +206,30 @@ public class Particle {
 			}
 		});
 	}
-	
+
 	public void raceBecauseOfOutsideInterference() {
-		ParallelArray<Particle> particles = ParallelArray.create(10,
-				Particle.class, ParallelArray.defaultExecutor());
-		
+		ParallelArray<Particle> particles = ParallelArray.create(10, Particle.class, ParallelArray.defaultExecutor());
+
 		final Particle shared = new Particle();
-		shared.moveTo(3,4);
-		
-		particles.replaceWithGeneratedValue(new Ops.Generator<Particle>(){
+		shared.moveTo(3, 4);
+
+		particles.replaceWithGeneratedValue(new Ops.Generator<Particle>() {
 			@Override
 			public Particle op() {
 				shared.origin = new Particle();
-				shared.origin.moveTo(2, 3);
+				shared.origin.x = 10;
 				return shared.origin;
 			}
 		});
 	}
-	
+
 	public void raceOnSharedObjectCarriedByArray() {
-		ParallelArray<Particle> particles = ParallelArray.create(10,
-				Particle.class, ParallelArray.defaultExecutor());
-		
+		ParallelArray<Particle> particles = ParallelArray.create(10, Particle.class, ParallelArray.defaultExecutor());
+
 		final Particle shared = new Particle();
-		shared.moveTo(3,4);
-		
-		particles.replaceWithGeneratedValueSeq(new Ops.Generator<Particle>(){
+		shared.moveTo(3, 4);
+
+		particles.replaceWithGeneratedValueSeq(new Ops.Generator<Particle>() {
 			@Override
 			public Particle op() {
 				Particle p = new Particle();
@@ -241,12 +238,50 @@ public class Particle {
 				return p;
 			}
 		});
-		
+
 		particles.apply(new Ops.Procedure<Particle>() {
 			@Override
 			public void op(Particle p) {
-				p.origin.origin.moveTo(2,3);
+				p.origin.origin.moveTo(2, 3);
 			}
 		});
+	}
+
+	public void raceBecauseOfDirectArrayLoad() {
+		final ParallelArray<Particle> particles = ParallelArray.create(10, Particle.class,
+				ParallelArray.defaultExecutor());
+
+		final Particle shared = new Particle();
+
+		particles.replaceWithGeneratedValue(new Ops.Generator<Particle>() {
+			@Override
+			public Particle op() {
+				Particle p = particles.getArray()[0];
+				p.x = 10;
+				return shared.origin;
+			}
+		});
+	}
+
+	public void noRace() {
+		final Particle[] a = new Particle[10];
+		
+		final Particle shared = new Particle();
+
+		for (int i = 0; i < 10; i++) {
+			final int j = i;
+			Thread thread = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					Particle p = new Particle();
+					p.x = shared.x;
+				}
+			});
+			thread.start();
+		}
+		
+		for (int i = 0; i < a.length; i++) {
+			System.out.println(a[i]);
+		}
 	}
 }

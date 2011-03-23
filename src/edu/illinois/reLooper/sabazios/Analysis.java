@@ -171,12 +171,12 @@ public class Analysis {
 
 				Context instanceAllocationContext = allocationSite.getNode().getContext();
 				
-				if (instanceAllocationContext.equals(Everywhere.EVERYWHERE))
+				if (instanceAllocationContext.equals(Everywhere.EVERYWHERE)) 
 					return true;
 				
 				return false;
 			}
-		}) {
+		}) {  
 			@Override
 			protected Iterator<? extends Object> getConnected(Object n) {
 				// stop traversing when reaching a current element
@@ -192,7 +192,13 @@ public class Analysis {
 		if (listOfSharedObjects == null)
 			return null;
 		else
-			return (AllocationSiteInNode) listOfSharedObjects.get(0);
+		{
+			AllocationSiteInNode sharedInstance = (AllocationSiteInNode) listOfSharedObjects.get(0);
+			if(sharedInstance.getConcreteType().toString().contains("ParallelArray") && currentElement.isEmpty())
+				return null;
+			else
+				return sharedInstance;
+		}
 
 		// boolean needsDemandDrivenConfirmation = true;
 

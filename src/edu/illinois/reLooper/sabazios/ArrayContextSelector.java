@@ -16,20 +16,25 @@ import extra166y.ParallelArray;
 
 final class ArrayContextSelector implements ContextSelector {
 
-
 	public ArrayContextSelector() {
 	}
 
 	@Override
 	public Context getCalleeTarget(CGNode caller, CallSiteReference site, IMethod callee, InstanceKey receiver) {
-		if(caller.toString().contains("replaceWithGeneratedValue") && callee.toString().contains("op"))
-			return new ArrayOperatorContext( caller, -1, true);
-		if(caller.toString().contains("apply") && callee.toString().contains("op"))
-		{
+		if (caller.toString().contains("replaceWithGeneratedValueSeq") && callee.toString().contains("op"))
+			return new ArrayOperatorContext(caller, -1, false);
+		if (caller.toString().contains("replaceWithGeneratedValue") && callee.toString().contains("op"))
+			return new ArrayOperatorContext(caller, -1, true);
+
+		if (caller.toString().contains("applySeq") && callee.toString().contains("op")) {
 			SSAAbstractInvokeInstruction invoke = caller.getIR().getCalls(site)[0];
-			return new ArrayOperatorContext( caller, invoke.getUse(1), true);
+			return new ArrayOperatorContext(caller, invoke.getUse(1), false);
 		}
-		
+		if (caller.toString().contains("apply") && callee.toString().contains("op")) {
+			SSAAbstractInvokeInstruction invoke = caller.getIR().getCalls(site)[0];
+			return new ArrayOperatorContext(caller, invoke.getUse(1), true);
+		}
+
 		return caller.getContext();
 	}
 }

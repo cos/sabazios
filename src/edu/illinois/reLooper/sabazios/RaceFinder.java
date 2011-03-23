@@ -24,6 +24,7 @@ import com.ibm.wala.ssa.SSANewInstruction;
 import com.ibm.wala.ssa.SSAPutInstruction;
 import com.ibm.wala.util.CancelException;
 
+import edu.illinois.reLooper.sabazios.ArrayOperatorContext.IsParallel;
 import edu.illinois.reLooper.sabazios.race.Race;
 import edu.illinois.reLooper.sabazios.race.RaceOnNonStatic;
 import edu.illinois.reLooper.sabazios.race.RaceOnStatic;
@@ -46,8 +47,9 @@ public class RaceFinder {
 	public Set<Race> findRaces() throws CancelException {
 		HashSet<Race> races = new HashSet<Race>();
 
-		for (CGNode node : callGraph)
-			if (!node.getContext().equals(Everywhere.EVERYWHERE)) {
+		for (CGNode node : callGraph) {
+			IsParallel isParallelContextItem = (ArrayOperatorContext.IsParallel)node.getContext().get(ArrayOperatorContext.PARALLEL_OPERATOR);
+			if (isParallelContextItem != null && isParallelContextItem.parallel) {
 				IR ir = node.getIR();
 				if(ir == null)
 					continue;
@@ -57,6 +59,7 @@ public class RaceFinder {
 						races.add(race);
 				}
 			}
+		}
 		return races;
 	}
 

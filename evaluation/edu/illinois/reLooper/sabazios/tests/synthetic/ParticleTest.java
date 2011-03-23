@@ -130,4 +130,10 @@ public class ParticleTest extends DataRaceAnalysisTest {
 		findRaces();
 		assertRaces("synthetic.Particle.moveTo(Particle.java:12)","synthetic.Particle.moveTo(Particle.java:13)");
 	}
+	
+	@Test
+	public void raceBecauseOfDirectArrayLoad() {
+		findRaces();
+
+	}
 }

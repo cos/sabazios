@@ -18,6 +18,7 @@ import com.ibm.wala.util.graph.impl.GraphInverter;
 import com.ibm.wala.util.graph.traverse.DFS;
 
 import edu.illinois.reLooper.sabazios.Analysis;
+import edu.illinois.reLooper.sabazios.ArrayOperatorContext;
 import edu.illinois.reLooper.sabazios.CodeLocation;
 
 public abstract class Race {
@@ -57,28 +58,28 @@ public abstract class Race {
 			CGNode predNode;
 			Iterator<CGNode> predNodes = callGraph.getPredNodes(node);
 			do {
-			predNode = predNodes.next();
-			} while(visitedNodes.contains(predNode) && predNodes.hasNext());
-			
-//			if (!node.toString().contains("Ljava/")) {
-				Iterator<CallSiteReference> possibleSites = callGraph.getPossibleSites(predNode, node);
-				while (possibleSites.hasNext()) {
-					CallSiteReference callSiteReference = (CallSiteReference) possibleSites.next();
-					CodeLocation cl = CodeLocation.make(predNode, callSiteReference.getProgramCounter());
-					if (cl != null)
-						s.append(cl.toString());
-					SSAAbstractInvokeInstruction[] calls = predNode.getIR().getCalls(callSiteReference);
-					for (SSAAbstractInvokeInstruction invoke : calls) {
-						for (int i = 0; i < invoke.getNumberOfUses(); i++) {
-							int use = invoke.getUse(i);
-							LocalPointerKey localPointerKey = Analysis.instance.getLocalPointerKey(predNode, use);
-							if (!(Analysis.instance.getSharedObjectThisIsReachableFrom(predNode, use) == null))
-								s.append(" : " + CodeLocation.variableName(use, predNode, invoke));
-						}
+				predNode = predNodes.next();
+			} while (visitedNodes.contains(predNode) && predNodes.hasNext());
+
+			// if (!node.toString().contains("Ljava/")) {
+			Iterator<CallSiteReference> possibleSites = callGraph.getPossibleSites(predNode, node);
+			while (possibleSites.hasNext()) {
+				CallSiteReference callSiteReference = (CallSiteReference) possibleSites.next();
+				CodeLocation cl = CodeLocation.make(predNode, callSiteReference.getProgramCounter());
+				if (cl != null)
+					s.append(cl.toString());
+				SSAAbstractInvokeInstruction[] calls = predNode.getIR().getCalls(callSiteReference);
+				for (SSAAbstractInvokeInstruction invoke : calls) {
+					for (int i = 0; i < invoke.getNumberOfUses(); i++) {
+						int use = invoke.getUse(i);
+						LocalPointerKey localPointerKey = Analysis.instance.getLocalPointerKey(predNode, use);
+						if (!(Analysis.instance.getSharedObjectThisIsReachableFrom(predNode, use) == null))
+							s.append(" : " + CodeLocation.variableName(use, predNode, invoke));
 					}
 				}
-				s.append("\n");
-//			}
+			}
+			s.append("\n");
+			// }
 			node = predNode;
 		}
 		return s.toString();
@@ -97,15 +98,17 @@ public abstract class Race {
 	public String toDetailedString(CallGraph callGraph) {
 		return this.toString();
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
-		if(!(obj instanceof Race))
+		if (!(obj instanceof Race))
 			return false;
 		Race race = (Race) obj;
-		return this.toString().equals(race.toString());
+		return this.statement.getInstruction().equals(race.statement.getInstruction())
+				&& this.statement.getNode().getMethod().equals(race.statement.getNode().getMethod())
+				&& ((ArrayOperatorContext)this.statement.getNode().getContext()).equivalentTo((ArrayOperatorContext) race.statement.getNode().getContext());
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return 7057;

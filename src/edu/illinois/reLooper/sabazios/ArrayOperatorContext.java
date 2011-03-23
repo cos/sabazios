@@ -69,4 +69,10 @@ public class ArrayOperatorContext implements Context {
 	public int hashCode() {
 		return 7841 * element.hashCode() * (isParallel.parallel ? 1 : 2);
 	}
+
+	public boolean equivalentTo(ArrayOperatorContext context) {
+		// TODO: two contexts are equivalent if the represent parallel run on the same array during the same opeartion
+		// this is a shortcut because I don't want to spend time on this now
+		return true;
+	}
 }
