@@ -21,7 +21,7 @@ public class HighCFA {
 	}
 
 	private void computeParticles() {
-		ParallelArray<Particle> particles = ParallelArray.create(10, Particle.class, ParallelArray.defaultExecutor());
+		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10], ParallelArray.defaultExecutor());
 		final Particle origin = new Particle();
 		final Particle delta = new Particle();
 		

@@ -14,7 +14,7 @@ public class Particle {
 	}
 
 	public void vacuouslyNoRace() {
-		ParallelArray<Particle> particles = ParallelArray.create(10, Particle.class, ParallelArray.defaultExecutor());
+		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10], ParallelArray.defaultExecutor());
 
 		particles.apply(new Ops.Procedure<Particle>() {
 			@Override
@@ -24,7 +24,7 @@ public class Particle {
 	}
 
 	public void noRaceOnParameter() {
-		ParallelArray<Particle> particles = ParallelArray.create(10, Particle.class, ParallelArray.defaultExecutor());
+		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10], ParallelArray.defaultExecutor());
 
 		particles.apply(new Ops.Procedure<Particle>() {
 			@Override
@@ -35,7 +35,7 @@ public class Particle {
 	}
 
 	public void noRaceOnParameterInitializedBefore() {
-		ParallelArray<Particle> particles = ParallelArray.create(10, Particle.class, ParallelArray.defaultExecutor());
+		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10], ParallelArray.defaultExecutor());
 
 		particles.replaceWithGeneratedValue(new Ops.Generator<Particle>() {
 			@Override
@@ -53,7 +53,7 @@ public class Particle {
 	}
 
 	public void verySimpleRace() {
-		ParallelArray<Particle> particles = ParallelArray.create(10, Particle.class, ParallelArray.defaultExecutor());
+		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10], ParallelArray.defaultExecutor());
 
 		final Particle shared = new Particle();
 
@@ -67,7 +67,7 @@ public class Particle {
 	}
 
 	public void raceOnParameterInitializedBefore() {
-		ParallelArray<Particle> particles = ParallelArray.create(10, Particle.class, ParallelArray.defaultExecutor());
+		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10], ParallelArray.defaultExecutor());
 
 		final Particle shared = new Particle();
 
@@ -89,7 +89,7 @@ public class Particle {
 	}
 
 	public void noRaceOnANonSharedField() {
-		ParallelArray<Particle> particles = ParallelArray.create(10, Particle.class, ParallelArray.defaultExecutor());
+		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10], ParallelArray.defaultExecutor());
 
 		final Particle shared = new Particle();
 
@@ -107,7 +107,7 @@ public class Particle {
 	}
 
 	public void OneCFANeeded() {
-		ParallelArray<Particle> particles = ParallelArray.create(10, Particle.class, ParallelArray.defaultExecutor());
+		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10], ParallelArray.defaultExecutor());
 
 		final Particle shared = new Particle();
 		shared.moveTo(3, 4);
@@ -123,7 +123,7 @@ public class Particle {
 	}
 
 	public void TwoCFANeeded() {
-		ParallelArray<Particle> particles = ParallelArray.create(10, Particle.class, ParallelArray.defaultExecutor());
+		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10], ParallelArray.defaultExecutor());
 
 		final Particle shared = new Particle();
 		compute(shared);
@@ -139,7 +139,7 @@ public class Particle {
 	}
 
 	public void recursive() {
-		ParallelArray<Particle> particles = ParallelArray.create(10, Particle.class, ParallelArray.defaultExecutor());
+		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10], ParallelArray.defaultExecutor());
 
 		final Particle shared = new Particle();
 		computeRec(shared);
@@ -167,7 +167,7 @@ public class Particle {
 	}
 
 	public void disambiguateFalseRace() {
-		ParallelArray<Particle> particles = ParallelArray.create(10, Particle.class, ParallelArray.defaultExecutor());
+		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10], ParallelArray.defaultExecutor());
 
 		final Particle shared = new Particle();
 		shared.moveTo(3, 4);
@@ -184,7 +184,7 @@ public class Particle {
 	}
 
 	public void ignoreFalseRacesInSeqOp() {
-		ParallelArray<Particle> particles = ParallelArray.create(10, Particle.class, ParallelArray.defaultExecutor());
+		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10], ParallelArray.defaultExecutor());
 
 		final Particle shared = new Particle();
 
@@ -208,7 +208,7 @@ public class Particle {
 	}
 
 	public void raceBecauseOfOutsideInterference() {
-		ParallelArray<Particle> particles = ParallelArray.create(10, Particle.class, ParallelArray.defaultExecutor());
+		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10], ParallelArray.defaultExecutor());
 
 		final Particle shared = new Particle();
 		shared.moveTo(3, 4);
@@ -224,7 +224,7 @@ public class Particle {
 	}
 
 	public void raceOnSharedObjectCarriedByArray() {
-		ParallelArray<Particle> particles = ParallelArray.create(10, Particle.class, ParallelArray.defaultExecutor());
+		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10], ParallelArray.defaultExecutor());
 
 		final Particle shared = new Particle();
 		shared.moveTo(3, 4);
@@ -248,10 +248,7 @@ public class Particle {
 	}
 
 	public void raceBecauseOfDirectArrayLoad() {
-		final ParallelArray<Particle> particles = ParallelArray.create(10, Particle.class,
-				ParallelArray.defaultExecutor());
-		
-		particles.innerArray = new Particle[10];
+		final ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10], ParallelArray.defaultExecutor());
 
 		final Particle shared = new Particle();
 		particles.getArray()[0] = shared;;
