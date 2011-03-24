@@ -26,12 +26,12 @@ public class ParticleTestAdvanced extends DataRaceAnalysisTest {
 	@Test 
 	public void raceOnSharedReturnValue() {
 		findRaces();
-		assertRaces("bla");
+		assertRaces("synthetic.Particle$19.op(Particle.java:289)");
 	}
 	
 	@Test
 	public void raceOnDifferntArrayIteration() {
 		findRaces();
-		assertRaces("bla");
+		assertRaces("synthetic.Particle$22.op(Particle.java:316)");
 	}
 }

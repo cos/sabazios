@@ -38,7 +38,8 @@ final class ArrayContextSelector implements ContextSelector {
 		if (callerMethod.contains("replaceWithGeneratedValueSeq") && callee.toString().contains("op")) {
 			FlexibleContext c = new FlexibleContext(caller.getContext());
 			c.putItem(NODE, caller);
-			c.putItem(ELEMENT_VALUE, -1);
+			SSAAbstractInvokeInstruction invoke = caller.getIR().getCalls(site)[0];
+			c.putItem(ELEMENT_VALUE, invoke.getDef());
 			c.putItem(PARALLEL, false);
 			return c;
 		}
@@ -46,7 +47,8 @@ final class ArrayContextSelector implements ContextSelector {
 		if (callerMethod.contains("replaceWithGeneratedValue") && callee.toString().contains("op")) {
 			FlexibleContext c = new FlexibleContext(caller.getContext());
 			c.putItem(NODE, caller);
-			c.putItem(ELEMENT_VALUE, -1);
+			SSAAbstractInvokeInstruction invoke = caller.getIR().getCalls(site)[0];
+			c.putItem(ELEMENT_VALUE, invoke.getDef());
 			c.putItem(PARALLEL, true);
 			c.putItem(CALL_SITE_REFERENCE, site);
 			return c;

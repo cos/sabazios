@@ -43,7 +43,8 @@ public class Analysis {
 			super(G, nodes, new Filter<Object>() {
 				@Override
 				public boolean accepts(Object iK) {
-					return (iK instanceof AllocationSiteInNode) && isAllocationSharedInContext(iK, currentContext);
+					boolean accepted = (iK instanceof AllocationSiteInNode) && isAllocationSharedInContext(iK, currentContext);
+					return accepted;
 				}
 			});
 			this.currentElement = currentElement;
@@ -53,7 +54,7 @@ public class Analysis {
 		@Override
 		protected Iterator<? extends Object> getConnected(Object n) {
 			// stop traversing when reaching a current element
-			if (currentElement.contains(n) && !isAllocationSharedInContext(n, currentContext))
+			if (currentElement.contains(n))
 				return (new HashSet<Object>()).iterator();
 			else
 				return super.getConnected(n);
@@ -170,29 +171,15 @@ public class Analysis {
 		if (localPointerKey == null)
 			return null;
 		// the actual instance keys for this pointer key
-		int n = Analysis.instance.heapGraph.getSuccNodeCount(localPointerKey);
 		Iterator<Object> instanceKeys = Analysis.instance.heapGraph.getSuccNodes(localPointerKey);
 
 		final Set<InstanceKey> currentElement;;
 		Integer elementValue = (Integer) currentContext.getItem(ArrayContextSelector.ELEMENT_VALUE);
 		CGNode elementNode = (CGNode) currentContext.getItem(ArrayContextSelector.NODE);
-		if (elementValue != -1) {
-			LocalPointerKey elementPK = getLocalPointerKey(elementNode, elementValue);
-			currentElement = getInstanceKeysForLocalValue(elementNode, elementValue);
-		} else {
-			CallSiteReference site = (CallSiteReference) currentContext.getItem(ArrayContextSelector.CALL_SITE_REFERENCE);
-			SSAAbstractInvokeInstruction[] calls = elementNode.getIR().getCalls(site);
-			currentElement = new HashSet<InstanceKey>();
-			Set<InstanceKey> elementsForInvocationI = null;
-			for (SSAAbstractInvokeInstruction i : calls) {
-				int def = i.getDef();
-				 elementsForInvocationI = getInstanceKeysForLocalValue(elementNode, def);
-			}
-			currentElement.addAll(elementsForInvocationI);
-		}
+
+		currentElement = getInstanceKeysForLocalValue(elementNode, elementValue);
 
 		final Graph<Object> revertedHeap = GraphInverter.invert(Analysis.instance.heapGraph);
-		@SuppressWarnings("deprecation")
 		BFSPathFinder<Object> find = new PathToSharedFinder(revertedHeap, instanceKeys, currentElement, currentContext);
 
 		List<Object> listOfSharedObjects = find.find();
@@ -218,14 +205,13 @@ public class Analysis {
 	}
 	
 	private static boolean isAllocationSharedInContext(Object iK , final FlexibleContext currentContext) {
-		boolean allocationIsShared;
 		AllocationSiteInNode allocationSite = (AllocationSiteInNode) iK;
 		Context instanceAllocationContext = allocationSite.getNode().getContext();
 		if (instanceAllocationContext.equals(Everywhere.EVERYWHERE)
-				|| !currentContext.equals(instanceAllocationContext, ArrayContextSelector.ARRAY))
-			allocationIsShared = true;
+				|| !currentContext.equals(instanceAllocationContext, ArrayContextSelector.ARRAY)
+				|| !currentContext.equals(instanceAllocationContext, ArrayContextSelector.ELEMENT_VALUE))
+			return true;
 		else
-			allocationIsShared = false;
-		return allocationIsShared;
+			return false;
 	}
 }

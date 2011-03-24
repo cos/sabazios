@@ -34,7 +34,13 @@ public class FlexibleContext implements Context {
 	}
 	
 	public Object getItem(ContextKey k) {
-		return items.get(k);
+		Object item = items.get(k);
+		if(item != null)
+			return item;
+		else
+			if(inner instanceof FlexibleContext)
+				return ((FlexibleContext) inner).getItem(k);
+		return null;
 	}
 	
 	
@@ -102,6 +108,9 @@ public class FlexibleContext implements Context {
 		FlexibleContext otherF = (FlexibleContext) other;
 		if(this.getItem(key)==null)
 			return otherF.getItem(key) == null;
+		
+		System.out.println("COMPARE "+this+" <<<<>>>> "+otherF);
+		System.out.println("COMPARE on "+key+": "+this.getItem(key)+" <<<<>>>> "+otherF.getItem(key));
 		
 		return this.getItem(key).equals(otherF.getItem(key));
 	}

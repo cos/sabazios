@@ -58,8 +58,6 @@ public class RaceOnNonStatic extends Race {
 
 	public String getAllocationStackTrace(CallGraph callGraph) {
 		AllocationSiteInNode allocationSite = (AllocationSiteInNode) instanceKey;
-		if (instanceKey == null)
-			return "STATIC";
-		return getStackTrace(callGraph, Analysis.getNormalStatement(allocationSite));
+		return instanceKey.toString() + " \n " + getStackTrace(callGraph, Analysis.getNormalStatement(allocationSite));
 	}
 }

@@ -71,7 +71,6 @@ public abstract class Race {
 				for (SSAAbstractInvokeInstruction invoke : calls) {
 					for (int i = 0; i < invoke.getNumberOfUses(); i++) {
 						int use = invoke.getUse(i);
-						LocalPointerKey localPointerKey = Analysis.instance.getLocalPointerKey(predNode, use);
 						if (!(Analysis.instance.traceBackToShared(predNode, use) == null))
 							s.append(" : " + CodeLocation.variableName(use, predNode, invoke));
 					}
@@ -82,11 +81,6 @@ public abstract class Race {
 			node = predNode;
 		}
 		return s.toString();
-	}
-
-	private static PartialCallGraph getStackTrace(CGNode node, HashSet<CGNode> visitedNodes, CallGraph callGraph) {
-		Set<CGNode> reachableNodes = DFS.getReachableNodes(GraphInverter.invert(callGraph), Sets.newHashSet(node));
-		return PartialCallGraph.make(callGraph, callGraph.getEntrypointNodes(), reachableNodes);
 	}
 
 	@Override

@@ -127,6 +127,6 @@ public class ParticleTest extends DataRaceAnalysisTest {
 	@Test 
 	public void raceBecauseOfDirectArrayLoad() {
 		findRaces();
-		assertRaces("synthetic.Particle$18.op(Particle.java:275)");
+		assertRaces("synthetic.Particle$18.op(Particle.java:274)");
 	}
 }

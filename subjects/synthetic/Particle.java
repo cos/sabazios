@@ -266,7 +266,6 @@ public class Particle {
 
 		final Particle shared = new Particle();
 		particles.getArray()[0] = shared;
-		;
 
 		particles.replaceWithGeneratedValue(new Ops.Generator<Particle>() {
 			@Override
@@ -284,7 +283,7 @@ public class Particle {
 
 		final Particle shared = new Particle();
 
-		particles.replaceWithGeneratedValueSeq(new Ops.Generator<Particle>() {
+		particles.replaceWithGeneratedValue(new Ops.Generator<Particle>() {
 			@Override
 			public Particle op() {
 				shared.x = 10;
