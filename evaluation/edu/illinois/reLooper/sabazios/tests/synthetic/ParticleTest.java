@@ -134,6 +134,6 @@ public class ParticleTest extends DataRaceAnalysisTest {
 	@Test
 	public void raceBecauseOfDirectArrayLoad() {
 		findRaces();
-
+		assertRaces("bla");
 	}
 }

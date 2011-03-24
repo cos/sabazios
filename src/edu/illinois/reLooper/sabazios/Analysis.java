@@ -30,8 +30,6 @@ import com.ibm.wala.util.graph.Graph;
 import com.ibm.wala.util.graph.impl.GraphInverter;
 import com.ibm.wala.util.graph.traverse.BFSPathFinder;
 
-import edu.illinois.reLooper.sabazios.ArrayOperatorContext.Element;
-
 public class Analysis {
 
 	public static Analysis instance;
@@ -145,13 +143,12 @@ public class Analysis {
 		// the actual instance keys for this pointer key
 		Iterator<Object> instanceKeys = Analysis.instance.heapGraph.getSuccNodes(localPointerKey);
 		
-		final Context currentContext = localPointerKey.getNode().getContext();
-		final ArrayOperatorContext.Element currentElementContextItem = (Element) currentContext.get(ArrayOperatorContext.ELEMENT);
+		final FlexibleContext currentContext = (FlexibleContext) localPointerKey.getNode().getContext();
 		final Set<InstanceKey> currentElement = new HashSet<InstanceKey>();
-		if(currentElementContextItem.element != -1)
+		Integer elementValue = (Integer)currentContext.getItem(ArrayContextSelector.ELEMENT_VALUE);
+		if(elementValue != -1)
 		{
-			int elementValue = currentElementContextItem.element;
-			CGNode elementNode = currentElementContextItem.cgNode;
+			CGNode elementNode = (CGNode)currentContext.getItem(ArrayContextSelector.NODE);
 			LocalPointerKey elementPK = getLocalPointerKey(elementNode, elementValue);
 			Iterator<Object> succNodes = heapGraph.getSuccNodes(elementPK);
 			while (succNodes.hasNext()) {
@@ -199,25 +196,5 @@ public class Analysis {
 			else
 				return sharedInstance;
 		}
-
-		// boolean needsDemandDrivenConfirmation = true;
-
-		// Set<AllocationSiteInNode> allocSites = new
-		// HashSet<AllocationSiteInNode>();
-		//
-		// while (instanceKeys.hasNext()) {
-		// Object iK = instanceKeys.next();
-		// if (!(iK instanceof AllocationSiteInNode))
-		// continue;
-		//
-		// AllocationSiteInNode allocationSite = (AllocationSiteInNode) iK;
-		//
-		// if
-		// (!(allocationSite.getNode().getContext().equals(SmartContextSelector.PAROP_CONTEXT)
-		// || allocationSite
-		// .getNode().getContext().equals(SmartContextSelector.SEQOP_CONTEXT)))
-		// allocSites.add(allocationSite);
-		// }
-		// return allocSites;
 	}
 }

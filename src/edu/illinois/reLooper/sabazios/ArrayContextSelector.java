@@ -16,23 +16,46 @@ import extra166y.ParallelArray;
 
 final class ArrayContextSelector implements ContextSelector {
 
+	public static final ContextKey NODE = new FlexibleContext.NamedContextKey("NODE");
+	public static final ContextKey ELEMENT_VALUE = new FlexibleContext.NamedContextKey("ELEMENT_VALUE");
+	public static final ContextKey PARALLEL = new FlexibleContext.NamedContextKey("PARALLEL");
+
 	public ArrayContextSelector() {
 	}
 
 	@Override
 	public Context getCalleeTarget(CGNode caller, CallSiteReference site, IMethod callee, InstanceKey receiver) {
-		if (caller.toString().contains("replaceWithGeneratedValueSeq") && callee.toString().contains("op"))
-			return new ArrayOperatorContext(caller, -1, false);
-		if (caller.toString().contains("replaceWithGeneratedValue") && callee.toString().contains("op"))
-			return new ArrayOperatorContext(caller, -1, true);
+		if (caller.toString().contains("replaceWithGeneratedValueSeq") && callee.toString().contains("op")) {
+			FlexibleContext c = new FlexibleContext();
+			c.putItem(NODE, caller);
+			c.putItem(ELEMENT_VALUE, -1);
+			c.putItem(PARALLEL, false);
+			return c;
+		}
+
+		if (caller.toString().contains("replaceWithGeneratedValue") && callee.toString().contains("op")) {
+			FlexibleContext c = new FlexibleContext();
+			c.putItem(NODE, caller);
+			c.putItem(ELEMENT_VALUE, -1);
+			c.putItem(PARALLEL, true);
+			return c;
+		}
 
 		if (caller.toString().contains("applySeq") && callee.toString().contains("op")) {
+			FlexibleContext c = new FlexibleContext();
+			c.putItem(NODE, caller);
 			SSAAbstractInvokeInstruction invoke = caller.getIR().getCalls(site)[0];
-			return new ArrayOperatorContext(caller, invoke.getUse(1), false);
+			c.putItem(ELEMENT_VALUE, invoke.getUse(1));
+			c.putItem(PARALLEL, false);
+			return c;
 		}
 		if (caller.toString().contains("apply") && callee.toString().contains("op")) {
+			FlexibleContext c = new FlexibleContext();
+			c.putItem(NODE, caller);
 			SSAAbstractInvokeInstruction invoke = caller.getIR().getCalls(site)[0];
-			return new ArrayOperatorContext(caller, invoke.getUse(1), true);
+			c.putItem(ELEMENT_VALUE, invoke.getUse(1));
+			c.putItem(PARALLEL, true);
+			return c;
 		}
 
 		return caller.getContext();

@@ -262,26 +262,4 @@ public class Particle {
 			}
 		});
 	}
-
-	public void noRace() {
-		final Particle[] a = new Particle[10];
-		
-		final Particle shared = new Particle();
-
-		for (int i = 0; i < 10; i++) {
-			final int j = i;
-			Thread thread = new Thread(new Runnable() {
-				@Override
-				public void run() {
-					Particle p = new Particle();
-					p.x = shared.x;
-				}
-			});
-			thread.start();
-		}
-		
-		for (int i = 0; i < a.length; i++) {
-			System.out.println(a[i]);
-		}
-	}
 }

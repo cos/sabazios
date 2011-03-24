@@ -8,6 +8,7 @@ import java.util.Set;
 import com.ibm.wala.analysis.pointers.HeapGraph;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
+import com.ibm.wala.ipa.callgraph.Context;
 import com.ibm.wala.ipa.callgraph.impl.Everywhere;
 import com.ibm.wala.ipa.callgraph.propagation.AllocationSiteInNode;
 import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
@@ -24,7 +25,6 @@ import com.ibm.wala.ssa.SSANewInstruction;
 import com.ibm.wala.ssa.SSAPutInstruction;
 import com.ibm.wala.util.CancelException;
 
-import edu.illinois.reLooper.sabazios.ArrayOperatorContext.IsParallel;
 import edu.illinois.reLooper.sabazios.race.Race;
 import edu.illinois.reLooper.sabazios.race.RaceOnNonStatic;
 import edu.illinois.reLooper.sabazios.race.RaceOnStatic;
@@ -48,14 +48,19 @@ public class RaceFinder {
 		HashSet<Race> races = new HashSet<Race>();
 
 		for (CGNode node : callGraph) {
-			IsParallel isParallelContextItem = (ArrayOperatorContext.IsParallel)node.getContext().get(ArrayOperatorContext.PARALLEL_OPERATOR);
-			if (isParallelContextItem != null && isParallelContextItem.parallel) {
+			if (!(node.getContext() instanceof FlexibleContext))
+				continue;
+
+			FlexibleContext c = (FlexibleContext) node.getContext();
+
+			if (c.getItem(ArrayContextSelector.PARALLEL) != null
+					&& ((Boolean) c.getItem(ArrayContextSelector.PARALLEL))) {
 				IR ir = node.getIR();
-				if(ir == null)
+				if (ir == null)
 					continue;
 				for (SSAInstruction instruction : ir.getControlFlowGraph().getInstructions()) {
 					Race race = getRace(node, instruction);
-					if(race != null)
+					if (race != null)
 						races.add(race);
 				}
 			}
@@ -64,7 +69,8 @@ public class RaceFinder {
 	}
 
 	private Race getRace(CGNode node, SSAInstruction instruction) {
-		//TODO: we only check put instructions for now. should also include array, etc. in the future
+		// TODO: we only check put instructions for now. should also include
+		// array, etc. in the future
 		if (instruction instanceof SSAPutInstruction) {
 			SSAPutInstruction putI = (SSAPutInstruction) instruction;
 
@@ -75,18 +81,17 @@ public class RaceFinder {
 			if (!putI.isStatic()) {
 				int ref = putI.getRef();
 
-				AllocationSiteInNode sharedObject = Analysis.instance.getSharedObjectThisIsReachableFrom(
-						node, ref);
+				AllocationSiteInNode sharedObject = Analysis.instance.getSharedObjectThisIsReachableFrom(node, ref);
 
 				// report race if it still stands
-				if (!(sharedObject == null)) 
-					return new RaceOnNonStatic(new NormalStatement(node, CodeLocation.getSSAInstructionNo(node, instruction)), sharedObject);
-				
+				if (!(sharedObject == null))
+					return new RaceOnNonStatic(new NormalStatement(node, CodeLocation.getSSAInstructionNo(node,
+							instruction)), sharedObject);
 
 			} else {
 				// TODO: replace false with the true value of
 				// isLoopCarriedDependency
-				return new RaceOnStatic(new NormalStatement(node, CodeLocation.getSSAInstructionNo(node, instruction)));				
+				return new RaceOnStatic(new NormalStatement(node, CodeLocation.getSSAInstructionNo(node, instruction)));
 			}
 		}
 		return null;

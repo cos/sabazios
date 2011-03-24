@@ -18,7 +18,6 @@ import com.ibm.wala.util.graph.impl.GraphInverter;
 import com.ibm.wala.util.graph.traverse.DFS;
 
 import edu.illinois.reLooper.sabazios.Analysis;
-import edu.illinois.reLooper.sabazios.ArrayOperatorContext;
 import edu.illinois.reLooper.sabazios.CodeLocation;
 
 public abstract class Race {
@@ -105,8 +104,7 @@ public abstract class Race {
 			return false;
 		Race race = (Race) obj;
 		return this.statement.getInstruction().equals(race.statement.getInstruction())
-				&& this.statement.getNode().getMethod().equals(race.statement.getNode().getMethod())
-				&& ((ArrayOperatorContext)this.statement.getNode().getContext()).equivalentTo((ArrayOperatorContext) race.statement.getNode().getContext());
+				&& this.statement.getNode().getMethod().equals(race.statement.getNode().getMethod());
 	}
 
 	@Override
