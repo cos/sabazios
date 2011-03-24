@@ -88,4 +88,21 @@ public class FlexibleContext implements Context {
 			return s.toString().equals(obj.toString());
 		}
 	}
+
+	/**
+	 * Are the two contexts equal with respect to key?
+	 * @param other
+	 * @param key
+	 * @return
+	 */
+	public boolean equals(Context other, ContextKey key) {
+		if(!(other instanceof FlexibleContext))
+			return false;
+		
+		FlexibleContext otherF = (FlexibleContext) other;
+		if(this.getItem(key)==null)
+			return otherF.getItem(key) == null;
+		
+		return this.getItem(key).equals(otherF.getItem(key));
+	}
 }

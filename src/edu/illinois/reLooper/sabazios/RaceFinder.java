@@ -11,6 +11,7 @@ import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.Context;
 import com.ibm.wala.ipa.callgraph.impl.Everywhere;
 import com.ibm.wala.ipa.callgraph.propagation.AllocationSiteInNode;
+import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
 import com.ibm.wala.ipa.slicer.NormalStatement;
@@ -20,6 +21,7 @@ import com.ibm.wala.ipa.slicer.StatementWithInstructionIndex;
 import com.ibm.wala.ipa.slicer.Slicer.ControlDependenceOptions;
 import com.ibm.wala.ipa.slicer.Slicer.DataDependenceOptions;
 import com.ibm.wala.ssa.IR;
+import com.ibm.wala.ssa.SSAArrayStoreInstruction;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSANewInstruction;
 import com.ibm.wala.ssa.SSAPutInstruction;
@@ -76,12 +78,10 @@ public class RaceFinder {
 
 			if (DEBUG)
 				System.out.println(instruction);
-
 			// if it is not static, we do the more involved check
 			if (!putI.isStatic()) {
 				int ref = putI.getRef();
-
-				AllocationSiteInNode sharedObject = Analysis.instance.getSharedObjectThisIsReachableFrom(node, ref);
+				InstanceKey sharedObject = Analysis.instance.traceBackToShared(node, ref);
 
 				// report race if it still stands
 				if (!(sharedObject == null))
@@ -93,6 +93,21 @@ public class RaceFinder {
 				// isLoopCarriedDependency
 				return new RaceOnStatic(new NormalStatement(node, CodeLocation.getSSAInstructionNo(node, instruction)));
 			}
+		}
+		
+		if (instruction instanceof SSAArrayStoreInstruction) {
+			SSAArrayStoreInstruction putI = (SSAArrayStoreInstruction) instruction;
+
+			if (DEBUG)
+				System.out.println(instruction);
+			// if it is not static, we do the more involved check
+				int ref = putI.getArrayRef();
+				InstanceKey sharedObject = Analysis.instance.traceBackToShared(node, ref);
+
+				// report race if it still stands
+				if (!(sharedObject == null))
+					return new RaceOnNonStatic(new NormalStatement(node, CodeLocation.getSSAInstructionNo(node,
+							instruction)), sharedObject);
 		}
 		return null;
 	}

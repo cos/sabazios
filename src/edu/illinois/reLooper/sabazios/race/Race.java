@@ -72,7 +72,7 @@ public abstract class Race {
 					for (int i = 0; i < invoke.getNumberOfUses(); i++) {
 						int use = invoke.getUse(i);
 						LocalPointerKey localPointerKey = Analysis.instance.getLocalPointerKey(predNode, use);
-						if (!(Analysis.instance.getSharedObjectThisIsReachableFrom(predNode, use) == null))
+						if (!(Analysis.instance.traceBackToShared(predNode, use) == null))
 							s.append(" : " + CodeLocation.variableName(use, predNode, invoke));
 					}
 				}

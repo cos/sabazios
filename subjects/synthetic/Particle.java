@@ -218,7 +218,7 @@ public class Particle {
 			public Particle op() {
 				shared.origin = new Particle();
 				shared.origin.x = 10;
-				return shared.origin;
+				return new Particle();
 			}
 		});
 	}
@@ -250,15 +250,18 @@ public class Particle {
 	public void raceBecauseOfDirectArrayLoad() {
 		final ParallelArray<Particle> particles = ParallelArray.create(10, Particle.class,
 				ParallelArray.defaultExecutor());
+		
+		particles.innerArray = new Particle[10];
 
 		final Particle shared = new Particle();
+		particles.getArray()[0] = shared;;
 
 		particles.replaceWithGeneratedValue(new Ops.Generator<Particle>() {
 			@Override
 			public Particle op() {
-				Particle p = particles.getArray()[0];
+				Particle p = (Particle) particles.getArray()[0];
 				p.x = 10;
-				return shared.origin;
+				return new Particle();
 			}
 		});
 	}

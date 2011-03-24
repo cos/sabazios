@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.ibm.wala.analysis.pointers.HeapGraph;
+import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.Context;
@@ -22,6 +23,7 @@ import com.ibm.wala.ipa.slicer.NormalStatement;
 import com.ibm.wala.ipa.slicer.Statement;
 import com.ibm.wala.ipa.slicer.StatementWithInstructionIndex;
 import com.ibm.wala.shrikeBT.Instruction;
+import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSANewInstruction;
 import com.ibm.wala.ssa.SSAPutInstruction;
@@ -130,30 +132,42 @@ public class Analysis {
 		return cgNode.getIR().getInstructions()[statement.getInstructionIndex()];
 	}
 
-	public AllocationSiteInNode getSharedObjectThisIsReachableFrom(CGNode node, int ref) {
-		
-		if(node.getContext().equals(Everywhere.EVERYWHERE))
+	public InstanceKey traceBackToShared(CGNode node, int ref) {
+		if (node.getContext().equals(Everywhere.EVERYWHERE))
 			return null;
+		final FlexibleContext currentContext = (FlexibleContext) node.getContext();
+		if (currentContext.get(ArrayContextSelector.PARALLEL) == null)
+			return null;
+
 		// the local pointer key the statement writes to
 		LocalPointerKey localPointerKey = Analysis.instance.getLocalPointerKey(node, ref);
-
 		if (localPointerKey == null)
 			return null;
-
 		// the actual instance keys for this pointer key
+		int n = Analysis.instance.heapGraph.getSuccNodeCount(localPointerKey);
 		Iterator<Object> instanceKeys = Analysis.instance.heapGraph.getSuccNodes(localPointerKey);
-		
-		final FlexibleContext currentContext = (FlexibleContext) localPointerKey.getNode().getContext();
+
 		final Set<InstanceKey> currentElement = new HashSet<InstanceKey>();
-		Integer elementValue = (Integer)currentContext.getItem(ArrayContextSelector.ELEMENT_VALUE);
-		if(elementValue != -1)
-		{
-			CGNode elementNode = (CGNode)currentContext.getItem(ArrayContextSelector.NODE);
+		Integer elementValue = (Integer) currentContext.getItem(ArrayContextSelector.ELEMENT_VALUE);
+		CGNode elementNode = (CGNode) currentContext.getItem(ArrayContextSelector.NODE);
+		if (elementValue != -1) {
 			LocalPointerKey elementPK = getLocalPointerKey(elementNode, elementValue);
 			Iterator<Object> succNodes = heapGraph.getSuccNodes(elementPK);
 			while (succNodes.hasNext()) {
 				Object object = (Object) succNodes.next();
 				currentElement.add((InstanceKey) object);
+			}
+		} else {
+			CallSiteReference site = (CallSiteReference) currentContext.getItem(ArrayContextSelector.CALL_SITE_REFERENCE);
+			SSAAbstractInvokeInstruction[] calls = elementNode.getIR().getCalls(site);
+			for (SSAAbstractInvokeInstruction i : calls) {
+				int def = i.getDef();
+				LocalPointerKey callDefKey = getLocalPointerKey(elementNode,def);
+				Iterator<Object> succNodes = heapGraph.getSuccNodes(callDefKey);
+				while (succNodes.hasNext()) {
+					Object object = (Object) succNodes.next();
+					currentElement.add((InstanceKey) object);
+				}
 			}
 		}
 
@@ -165,19 +179,18 @@ public class Analysis {
 					return false;
 
 				AllocationSiteInNode allocationSite = (AllocationSiteInNode) iK;
-
 				Context instanceAllocationContext = allocationSite.getNode().getContext();
-				
-				if (instanceAllocationContext.equals(Everywhere.EVERYWHERE)) 
+				if (instanceAllocationContext.equals(Everywhere.EVERYWHERE)
+						|| !currentContext.equals(instanceAllocationContext, ArrayContextSelector.ARRAY))
 					return true;
-				
+
 				return false;
 			}
-		}) {  
+		}) {
 			@Override
 			protected Iterator<? extends Object> getConnected(Object n) {
 				// stop traversing when reaching a current element
-				if(currentElement.contains(n))
+				if (currentElement.contains(n))
 					return (new HashSet()).iterator();
 				else
 					return super.getConnected(n);
@@ -188,12 +201,11 @@ public class Analysis {
 
 		if (listOfSharedObjects == null)
 			return null;
-		else
-		{
+		else {
 			AllocationSiteInNode sharedInstance = (AllocationSiteInNode) listOfSharedObjects.get(0);
-			if(sharedInstance.getConcreteType().toString().contains("ParallelArray") && currentElement.isEmpty())
-				return null;
-			else
+			if (sharedInstance.getConcreteType().toString().contains("ParallelArray") && currentElement.isEmpty()) {
+				return sharedInstance;
+			} else
 				return sharedInstance;
 		}
 	}

@@ -43,6 +43,7 @@ import com.ibm.wala.types.TypeName;
 import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.config.FileOfClasses;
+import com.ibm.wala.util.graph.GraphPrint;
 import com.ibm.wala.util.io.FileProvider;
 
 import edu.illinois.reLooper.sabazios.race.Race;
