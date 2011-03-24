@@ -196,7 +196,7 @@ public abstract class DataRaceAnalysisTest {
 	}
 	
 	public void findRaces() {
-		foundRaces = findRaces(getTestClassName(), getEntryMethod());
+		foundRaces = findRaces(getTestedClassName(), getEntryMethod());
 	}
 	
 	public void assertRaces(String... expected) {
@@ -229,7 +229,7 @@ public abstract class DataRaceAnalysisTest {
 		return getCurrentlyExecutingTestName() + "()V";
 	}
 
-	protected String getTestClassName() {
+	protected String getTestedClassName() {
 		String testClassName = this.getClass().getSimpleName();
 		String className = testClassName.substring(0, testClassName.length() - 4);
 		String classNameForWala = "Lsynthetic/" + className;

@@ -34,6 +34,32 @@ import com.ibm.wala.util.graph.traverse.BFSPathFinder;
 
 public class Analysis {
 
+	private static final class PathToSharedFinder extends BFSPathFinder<Object> {
+		private final Set<InstanceKey> currentElement;
+		private final FlexibleContext currentContext;
+		
+		@SuppressWarnings("deprecation")
+		private PathToSharedFinder(Graph<Object> G, Iterator<Object> nodes, Set<InstanceKey> currentElement, final FlexibleContext currentContext) {
+			super(G, nodes, new Filter<Object>() {
+				@Override
+				public boolean accepts(Object iK) {
+					return (iK instanceof AllocationSiteInNode) && isAllocationSharedInContext(iK, currentContext);
+				}
+			});
+			this.currentElement = currentElement;
+			this.currentContext = currentContext;
+		}
+
+		@Override
+		protected Iterator<? extends Object> getConnected(Object n) {
+			// stop traversing when reaching a current element
+			if (currentElement.contains(n) && !isAllocationSharedInContext(n, currentContext))
+				return (new HashSet<Object>()).iterator();
+			else
+				return super.getConnected(n);
+		}
+	}
+
 	public static Analysis instance;
 	final CallGraph callGraph;
 	final PointerAnalysis pointerAnalysis;
@@ -147,55 +173,27 @@ public class Analysis {
 		int n = Analysis.instance.heapGraph.getSuccNodeCount(localPointerKey);
 		Iterator<Object> instanceKeys = Analysis.instance.heapGraph.getSuccNodes(localPointerKey);
 
-		final Set<InstanceKey> currentElement = new HashSet<InstanceKey>();
+		final Set<InstanceKey> currentElement;;
 		Integer elementValue = (Integer) currentContext.getItem(ArrayContextSelector.ELEMENT_VALUE);
 		CGNode elementNode = (CGNode) currentContext.getItem(ArrayContextSelector.NODE);
 		if (elementValue != -1) {
 			LocalPointerKey elementPK = getLocalPointerKey(elementNode, elementValue);
-			Iterator<Object> succNodes = heapGraph.getSuccNodes(elementPK);
-			while (succNodes.hasNext()) {
-				Object object = (Object) succNodes.next();
-				currentElement.add((InstanceKey) object);
-			}
+			currentElement = getInstanceKeysForLocalValue(elementNode, elementValue);
 		} else {
 			CallSiteReference site = (CallSiteReference) currentContext.getItem(ArrayContextSelector.CALL_SITE_REFERENCE);
 			SSAAbstractInvokeInstruction[] calls = elementNode.getIR().getCalls(site);
+			currentElement = new HashSet<InstanceKey>();
+			Set<InstanceKey> elementsForInvocationI = null;
 			for (SSAAbstractInvokeInstruction i : calls) {
 				int def = i.getDef();
-				LocalPointerKey callDefKey = getLocalPointerKey(elementNode,def);
-				Iterator<Object> succNodes = heapGraph.getSuccNodes(callDefKey);
-				while (succNodes.hasNext()) {
-					Object object = (Object) succNodes.next();
-					currentElement.add((InstanceKey) object);
-				}
+				 elementsForInvocationI = getInstanceKeysForLocalValue(elementNode, def);
 			}
+			currentElement.addAll(elementsForInvocationI);
 		}
 
 		final Graph<Object> revertedHeap = GraphInverter.invert(Analysis.instance.heapGraph);
-		BFSPathFinder<Object> find = new BFSPathFinder<Object>(revertedHeap, instanceKeys, new Filter<Object>() {
-			@Override
-			public boolean accepts(Object iK) {
-				if (!(iK instanceof AllocationSiteInNode))
-					return false;
-
-				AllocationSiteInNode allocationSite = (AllocationSiteInNode) iK;
-				Context instanceAllocationContext = allocationSite.getNode().getContext();
-				if (instanceAllocationContext.equals(Everywhere.EVERYWHERE)
-						|| !currentContext.equals(instanceAllocationContext, ArrayContextSelector.ARRAY))
-					return true;
-
-				return false;
-			}
-		}) {
-			@Override
-			protected Iterator<? extends Object> getConnected(Object n) {
-				// stop traversing when reaching a current element
-				if (currentElement.contains(n))
-					return (new HashSet()).iterator();
-				else
-					return super.getConnected(n);
-			}
-		};
+		@SuppressWarnings("deprecation")
+		BFSPathFinder<Object> find = new PathToSharedFinder(revertedHeap, instanceKeys, currentElement, currentContext);
 
 		List<Object> listOfSharedObjects = find.find();
 
@@ -203,10 +201,31 @@ public class Analysis {
 			return null;
 		else {
 			AllocationSiteInNode sharedInstance = (AllocationSiteInNode) listOfSharedObjects.get(0);
-			if (sharedInstance.getConcreteType().toString().contains("ParallelArray") && currentElement.isEmpty()) {
-				return sharedInstance;
-			} else
-				return sharedInstance;
+			return sharedInstance;
 		}
+	}
+
+	private Set<InstanceKey> getInstanceKeysForLocalValue(CGNode elementNode, int def) {
+		Set<InstanceKey> currentElement;
+		LocalPointerKey callDefKey = getLocalPointerKey(elementNode,def);
+		Iterator<Object> succNodes = heapGraph.getSuccNodes(callDefKey);
+		currentElement = new HashSet<InstanceKey>();
+		while (succNodes.hasNext()) {
+			Object object = (Object) succNodes.next();
+			currentElement.add((InstanceKey) object);
+		}
+		return currentElement;
+	}
+	
+	private static boolean isAllocationSharedInContext(Object iK , final FlexibleContext currentContext) {
+		boolean allocationIsShared;
+		AllocationSiteInNode allocationSite = (AllocationSiteInNode) iK;
+		Context instanceAllocationContext = allocationSite.getNode().getContext();
+		if (instanceAllocationContext.equals(Everywhere.EVERYWHERE)
+				|| !currentContext.equals(instanceAllocationContext, ArrayContextSelector.ARRAY))
+			allocationIsShared = true;
+		else
+			allocationIsShared = false;
+		return allocationIsShared;
 	}
 }
