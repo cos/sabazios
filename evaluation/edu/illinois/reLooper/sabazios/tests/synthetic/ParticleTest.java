@@ -1,18 +1,10 @@
 package edu.illinois.reLooper.sabazios.tests.synthetic;
 
-import java.util.Iterator;
-
 import org.junit.Test;
 
-import com.ibm.wala.classLoader.CallSiteReference;
-import com.ibm.wala.classLoader.IMethod;
-import com.ibm.wala.ipa.callgraph.CGNode;
-import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.util.CancelException;
 
 import edu.illinois.reLooper.sabazios.DataRaceAnalysisTest;
-import edu.illinois.reLooper.sabazios.OpSelector;
-import extra166y.ParallelArray;
 
 public class ParticleTest extends DataRaceAnalysisTest {
 
@@ -39,7 +31,7 @@ public class ParticleTest extends DataRaceAnalysisTest {
 	@Test
 	public void verySimpleRace() {
 		findRaces();
-		assertRace("synthetic.Particle$5.op(Particle.java:65)");
+		assertRace("synthetic.Particle$5.op(Particle.java:63)");
 	}
 	
 	/**
@@ -57,7 +49,7 @@ public class ParticleTest extends DataRaceAnalysisTest {
 	@Test
 	public void raceOnParameterInitializedBefore() throws CancelException  {
 		findRaces();
-		assertRace("synthetic.Particle$6.op(Particle.java:73)");
+		assertRace("synthetic.Particle$7.op(Particle.java:86)");
 	}
 	
 	/**
@@ -122,7 +114,7 @@ public class ParticleTest extends DataRaceAnalysisTest {
 	@Test
 	public void raceBecauseOfOutsideInterference()  {
 		findRaces();
-		assertRaces("synthetic.Particle$15.op(Particle.java:221)","bla");
+		assertRaces("synthetic.Particle$15.op(Particle.java:219)","synthetic.Particle$15.op(Particle.java:220)");
 	}
 	
 	@Test
@@ -134,6 +126,6 @@ public class ParticleTest extends DataRaceAnalysisTest {
 	@Test
 	public void raceBecauseOfDirectArrayLoad() {
 		findRaces();
-		assertRaces("bla");
+		assertRaces("synthetic.Particle$18.op(Particle.java:263)");
 	}
 }

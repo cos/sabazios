@@ -208,14 +208,18 @@ public abstract class DataRaceAnalysisTest {
 		if (foundRaces.size() == 0 && expectedRaces == null)
 			return;
 		if (expectedRaces != null && expectedRaces.size() == foundRaces.size()) {
+			boolean noMatch = false;
 			for (Race r : foundRaces) {
-				
 				if (!expectedRaces.contains(CodeLocation.make(r.getStatement()).toString())) {
 					System.out.println(CodeLocation.make(r.getStatement()).toString());
+					noMatch = true;
 					break;
 				}
 			}
-			return;
+			if(noMatch)
+				fail(expectedRaces, foundRaces);
+			else
+				return;
 		}
 
 		fail(expectedRaces, foundRaces);
