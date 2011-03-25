@@ -48,9 +48,8 @@ public class SmartCFABuilder extends SSAPropagationCallGraphBuilder {
     SSAContextInterpreter contextInterpreter = new DelegatingSSAContextInterpreter(appContextInterpreter, defI);
     setContextInterpreter(contextInterpreter);
     
-//    ZeroXInstanceKeys zik = makeInstanceKeys(cha, options, contextInterpreter, instancePolicy);
-//    setInstanceKeys(zik);
-    setInstanceKeys(new AllocationSiteInNodeFactory(options, cha));
+    ZeroXInstanceKeys zik = makeInstanceKeys(cha, options, contextInterpreter, instancePolicy);
+    setInstanceKeys(zik);
   }
   /**
    * subclasses can override as desired

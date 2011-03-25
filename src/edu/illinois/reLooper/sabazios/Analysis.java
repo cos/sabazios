@@ -14,6 +14,7 @@ import com.ibm.wala.ipa.callgraph.Context;
 import com.ibm.wala.ipa.callgraph.impl.Everywhere;
 import com.ibm.wala.ipa.callgraph.propagation.AbstractPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.AllocationSiteInNode;
+import com.ibm.wala.ipa.callgraph.propagation.ConcreteTypeKey;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
@@ -210,6 +211,9 @@ public class Analysis {
 		while (instanceKeys.hasNext() && sharedInstance == null) {
 			Object object = (Object) instanceKeys.next();
 
+			if(object instanceof ConcreteTypeKey)
+				continue;
+			
 			AllocationSiteInNode objectInCurrentContext = (AllocationSiteInNode) object;
 			if (sharedObjects.alreadyAnalyzed(currentContext, objectInCurrentContext))
 				sharedInstance = sharedObjects.getOutsideObject(currentContext, objectInCurrentContext);
@@ -243,7 +247,7 @@ public class Analysis {
 		Context instanceAllocationContext = allocationSite.getNode().getContext();
 		if (instanceAllocationContext.equals(Everywhere.EVERYWHERE)
 				|| !currentContext.equals(instanceAllocationContext, ArrayContextSelector.ARRAY)
-				|| !currentContext.equals(instanceAllocationContext, ArrayContextSelector.ELEMENT_VALUE))
+				|| !currentContext.equals(instanceAllocationContext, ArrayContextSelector.MAIN_ITERATION))
 			return true;
 		else
 			return false;

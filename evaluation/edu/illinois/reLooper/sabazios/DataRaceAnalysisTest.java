@@ -46,6 +46,7 @@ import com.ibm.wala.util.config.FileOfClasses;
 import com.ibm.wala.util.graph.GraphPrint;
 import com.ibm.wala.util.io.FileProvider;
 
+import edu.illinois.reLooper.sabazios.log.Log;
 import edu.illinois.reLooper.sabazios.race.Race;
 import edu.illinois.reLooper.sabazios.race.RaceOnNonStatic;
 import extra166y.ParallelArray;
@@ -72,6 +73,7 @@ public abstract class DataRaceAnalysisTest {
 	protected Set<Race> foundRaces;
 
 	public DataRaceAnalysisTest() {
+		Log.start();
 		testClassName = this.getClass().getName();
 	}
 
@@ -102,6 +104,7 @@ public abstract class DataRaceAnalysisTest {
 			Analysis.instance = analysis;
 			RaceFinder raceFinder = new RaceFinder(analysis);
 
+			Log.log("Pointer analysis done");
 			Set<Race> races = null;
 			try {
 				races = raceFinder.findRaces();
@@ -109,9 +112,8 @@ public abstract class DataRaceAnalysisTest {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-
+			Log.log("Data race analysis done");
 			return races;
-		
 	}
 
 	public void setBinaryDependency(String path) {

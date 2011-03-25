@@ -56,7 +56,8 @@ public class RaceFinder {
 			FlexibleContext c = (FlexibleContext) node.getContext();
 
 			if (c.getItem(ArrayContextSelector.PARALLEL) != null
-					&& ((Boolean) c.getItem(ArrayContextSelector.PARALLEL))) {
+					&& ((Boolean) c.getItem(ArrayContextSelector.PARALLEL))
+					&& ((Boolean) c.getItem(ArrayContextSelector.MAIN_ITERATION))) {
 				IR ir = node.getIR();
 				if (ir == null)
 					continue;

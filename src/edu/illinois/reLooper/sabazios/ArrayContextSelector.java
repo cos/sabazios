@@ -18,6 +18,7 @@ final class ArrayContextSelector implements ContextSelector {
 
 	public static final ContextKey NODE = new FlexibleContext.NamedContextKey("NODE");
 	public static final ContextKey ELEMENT_VALUE = new FlexibleContext.NamedContextKey("ELEMENT_VALUE");
+	public static final ContextKey MAIN_ITERATION = new FlexibleContext.NamedContextKey("MAIN_ITERATION");
 	public static final ContextKey PARALLEL = new FlexibleContext.NamedContextKey("PARALLEL");
 	public static final ContextKey ARRAY = new FlexibleContext.NamedContextKey("ARRAY");
 	public static final ContextKey CALL_SITE_REFERENCE = new FlexibleContext.NamedContextKey("CALL_SITE_REFERENCE");
@@ -43,6 +44,7 @@ final class ArrayContextSelector implements ContextSelector {
 			c.putItem(NODE, caller);
 			SSAAbstractInvokeInstruction invoke = caller.getIR().getCalls(site)[0];
 			c.putItem(ELEMENT_VALUE, invoke.getDef());
+			c.putItem(MAIN_ITERATION, invoke.getDef() == 5);
 			c.putItem(PARALLEL, false);
 			System.out.println(c);
 			return c;
@@ -53,17 +55,31 @@ final class ArrayContextSelector implements ContextSelector {
 			c.putItem(NODE, caller);
 			SSAAbstractInvokeInstruction invoke = caller.getIR().getCalls(site)[0];
 			c.putItem(ELEMENT_VALUE, invoke.getDef());
+			c.putItem(MAIN_ITERATION, invoke.getDef() == 5);
 			c.putItem(PARALLEL, true);
 			c.putItem(CALL_SITE_REFERENCE, site);
 			System.out.println(c);
 			return c;
 		}
 
+		if (callerMethod.contains("replaceWithMappedIndexSeq") && calleeString.contains("op")) {
+			FlexibleContext c = new FlexibleContext(caller.getContext());
+			c.putItem(NODE, caller);
+			SSAAbstractInvokeInstruction invoke = caller.getIR().getCalls(site)[0];
+			c.putItem(ELEMENT_VALUE, invoke.getDef());
+			c.putItem(MAIN_ITERATION, invoke.getDef() == 6);
+			c.putItem(PARALLEL, true);
+			c.putItem(CALL_SITE_REFERENCE, site);
+			System.out.println(c);
+			return c;
+		}
+		
 		if (callerMethod.contains("replaceWithMappedIndex") && calleeString.contains("op")) {
 			FlexibleContext c = new FlexibleContext(caller.getContext());
 			c.putItem(NODE, caller);
 			SSAAbstractInvokeInstruction invoke = caller.getIR().getCalls(site)[0];
 			c.putItem(ELEMENT_VALUE, invoke.getDef());
+			c.putItem(MAIN_ITERATION, invoke.getDef() == 6);
 			c.putItem(PARALLEL, true);
 			c.putItem(CALL_SITE_REFERENCE, site);
 			System.out.println(c);
@@ -75,6 +91,7 @@ final class ArrayContextSelector implements ContextSelector {
 			c.putItem(NODE, caller);
 			SSAAbstractInvokeInstruction invoke = caller.getIR().getCalls(site)[0];
 			c.putItem(ELEMENT_VALUE, invoke.getUse(1));
+			c.putItem(MAIN_ITERATION, invoke.getUse(1) == 4);
 			c.putItem(PARALLEL, false);
 			System.out.println(c);
 			return c;
@@ -84,6 +101,7 @@ final class ArrayContextSelector implements ContextSelector {
 			c.putItem(NODE, caller);
 			SSAAbstractInvokeInstruction invoke = caller.getIR().getCalls(site)[0];
 			c.putItem(ELEMENT_VALUE, invoke.getUse(1));
+			c.putItem(MAIN_ITERATION, invoke.getUse(1) == 4);
 			c.putItem(PARALLEL, true);
 			System.out.println(c);
 			return c;

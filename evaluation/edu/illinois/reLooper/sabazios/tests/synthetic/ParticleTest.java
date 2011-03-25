@@ -35,6 +35,12 @@ public class ParticleTest extends DataRaceAnalysisTest {
 		assertRace("synthetic.Particle$5.op(Particle.java:67)");
 	}
 	
+	@Test 
+	public void verySimpleRaceWithIndex() {
+		findRaces();
+		assertRace("synthetic.Particle$28.op(Particle.java:382)");
+	}
+	
 	/**
 	 * Is there a problem when the elements are initialized in another forall?
 	 */
@@ -128,5 +134,47 @@ public class ParticleTest extends DataRaceAnalysisTest {
 	public void raceBecauseOfDirectArrayLoad() {
 		findRaces();
 		assertRaces("synthetic.Particle$18.op(Particle.java:274)");
+	}
+	
+	@Test 
+	public void verySimpleRaceToStatic() {
+		findRaces();
+		assertRace("synthetic.Particle$29.op(Particle.java:397)");
+	}
+	
+	@Override
+	protected String getTestedClassName() {
+		return "Lsynthetic/Particle";
+	};
+	
+	
+	@Test 
+	public void raceOnSharedReturnValue() {
+		findRaces();
+		assertRaces("synthetic.Particle$19.op(Particle.java:289)");
+	}
+	
+	@Test
+	public void raceOnDifferntArrayIteration() {
+		findRaces();
+		assertRaces("synthetic.Particle$22.op(Particle.java:316)");
+	}
+	
+	@Test @Ignore
+	public void noRaceIfFlowSensitive() {
+		findRaces();
+		assertNoRaces();
+	}
+	
+	@Test
+	public void raceOnDifferntArrayIterationOneLoop() {
+		findRaces();
+		assertRaces("synthetic.Particle$27.op(Particle.java:366)","synthetic.Particle$27.op(Particle.java:367)");
+	}
+	
+	@Test
+	public void raceOnSharedFromStatic() {
+		findRaces();
+		assertRaces("synthetic.Particle$30.op(Particle.java:411)");
 	}
 }

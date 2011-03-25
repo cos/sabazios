@@ -369,4 +369,48 @@ public class Particle {
 			}
 		});
 	}
+	
+	public void verySimpleRaceWithIndex() {
+		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
+				ParallelArray.defaultExecutor());
+
+		final Particle shared = new Particle();
+
+		particles.replaceWithMappedIndex(new Ops.IntToObject<Particle>() {
+			@Override
+			public Particle op(int i) {
+				shared.x = 10;
+				return new Particle();
+			}
+		});
+	 }
+	
+	final static Particle staticShared = new Particle();
+	
+	public void verySimpleRaceToStatic() {
+		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
+				ParallelArray.defaultExecutor());
+
+		particles.replaceWithMappedIndex(new Ops.IntToObject<Particle>() {
+			@Override
+			public Particle op(int i) {
+				staticShared.x = 10;
+				return new Particle();
+			}
+		});
+	 }
+	
+	public void raceOnSharedFromStatic() {
+		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
+				ParallelArray.defaultExecutor());
+
+		particles.replaceWithMappedIndex(new Ops.IntToObject<Particle>() {
+			@Override
+			public Particle op(int i) {
+				Particle x = staticShared;
+				x.y = 11;
+				return new Particle();
+			}
+		});
+	 }
 }
