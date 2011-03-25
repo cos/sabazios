@@ -109,9 +109,6 @@ public class FlexibleContext implements Context {
 		if(this.getItem(key)==null)
 			return otherF.getItem(key) == null;
 		
-		System.out.println("COMPARE "+this+" <<<<>>>> "+otherF);
-		System.out.println("COMPARE on "+key+": "+this.getItem(key)+" <<<<>>>> "+otherF.getItem(key));
-		
 		return this.getItem(key).equals(otherF.getItem(key));
 	}
 }

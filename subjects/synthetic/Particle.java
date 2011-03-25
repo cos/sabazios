@@ -317,4 +317,56 @@ public class Particle {
 			}
 		});
 	}
+	
+	public void noRaceIfFlowSensitive() {
+		final ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
+				ParallelArray.defaultExecutor());
+
+		particles.replaceWithGeneratedValueSeq(new Ops.Generator<Particle>() {
+			@Override
+			public Particle op() {
+				return new Particle();
+			}
+		});
+		
+		particles.apply(new Ops.Procedure<Particle>() {
+			@Override
+			public void op(Particle p) {
+				p.x = 10;
+			}
+		});
+		
+		final Particle s = new Particle();
+
+		particles.replaceWithGeneratedValueSeq(new Ops.Generator<Particle>() {
+			@Override
+			public Particle op() {				
+				return s;
+			}
+		});
+
+	}
+	
+	public void raceOnDifferntArrayIterationOneLoop() {
+		final ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
+				ParallelArray.defaultExecutor());
+
+		particles.replaceWithGeneratedValueSeq(new Ops.Generator<Particle>() {
+			@Override
+			public Particle op() {
+				return new Particle();
+			}
+		});
+		
+		final Particle s = new Particle();
+		
+		particles.apply(new Ops.Procedure<Particle>() {
+			@Override
+			public void op(Particle p) {
+				p.origin.x = 10;
+				s.origin = new Particle();
+				p.origin = s.origin;
+			}
+		});
+	}
 }

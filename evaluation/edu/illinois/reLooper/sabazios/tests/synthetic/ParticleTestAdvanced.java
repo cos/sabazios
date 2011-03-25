@@ -34,4 +34,16 @@ public class ParticleTestAdvanced extends DataRaceAnalysisTest {
 		findRaces();
 		assertRaces("synthetic.Particle$22.op(Particle.java:316)");
 	}
+	
+	@Test
+	public void noRaceIfFlowSensitive() {
+		findRaces();
+		assertNoRaces();
+	}
+	
+	@Test
+	public void raceOnDifferntArrayIterationOneLoop() {
+		findRaces();
+		assertRaces("synthetic.Particle$27.op(Particle.java:366)","synthetic.Particle$27.op(Particle.java:367)");
+	}
 }
