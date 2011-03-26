@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.ibm.wala.ipa.callgraph.propagation.AllocationSiteInNode;
+import com.ibm.wala.ipa.callgraph.propagation.ConcreteTypeKey;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
 import com.ibm.wala.util.collections.Filter;
@@ -28,6 +29,11 @@ final class PathToSharedFinder extends BFSPathFinder<Object> {
 		public boolean accepts(Object iK) {
 			if (iK instanceof PointerKey)
 				return false;
+			if (iK instanceof ConcreteTypeKey) {
+				System.out.println(iK);
+				return false;
+			}
+
 			AllocationSiteInNode currentObject = (AllocationSiteInNode) iK;
 
 			// if found a shared outside object, stop
@@ -38,7 +44,7 @@ final class PathToSharedFinder extends BFSPathFinder<Object> {
 			return Analysis.isAllocationSharedInContext(currentObject, currentContext);
 		}
 	}
-	
+
 	private final Set<InstanceKey> currentElement;
 	private final FlexibleContext currentContext;
 	private final SharedCache sharedObjects;
@@ -67,7 +73,10 @@ final class PathToSharedFinder extends BFSPathFinder<Object> {
 	@Override
 	protected Iterator<? extends Object> getConnected(Object n) {
 		// stop traversing when reaching a current element
-		if (currentElement.contains(n) || (n instanceof AllocationSiteInNode && sharedObjects.alreadyAnalyzed(currentContext, (AllocationSiteInNode) n)))
+		if (currentElement.contains(n)
+				|| (n instanceof AllocationSiteInNode && sharedObjects.alreadyAnalyzed(currentContext,
+						(AllocationSiteInNode) n)) 
+				|| (n instanceof ConcreteTypeKey))
 			return (new HashSet<Object>()).iterator();
 		else
 			return super.getConnected(n);

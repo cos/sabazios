@@ -140,7 +140,6 @@ public class Analysis {
 		Iterator<Object> instanceKeys = this.heapGraph.getSuccNodes(localPointerKey);
 
 		final Set<InstanceKey> currentElement;
-		;
 		Integer elementValue = (Integer) currentContext.getItem(ArrayContextSelector.ELEMENT_VALUE);
 		CGNode elementNode = (CGNode) currentContext.getItem(ArrayContextSelector.NODE);
 

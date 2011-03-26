@@ -35,7 +35,6 @@ public class SmartCFABuilder extends SSAPropagationCallGraphBuilder {
     if (options == null) {
       throw new IllegalArgumentException("options is null");
     }
-    setContextSelector(new ArrayContextSelector());
 
     SSAContextInterpreter defI = new DefaultSSAInterpreter(options, cache);
     defI = new DelegatingSSAContextInterpreter(ReflectionContextInterpreter.createReflectionContextInterpreter(cha, options, getAnalysisCache()), defI);
@@ -43,6 +42,7 @@ public class SmartCFABuilder extends SSAPropagationCallGraphBuilder {
     setContextInterpreter(contextInterpreter);
     
     ZeroXInstanceKeys zik = makeInstanceKeys(cha, options, contextInterpreter, instancePolicy);
+    setContextSelector(new ArrayContextSelector(zik));
     setInstanceKeys(zik);
   }
   /**

@@ -178,6 +178,6 @@ public class ParticleTest extends DataRaceAnalysisTest {
 	@Test
 	public void raceInLibrary() {
 		findRaces();
-		assertRaces("synthetic.Particle$30.op(Particle.java:427)");
+		assertRaces("synthetic.Particle$31.op(Particle.java:427)");
 	}
 }

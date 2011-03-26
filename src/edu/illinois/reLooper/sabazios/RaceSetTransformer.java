@@ -25,6 +25,7 @@ import com.ibm.wala.util.intset.IntSet;
 
 import edu.illinois.reLooper.sabazios.race.Race;
 import edu.illinois.reLooper.sabazios.race.RaceOnNonStatic;
+import edu.illinois.reLooper.sabazios.race.ShallowRace;
 import edu.illinois.reLooper.sabazios.util.NodeFinder;
 
 public class RaceSetTransformer {
@@ -58,7 +59,7 @@ public class RaceSetTransformer {
 			while (predNodes.hasNext()) {
 				CGNode predNode = (CGNode) predNodes.next();
 				if (inApplicationScope(predNode))
-					addRaces(predNode, node, shallowRaces, (RaceOnNonStatic) r);
+					addRaces(predNode, node, shallowRaces, r);
 				else
 					if(!visitedNodes.contains(predNode))
 					workList.add(predNode);
@@ -78,7 +79,7 @@ public class RaceSetTransformer {
 	 *            - a node in Application scope
 	 * @param r 
 	 */
-	private void addRaces(CGNode predNode, CGNode node, HashSet<Race> shallowRaces, RaceOnNonStatic r) {
+	private void addRaces(CGNode predNode, CGNode node, HashSet<Race> shallowRaces, Race r) {
 		Iterator<CallSiteReference> possibleSites = analysis.callGraph.getPossibleSites(predNode, node);
 		while (possibleSites.hasNext()) {
 			CallSiteReference callSiteReference = (CallSiteReference) possibleSites.next();
@@ -86,7 +87,7 @@ public class RaceSetTransformer {
 					.intIterator();
 			while (callInstructionIndices.hasNext()) {
 				int next = callInstructionIndices.next();
-				shallowRaces.add(new RaceOnNonStatic(new NormalStatement(predNode, next), r.getInstanceKey()));
+				shallowRaces.add(new ShallowRace(new NormalStatement(predNode, next), r));
 			}
 		}
 	}

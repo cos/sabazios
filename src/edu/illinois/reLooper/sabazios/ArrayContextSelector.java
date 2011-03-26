@@ -6,7 +6,9 @@ import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.Context;
 import com.ibm.wala.ipa.callgraph.ContextKey;
 import com.ibm.wala.ipa.callgraph.ContextSelector;
+import com.ibm.wala.ipa.callgraph.impl.Everywhere;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
+import com.ibm.wala.ipa.callgraph.propagation.cfa.ZeroXInstanceKeys;
 import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
 
 final class ArrayContextSelector implements ContextSelector {
@@ -18,7 +20,10 @@ final class ArrayContextSelector implements ContextSelector {
 	public static final ContextKey ARRAY = new FlexibleContext.NamedContextKey("ARRAY");
 	public static final ContextKey CALL_SITE_REFERENCE = new FlexibleContext.NamedContextKey("CALL_SITE_REFERENCE");
 
-	public ArrayContextSelector() {
+	ZeroXInstanceKeys keyFactory;
+	
+	public ArrayContextSelector(ZeroXInstanceKeys keyFactory) {
+		this.keyFactory = keyFactory;
 	}
 
 	@Override
@@ -63,7 +68,7 @@ final class ArrayContextSelector implements ContextSelector {
 			SSAAbstractInvokeInstruction invoke = caller.getIR().getCalls(site)[0];
 			c.putItem(ELEMENT_VALUE, invoke.getDef());
 			c.putItem(MAIN_ITERATION, invoke.getDef() == 6);
-			c.putItem(PARALLEL, true);
+			c.putItem(PARALLEL, false);
 			c.putItem(CALL_SITE_REFERENCE, site);
 			System.out.println(c);
 			return c;
@@ -101,6 +106,9 @@ final class ArrayContextSelector implements ContextSelector {
 			System.out.println(c);
 			return c;
 		}
+		
+		if(!keyFactory.isInteresting(callee.getDeclaringClass()))
+			return Everywhere.EVERYWHERE;
 
 		return caller.getContext();
 	}
