@@ -1,21 +1,15 @@
 package edu.illinois.reLooper.sabazios;
 
-import java.util.Iterator;
-import java.util.Set;
-
 import org.junit.Test;
 
 import com.ibm.wala.util.CancelException;
-
-import edu.illinois.reLooper.sabazios.race.Race;
-import edu.illinois.reLooper.sabazios.race.RaceOnNonStatic;
 
 public class OldEm3dEvaluation extends DataRaceAnalysisTest{
 
 	public OldEm3dEvaluation() {
 		super();
-		this.setBinaryDependency("../old/WALATests_workinprogress/bin");
-		this.setBinaryDependency("../ParallelArrayMock/bin");
+		this.addBinaryDependency("../old/WALATests_workinprogress/bin");
+		this.addBinaryDependency("../ParallelArrayMock/bin");
 	}
 	
 	@Test

@@ -2,20 +2,12 @@ package edu.illinois.reLooper.sabazios.race;
 
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 
-import com.google.common.collect.Sets;
 import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
-import com.ibm.wala.ipa.callgraph.impl.PartialCallGraph;
-import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 import com.ibm.wala.ipa.slicer.NormalStatement;
 import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
-import com.ibm.wala.util.graph.Graph;
-import com.ibm.wala.util.graph.GraphPrint;
-import com.ibm.wala.util.graph.impl.GraphInverter;
-import com.ibm.wala.util.graph.traverse.DFS;
 
 import edu.illinois.reLooper.sabazios.Analysis;
 import edu.illinois.reLooper.sabazios.CodeLocation;
@@ -32,23 +24,21 @@ public abstract class Race {
 		return statement;
 	}
 
-	public String toStackTraceString(CallGraph callGraph) {
+	public String toStackTraceString(Analysis analysis) {
 		NormalStatement statement = this.getStatement();
-		return this.getStackTrace(callGraph, statement);
+		return this.getStackTrace(analysis, statement);
 	}
 
-	protected String getStackTrace(CallGraph callGraph, NormalStatement statement) {
+	protected String getStackTrace(Analysis analysis,  NormalStatement statement) {
 		StringBuilder s = new StringBuilder();
 		s.append(CodeLocation.make(statement));
 		s.append("\n");
 		CGNode node = statement.getNode();
-		HashSet<CGNode> visitedNodes = new HashSet<CGNode>();
-		// PartialCallGraph stackTrace = getStackTrace(node, visitedNodes,
-		// callGraph);
-		return s.toString() + getOneStackTraceString(node, callGraph);
+		return s.toString() + getOneStackTraceString(analysis, node);
 	}
 
-	private static String getOneStackTraceString(CGNode node, CallGraph callGraph) {
+	private static String getOneStackTraceString(Analysis analysis, CGNode node) {
+		CallGraph callGraph = analysis.callGraph;
 		HashSet<CGNode> visitedNodes = new HashSet<CGNode>();
 		StringBuilder s = new StringBuilder();
 
@@ -71,7 +61,7 @@ public abstract class Race {
 				for (SSAAbstractInvokeInstruction invoke : calls) {
 					for (int i = 0; i < invoke.getNumberOfUses(); i++) {
 						int use = invoke.getUse(i);
-						if (!(Analysis.instance.traceBackToShared(predNode, use) == null))
+						if (!(analysis.traceBackToShared(predNode, use) == null))
 							s.append(" : " + CodeLocation.variableName(use, predNode, invoke));
 					}
 				}

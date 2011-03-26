@@ -1,5 +1,6 @@
 package synthetic;
 
+import java.util.HashSet;
 import extra166y.Ops;
 import extra166y.ParallelArray;
 
@@ -9,8 +10,7 @@ public class Particle {
 	Particle origin1;
 
 	public void moveTo(double x, double y) {
-		this.x = x;
-		this.y = y;
+		this.x = x; this.y = y;
 	}
 
 	public void vacuouslyNoRace() {
@@ -112,7 +112,7 @@ public class Particle {
 		});
 	}
 
-	public void OneCFANeeded() {
+	public void oneCFANeeded() {
 		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
 				ParallelArray.defaultExecutor());
 
@@ -129,7 +129,7 @@ public class Particle {
 		});
 	}
 
-	public void TwoCFANeeded() {
+	public void twoCFANeeded() {
 		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
 				ParallelArray.defaultExecutor());
 
@@ -169,7 +169,7 @@ public class Particle {
 
 	private void computeRec(Particle particle) {
 		int x = 10 / 7;
-		if (x > 2)
+		if (x < 2)
 			computeRec(particle);
 		else
 			compute(particle);
@@ -410,6 +410,22 @@ public class Particle {
 				Particle x = staticShared;
 				x.y = 11;
 				return new Particle();
+			}
+		});
+	 }
+	
+	public void raceInLibrary() {
+		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
+				ParallelArray.defaultExecutor());
+
+		final HashSet<Particle> sharedSet = new HashSet<Particle>();
+		
+		particles.replaceWithGeneratedValue(new Ops.Generator<Particle>() {
+			@Override
+			public Particle op() {
+				Particle particle = new Particle();
+				sharedSet.add(particle);
+				return particle;
 			}
 		});
 	 }

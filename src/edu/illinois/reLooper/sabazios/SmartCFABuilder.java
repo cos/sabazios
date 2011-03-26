@@ -15,10 +15,6 @@ import com.ibm.wala.analysis.reflection.ReflectionContextInterpreter;
 import com.ibm.wala.ipa.callgraph.AnalysisCache;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;
 import com.ibm.wala.ipa.callgraph.ContextSelector;
-import com.ibm.wala.ipa.callgraph.impl.DefaultContextSelector;
-import com.ibm.wala.ipa.callgraph.impl.DelegatingContextSelector;
-import com.ibm.wala.ipa.callgraph.propagation.AllocationSiteInNodeFactory;
-import com.ibm.wala.ipa.callgraph.propagation.ClassBasedInstanceKeys;
 import com.ibm.wala.ipa.callgraph.propagation.SSAContextInterpreter;
 import com.ibm.wala.ipa.callgraph.propagation.SSAPropagationCallGraphBuilder;
 import com.ibm.wala.ipa.callgraph.propagation.cfa.DefaultPointerKeyFactory;
@@ -39,8 +35,6 @@ public class SmartCFABuilder extends SSAPropagationCallGraphBuilder {
     if (options == null) {
       throw new IllegalArgumentException("options is null");
     }
-
-    ContextSelector def = new DefaultContextSelector(options);
     setContextSelector(new ArrayContextSelector());
 
     SSAContextInterpreter defI = new DefaultSSAInterpreter(options, cache);

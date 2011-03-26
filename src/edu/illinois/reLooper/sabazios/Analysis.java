@@ -1,13 +1,10 @@
 package edu.illinois.reLooper.sabazios;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import com.ibm.wala.analysis.pointers.HeapGraph;
-import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.Context;
@@ -22,71 +19,16 @@ import com.ibm.wala.ipa.callgraph.propagation.PropagationCallGraphBuilder;
 import com.ibm.wala.ipa.callgraph.propagation.StaticFieldKey;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.ipa.slicer.NormalStatement;
-import com.ibm.wala.ipa.slicer.Statement;
 import com.ibm.wala.ipa.slicer.StatementWithInstructionIndex;
-import com.ibm.wala.shrikeBT.Instruction;
-import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSANewInstruction;
 import com.ibm.wala.ssa.SSAPutInstruction;
-import com.ibm.wala.util.collections.Filter;
 import com.ibm.wala.util.graph.Graph;
 import com.ibm.wala.util.graph.impl.GraphInverter;
-import com.ibm.wala.util.graph.traverse.BFSPathFinder;
 
 public class Analysis {
-
-	private final class PathToSharedFinder extends BFSPathFinder<Object> {
-		private final Set<InstanceKey> currentElement;
-		private final FlexibleContext currentContext;
-
-		@SuppressWarnings("deprecation")
-		private PathToSharedFinder(Graph<Object> G, Object startNode, Set<InstanceKey> currentElement,
-				final FlexibleContext currentContext) {
-			super(G, startNode, new Filter<Object>() {
-				@Override
-				public boolean accepts(Object iK) {
-					if (!(iK instanceof AllocationSiteInNode))
-						return false;
-					AllocationSiteInNode currentObject = (AllocationSiteInNode) iK;
-
-					// if found a shared outside object, stop
-					if (sharedObjects.alreadyAnalyzed(currentContext, currentObject)
-							&& sharedObjects.getOutsideObject(currentContext, currentObject) != null)
-						return true;
-
-					return isAllocationSharedInContext(currentObject, currentContext);
-				}
-			});
-			this.currentElement = currentElement;
-			this.currentContext = currentContext;
-		}
-
-		public AllocationSiteInNode outsideSharedObject = null;
-
-		public AllocationSiteInNode result() {
-			List<Object> found = this.find();
-			if (outsideSharedObject != null)
-				return outsideSharedObject;
-
-			if (found != null)
-				return (AllocationSiteInNode) found.get(0);
-
-			return null;
-		}
-
-		@Override
-		protected Iterator<? extends Object> getConnected(Object n) {
-			// stop traversing when reaching a current element
-			if (currentElement.contains(n) || (n instanceof AllocationSiteInNode && sharedObjects.alreadyAnalyzed(currentContext, (AllocationSiteInNode) n)))
-				return (new HashSet<Object>()).iterator();
-			else
-				return super.getConnected(n);
-		}
-	}
-
-	public static Analysis instance;
-	final CallGraph callGraph;
+	
+	public final CallGraph callGraph;
 	final PointerAnalysis pointerAnalysis;
 	public HeapGraph heapGraph;
 	final PropagationCallGraphBuilder builder;
@@ -191,11 +133,11 @@ public class Analysis {
 			return null;
 
 		// the local pointer key the statement writes to
-		LocalPointerKey localPointerKey = Analysis.instance.getLocalPointerKey(node, ref);
+		LocalPointerKey localPointerKey = this.getLocalPointerKey(node, ref);
 		if (localPointerKey == null)
 			return null;
 		// the actual instance keys for this pointer key
-		Iterator<Object> instanceKeys = Analysis.instance.heapGraph.getSuccNodes(localPointerKey);
+		Iterator<Object> instanceKeys = this.heapGraph.getSuccNodes(localPointerKey);
 
 		final Set<InstanceKey> currentElement;
 		;
@@ -204,7 +146,7 @@ public class Analysis {
 
 		currentElement = getInstanceKeysForLocalValue(elementNode, elementValue);
 
-		final Graph<Object> revertedHeap = GraphInverter.invert(Analysis.instance.heapGraph);
+		final Graph<Object> revertedHeap = GraphInverter.invert(this.heapGraph);
 
 		AllocationSiteInNode sharedInstance = null;
 
@@ -218,7 +160,7 @@ public class Analysis {
 			if (sharedObjects.alreadyAnalyzed(currentContext, objectInCurrentContext))
 				sharedInstance = sharedObjects.getOutsideObject(currentContext, objectInCurrentContext);
 			else {
-				PathToSharedFinder find = new PathToSharedFinder(revertedHeap, object, currentElement, currentContext);
+				PathToSharedFinder find = new PathToSharedFinder(revertedHeap, object, currentElement, currentContext, sharedObjects);
 				sharedInstance = find.result();
 				sharedObjects.putTriple(currentContext, objectInCurrentContext, sharedInstance);
 			}
@@ -242,7 +184,7 @@ public class Analysis {
 		return currentElement;
 	}
 
-	private static boolean isAllocationSharedInContext(Object iK, final FlexibleContext currentContext) {
+	public static boolean isAllocationSharedInContext(Object iK, final FlexibleContext currentContext) {
 		AllocationSiteInNode allocationSite = (AllocationSiteInNode) iK;
 		Context instanceAllocationContext = allocationSite.getNode().getContext();
 		if (instanceAllocationContext.equals(Everywhere.EVERYWHERE)

@@ -1,7 +1,6 @@
 package edu.illinois.reLooper.sabazios;
 
 import java.util.HashMap;
-import java.util.HashSet;
 
 import com.ibm.wala.ipa.callgraph.Context;
 import com.ibm.wala.ipa.callgraph.ContextItem;
@@ -46,9 +45,9 @@ public class FlexibleContext implements Context {
 	
 	@Override
 	public boolean equals(Object obj) {
-		if(!(obj instanceof FlexibleContext))
-			return false;
 		if(obj == null)
+			return false;
+		if(!(obj instanceof FlexibleContext))
 			return false;
 		
 		FlexibleContext other = (FlexibleContext) obj;
@@ -91,7 +90,9 @@ public class FlexibleContext implements Context {
 		
 		@Override
 		public boolean equals(Object obj) {
-			return s.toString().equals(obj.toString());
+			if(obj == null)
+				return false;
+			return s.equals(obj.toString());
 		}
 	}
 

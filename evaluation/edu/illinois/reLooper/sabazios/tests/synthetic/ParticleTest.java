@@ -2,19 +2,16 @@ package edu.illinois.reLooper.sabazios.tests.synthetic;
 
 import org.junit.Ignore;
 import org.junit.Test;
-
 import com.ibm.wala.util.CancelException;
-
 import edu.illinois.reLooper.sabazios.DataRaceAnalysisTest;
 
 public class ParticleTest extends DataRaceAnalysisTest {
 
 	public ParticleTest() {
 		super();
-		
 		DEBUG = true;
-		this.setBinaryDependency("synthetic");
-		this.setBinaryDependency("../ParallelArrayMock/bin");
+		this.addBinaryDependency("synthetic");
+		this.addBinaryDependency("../ParallelArrayMock/bin");
 	}
 	
 	@Test 
@@ -74,7 +71,7 @@ public class ParticleTest extends DataRaceAnalysisTest {
 	 * Works on 1-CFA
 	 */
 	@Test 
-	public void OneCFANeeded() throws CancelException {
+	public void oneCFANeeded() throws CancelException {
 		findRaces();
 		assertNoRaces();
 	}
@@ -85,7 +82,7 @@ public class ParticleTest extends DataRaceAnalysisTest {
 	 * Works on 2-CFA
 	 */
 	@Test 
-	public void TwoCFANeeded() throws CancelException {
+	public void twoCFANeeded() throws CancelException {
 		findRaces();
 		assertNoRaces();
 	}
@@ -176,5 +173,11 @@ public class ParticleTest extends DataRaceAnalysisTest {
 	public void raceOnSharedFromStatic() {
 		findRaces();
 		assertRaces("synthetic.Particle$30.op(Particle.java:411)");
+	}
+	
+	@Test
+	public void raceInLibrary() {
+		findRaces();
+		assertRaces("synthetic.Particle$30.op(Particle.java:427)");
 	}
 }

@@ -1,10 +1,5 @@
 package edu.illinois.reLooper.sabazios.tests.synthetic;
 
-import org.junit.Ignore;
-import org.junit.Test;
-
-import com.ibm.wala.util.CancelException;
-
 import edu.illinois.reLooper.sabazios.DataRaceAnalysisTest;
 
 public class ParticleTestAdvanced extends DataRaceAnalysisTest {
@@ -13,7 +8,7 @@ public class ParticleTestAdvanced extends DataRaceAnalysisTest {
 		super();
 		
 		DEBUG = true;
-		this.setBinaryDependency("synthetic");
-		this.setBinaryDependency("../ParallelArrayMock/bin");
+		this.addBinaryDependency("synthetic");
+		this.addBinaryDependency("../ParallelArrayMock/bin");
 	}
 }

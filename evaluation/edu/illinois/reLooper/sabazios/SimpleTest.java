@@ -1,6 +1,5 @@
 package edu.illinois.reLooper.sabazios;
 
-import java.util.Iterator;
 import java.util.Set;
 
 import org.junit.Test;
@@ -8,13 +7,12 @@ import org.junit.Test;
 import com.ibm.wala.util.CancelException;
 
 import edu.illinois.reLooper.sabazios.race.Race;
-import edu.illinois.reLooper.sabazios.race.RaceOnNonStatic;
 
 public class SimpleTest extends DataRaceAnalysisTest {
 
 	public SimpleTest() {
-		this.setBinaryDependency("subjects");
-		this.setBinaryDependency("../ParallelArrayMock/bin");
+		this.addBinaryDependency("subjects");
+		this.addBinaryDependency("../ParallelArrayMock/bin");
 	}
 	
 	@Test

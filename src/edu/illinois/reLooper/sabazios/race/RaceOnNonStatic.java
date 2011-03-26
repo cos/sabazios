@@ -1,12 +1,9 @@
 package edu.illinois.reLooper.sabazios.race;
 
 
-import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.propagation.AllocationSiteInNode;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.slicer.NormalStatement;
-import com.ibm.wala.ipa.slicer.Statement;
-import com.ibm.wala.ipa.slicer.StatementWithInstructionIndex;
 
 import edu.illinois.reLooper.sabazios.Analysis;
 import edu.illinois.reLooper.sabazios.CodeLocation;
@@ -40,14 +37,14 @@ public class RaceOnNonStatic extends Race {
 		return super.toString() + " write to " + allocationLocation;
 	}
 
-	public String toDetailedString(CallGraph callGraph) {
+	public String toDetailedString(Analysis analysis) {
 		StringBuffer s = new StringBuffer();
 		s.append(this);
 		s.append("\n");
-		s.append(this.toStackTraceString(callGraph));
+		s.append(this.toStackTraceString(analysis));
 		s.append("\n");
 		s.append("Allocation site\n");
-		s.append(this.getAllocationStackTrace(callGraph));
+		s.append(this.getAllocationStackTrace(analysis));
 		s.append("\n");
 		return s.toString();
 	}
@@ -56,8 +53,8 @@ public class RaceOnNonStatic extends Race {
 		return instanceKey;
 	}
 
-	public String getAllocationStackTrace(CallGraph callGraph) {
+	public String getAllocationStackTrace(Analysis analysis) {
 		AllocationSiteInNode allocationSite = (AllocationSiteInNode) instanceKey;
-		return instanceKey.toString() + " \n " + getStackTrace(callGraph, Analysis.getNormalStatement(allocationSite));
+		return instanceKey.toString() + " \n " + getStackTrace(analysis, Analysis.getNormalStatement(allocationSite));
 	}
 }

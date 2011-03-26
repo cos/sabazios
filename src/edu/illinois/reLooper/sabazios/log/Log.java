@@ -8,7 +8,8 @@ public class Log {
 	}
 
 	public static void log(String s) {
-		System.out.println((System.currentTimeMillis() - time) / 1000 + " : " + s);
-		time = System.currentTimeMillis();
+		long t = System.currentTimeMillis() - time;
+		System.out.println(t / 1000 + "." + (t % 1000) / 10 + " : " + s);
+		time = t + time;
 	}
 }
