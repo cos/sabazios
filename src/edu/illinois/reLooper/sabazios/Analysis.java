@@ -159,14 +159,15 @@ public class Analysis {
 			if (sharedObjects.alreadyAnalyzed(currentContext, objectInCurrentContext))
 				sharedInstance = sharedObjects.getOutsideObject(currentContext, objectInCurrentContext);
 			else {
-				PathToSharedFinder find = new PathToSharedFinder(revertedHeap, object, currentElement, currentContext, sharedObjects);
-				sharedInstance = find.result();
+//				PathToSharedFinder find = new PathToSharedFinder(revertedHeap, object, currentElement, currentContext, sharedObjects);
+//				sharedInstance = find.result();
+				if(Analysis.isAllocationSharedInContext(object, currentContext))
+					sharedInstance = objectInCurrentContext;
 				sharedObjects.putTriple(currentContext, objectInCurrentContext, sharedInstance);
 			}
 		}
 
 		return sharedInstance;
-
 	}
 
 	SharedCache sharedObjects = new SharedCache();

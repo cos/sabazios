@@ -78,7 +78,7 @@ public abstract class Race {
 		return "RACE " + CodeLocation.make(statement) + " : " + statement;
 	}
 
-	public String toDetailedString(CallGraph callGraph) {
+	public String toDetailedString(Analysis analysis) {
 		return this.toString();
 	}
 

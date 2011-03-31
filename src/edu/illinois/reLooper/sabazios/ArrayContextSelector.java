@@ -1,5 +1,7 @@
 package edu.illinois.reLooper.sabazios;
 
+import java.util.HashSet;
+
 import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.ipa.callgraph.CGNode;

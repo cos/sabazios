@@ -180,4 +180,22 @@ public class ParticleTest extends DataRaceAnalysisTest {
 		findRaces();
 		assertRaces("synthetic.Particle$31.op(Particle.java:427)");
 	}
+	
+	@Test
+	public void noRaceOnStringConcatenation() {
+		findRaces();
+		assertNoRaces();
+	}
+	
+	@Test
+	public void noRaceOnObjectsFromTheCurrentIterationThatHaveOrWillEscape() {
+		findRaces();
+		assertRace("synthetic.Particle$33.op(Particle.java:458)");
+	}
+	
+	@Test
+	public void noRaceWhenPrintln() {
+		findRaces();
+		assertNoRaces();
+	}
 }

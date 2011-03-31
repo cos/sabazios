@@ -70,7 +70,7 @@ public abstract class DataRaceAnalysisTest extends WalaAnalysis {
 		System.out.println("Number of races: " + foundRaces.size());
 		for (Iterator<Race> iterator = foundRaces.iterator(); iterator.hasNext();) {
 			Race race =  iterator.next();
-			System.out.println(race.toDetailedString(callGraph));
+			System.out.println(race.toDetailedString(analysis));
 		}
 	}
 

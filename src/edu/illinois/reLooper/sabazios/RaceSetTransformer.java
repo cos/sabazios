@@ -87,7 +87,8 @@ public class RaceSetTransformer {
 					.intIterator();
 			while (callInstructionIndices.hasNext()) {
 				int next = callInstructionIndices.next();
-				shallowRaces.add(new ShallowRace(new NormalStatement(predNode, next), r));
+				ShallowRace sr = new ShallowRace(new NormalStatement(predNode, next), r);
+				shallowRaces.add(sr);
 			}
 		}
 	}

@@ -429,4 +429,51 @@ public class Particle {
 			}
 		});
 	 }
+	
+	public void noRaceOnStringConcatenation() {
+		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
+				ParallelArray.defaultExecutor());
+		
+		particles.replaceWithGeneratedValue(new Ops.Generator<Particle>() {
+			@Override
+			public Particle op() {
+				Particle p = new Particle();
+				String bla = "tralala" + p;
+				return p;
+			}
+		});
+	 }
+	
+	// should only report one race on "shared.origin = p"
+	public void noRaceOnObjectsFromTheCurrentIterationThatHaveOrWillEscape() {
+		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
+				ParallelArray.defaultExecutor());
+		
+		final Particle shared = new Particle();
+		
+		particles.replaceWithGeneratedValue(new Ops.Generator<Particle>() {
+			@Override
+			public Particle op() {
+				Particle p = new Particle();
+				shared.origin = p;
+				p.x = 10;
+				return new Particle();
+			}
+		});
+	 }
+	
+	public void noRaceWhenPrintln() {
+		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
+				ParallelArray.defaultExecutor());
+		
+		
+		particles.replaceWithGeneratedValue(new Ops.Generator<Particle>() {
+			@Override
+			public Particle op() {
+				System.out.println("bla");
+				System.out.print("bla");
+				return new Particle();
+			}
+		});
+	 }
 }

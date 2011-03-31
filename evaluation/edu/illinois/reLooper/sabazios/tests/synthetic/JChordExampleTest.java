@@ -21,6 +21,6 @@ public class JChordExampleTest extends DataRaceAnalysisTest {
 	public void test() throws CancelException {
 		Set<Race> races = findRaces("Lsynthetic/jchordExample/T", "main([Ljava/lang/String;)V");
 		System.out.println(races.size());
-		System.out.println(races.iterator().next().toDetailedString(callGraph));
+		System.out.println(races.iterator().next().toDetailedString(analysis));
 	}
 }

@@ -3,6 +3,7 @@ package edu.illinois.reLooper.sabazios.race;
 import com.ibm.wala.ipa.callgraph.propagation.AllocationSiteInNode;
 import com.ibm.wala.ipa.slicer.NormalStatement;
 
+import edu.illinois.reLooper.sabazios.Analysis;
 import edu.illinois.reLooper.sabazios.CodeLocation;
 
 public class ShallowRace extends Race {
@@ -23,5 +24,10 @@ public class ShallowRace extends Race {
 			string += CodeLocation.make(instanceKey.getNode(), instanceKey.getSite().getProgramCounter());
 		}
 		return string;
+	}
+	
+	@Override
+	public String toDetailedString(Analysis analysis) {
+		return this.toString() + deepRace.toDetailedString(analysis);
 	}
 }

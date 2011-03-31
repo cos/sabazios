@@ -1,8 +1,11 @@
 package edu.illinois.reLooper.sabazios;
 
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
+import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.slicer.NormalStatement;
@@ -26,20 +29,32 @@ public class RaceFinder {
 	}
 
 	public Set<Race> findRaces() throws CancelException {
-		HashSet<Race> races = new HashSet<Race>();
 
-		for (CGNode node : analysis.callGraph) {
-			if (!(node.getContext() instanceof FlexibleContext))
-				continue;
+		Collection<CGNode> entrypointNodes = analysis.callGraph.getEntrypointNodes();
 
+		for (CGNode cgNode : entrypointNodes) {
+			explore(cgNode);
+		}
+		return races;
+	}
+
+	HashSet<CGNode> alreadyAnalyzed = new HashSet<CGNode>();
+	private HashSet<Race> races = new HashSet<Race>();
+
+	private void explore(CGNode node) {
+		if (alreadyAnalyzed.contains(node) || isThreadSafe(node)) {
+			return;
+		}
+		alreadyAnalyzed.add(node);
+
+		if (node.getContext() instanceof FlexibleContext) {
 			FlexibleContext c = (FlexibleContext) node.getContext();
 
 			if (c.getItem(ArrayContextSelector.PARALLEL) != null
 					&& ((Boolean) c.getItem(ArrayContextSelector.PARALLEL))
-					&& ((Boolean) c.getItem(ArrayContextSelector.MAIN_ITERATION))) {
+					&& ((Boolean) c.getItem(ArrayContextSelector.MAIN_ITERATION)) && node.getIR() != null) {
+
 				IR ir = node.getIR();
-				if (ir == null)
-					continue;
 				for (SSAInstruction instruction : ir.getControlFlowGraph().getInstructions()) {
 					Race race = getRace(node, instruction);
 					if (race != null)
@@ -47,7 +62,12 @@ public class RaceFinder {
 				}
 			}
 		}
-		return races;
+
+		Iterator<CGNode> succNodeCount = analysis.callGraph.getSuccNodes(node);
+		while (succNodeCount.hasNext()) {
+			CGNode succNode = (CGNode) succNodeCount.next();
+			explore(succNode);
+		}
 	}
 
 	private Race getRace(CGNode node, SSAInstruction instruction) {
@@ -64,7 +84,7 @@ public class RaceFinder {
 				InstanceKey sharedObject = analysis.traceBackToShared(node, ref);
 
 				// report race if it still stands
-				if (!(sharedObject == null))
+				if (sharedObject != null && !isThreadSafe(sharedObject))
 					return new RaceOnNonStatic(new NormalStatement(node, CodeLocation.getSSAInstructionNo(node,
 							instruction)), sharedObject);
 
@@ -85,10 +105,38 @@ public class RaceFinder {
 			InstanceKey sharedObject = analysis.traceBackToShared(node, ref);
 
 			// report race if it still stands
-			if (!(sharedObject == null))
+			if (sharedObject != null && !isThreadSafe(sharedObject))
 				return new RaceOnNonStatic(new NormalStatement(node,
 						CodeLocation.getSSAInstructionNo(node, instruction)), sharedObject);
 		}
 		return null;
 	}
+
+	
+	String[] threadSafeMethods = new String[] {
+			"java/util/regex/Pattern",
+			"java/lang/System, exit",
+//			"java/io/PrintStream, print",
+			"java/lang/Throwable, printStackTrace",
+			"java/security/AccessControlContext, getDebug",
+			"java.io.PrintStream, format",
+			"java/util/Random, <init>"
+	};
+	
+	private boolean isThreadSafe(CGNode node) {
+		for (String pattern : threadSafeMethods)
+			if (node.getMethod().toString().contains(pattern))
+				return true;
+		return false;
+	}
+	String[] threadSafeObjects = new String[] {
+			"< Primordial, Ljava/lang/System, initializeSystemClass()V >:NEW <Primordial,Ljava/io/PrintStream>",
+	};
+	private boolean isThreadSafe(InstanceKey sharedObject) {
+		for (String pattern : threadSafeObjects)
+			if (sharedObject.toString().contains(pattern))
+				return true;
+		return false;
+	}
+
 }

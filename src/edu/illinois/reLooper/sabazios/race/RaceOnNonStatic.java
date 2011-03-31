@@ -37,6 +37,7 @@ public class RaceOnNonStatic extends Race {
 		return super.toString() + " write to " + allocationLocation;
 	}
 
+	@Override
 	public String toDetailedString(Analysis analysis) {
 		StringBuffer s = new StringBuffer();
 		s.append(this);
