@@ -116,7 +116,7 @@ public class RaceFinder {
 	String[] threadSafeMethods = new String[] {
 			"java/util/regex/Pattern",
 			"java/lang/System, exit",
-//			"java/io/PrintStream, print",
+			"java/io/PrintStream, print",
 			"java/lang/Throwable, printStackTrace",
 			"java/security/AccessControlContext, getDebug",
 			"java.io.PrintStream, format",

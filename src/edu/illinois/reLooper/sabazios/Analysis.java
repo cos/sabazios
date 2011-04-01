@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import com.ibm.wala.analysis.pointers.HeapGraph;
+import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.Context;
@@ -41,7 +42,14 @@ public class Analysis {
 		this.heapGraph = this.pointerAnalysis.getHeapGraph();
 		this.cha = this.pointerAnalysis.getClassHierarchy();
 	}
-
+	
+	public boolean race(FlexibleContext c, IMethod m1, SSAInstruction i1, IMethod m2, SSAInstruction i2) {
+		return false;
+	}
+	
+	// ------------------------------------------------------------------------------------------------
+	
+	
 	public AbstractPointerKey getLocalPointerKey(StatementWithInstructionIndex s) {
 		SSAInstruction instruction = Analysis.getInstruction(s);
 		if (instruction instanceof SSAPutInstruction) {
