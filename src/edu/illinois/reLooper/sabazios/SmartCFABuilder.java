@@ -42,7 +42,7 @@ public class SmartCFABuilder extends SSAPropagationCallGraphBuilder {
     setContextInterpreter(contextInterpreter);
     
     ZeroXInstanceKeys zik = makeInstanceKeys(cha, options, contextInterpreter, instancePolicy);
-    setContextSelector(new ArrayContextSelector(zik));
+    setContextSelector(new CS(zik, options));
     setInstanceKeys(zik);
   }
   /**

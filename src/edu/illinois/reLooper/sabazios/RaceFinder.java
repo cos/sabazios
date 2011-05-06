@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.slicer.NormalStatement;
@@ -15,9 +14,9 @@ import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSAPutInstruction;
 import com.ibm.wala.util.CancelException;
 
-import edu.illinois.reLooper.sabazios.race.Race;
-import edu.illinois.reLooper.sabazios.race.RaceOnNonStatic;
-import edu.illinois.reLooper.sabazios.race.RaceOnStatic;
+import edu.illinois.reLooper.sabazios.raceObjects.Race;
+import edu.illinois.reLooper.sabazios.raceObjects.RaceOnNonStatic;
+import edu.illinois.reLooper.sabazios.raceObjects.RaceOnStatic;
 
 public class RaceFinder {
 
@@ -29,9 +28,7 @@ public class RaceFinder {
 	}
 
 	public Set<Race> findRaces() throws CancelException {
-
 		Collection<CGNode> entrypointNodes = analysis.callGraph.getEntrypointNodes();
-
 		for (CGNode cgNode : entrypointNodes) {
 			explore(cgNode);
 		}
@@ -50,9 +47,9 @@ public class RaceFinder {
 		if (node.getContext() instanceof FlexibleContext) {
 			FlexibleContext c = (FlexibleContext) node.getContext();
 
-			if (c.getItem(ArrayContextSelector.PARALLEL) != null
-					&& ((Boolean) c.getItem(ArrayContextSelector.PARALLEL))
-					&& ((Boolean) c.getItem(ArrayContextSelector.MAIN_ITERATION)) && node.getIR() != null) {
+			if (c.getItem(CS.PARALLEL) != null
+					&& ((Boolean) c.getItem(CS.PARALLEL))
+					&& ((Boolean) c.getItem(CS.MAIN_ITERATION)) && node.getIR() != null) {
 
 				IR ir = node.getIR();
 				for (SSAInstruction instruction : ir.getControlFlowGraph().getInstructions()) {
@@ -65,7 +62,7 @@ public class RaceFinder {
 
 		Iterator<CGNode> succNodeCount = analysis.callGraph.getSuccNodes(node);
 		while (succNodeCount.hasNext()) {
-			CGNode succNode = (CGNode) succNodeCount.next();
+			CGNode succNode = succNodeCount.next();
 			explore(succNode);
 		}
 	}

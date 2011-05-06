@@ -1,38 +1,26 @@
 package edu.illinois.reLooper.sabazios;
 
 import java.util.ArrayDeque;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
+
+import sabazios.util.U;
 
 import com.google.common.collect.Sets;
 import com.ibm.wala.classLoader.CallSiteReference;
-import com.ibm.wala.classLoader.IClass;
-import com.ibm.wala.classLoader.IClassLoader;
-import com.ibm.wala.classLoader.ShrikeClass;
-import com.ibm.wala.ipa.callgraph.AnalysisScope;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.slicer.NormalStatement;
-import com.ibm.wala.types.ClassLoaderReference;
-import com.ibm.wala.util.collections.Filter;
-import com.ibm.wala.util.graph.Graph;
-import com.ibm.wala.util.graph.impl.GraphInverter;
 import com.ibm.wala.util.intset.IntIterator;
-import com.ibm.wala.util.intset.IntSet;
 
-import edu.illinois.reLooper.sabazios.race.Race;
-import edu.illinois.reLooper.sabazios.race.RaceOnNonStatic;
-import edu.illinois.reLooper.sabazios.race.ShallowRace;
-import edu.illinois.reLooper.sabazios.util.NodeFinder;
+import edu.illinois.reLooper.sabazios.raceObjects.Race;
+import edu.illinois.reLooper.sabazios.raceObjects.ShallowRace;
 
 public class RaceSetTransformer {
 	private final Analysis analysis;
 
-	public RaceSetTransformer(Analysis analysis) {
-		this.analysis = analysis;
+	public RaceSetTransformer(Analysis analysis2) {
+		this.analysis = analysis2;
 	}
 
 	public Set<Race> transform(Set<Race> deepRaces) {
@@ -45,7 +33,7 @@ public class RaceSetTransformer {
 
 	private Set<Race> getShallowRaces(Race r) {
 		CGNode node = r.getStatement().getNode();
-		if (inApplicationScope(node))
+		if (U.inApplicationScope(node))
 			return Sets.newHashSet(r);
 
 		HashSet<Race> shallowRaces = new HashSet<Race>();
@@ -57,8 +45,8 @@ public class RaceSetTransformer {
 			visitedNodes.add(node);
 			Iterator<CGNode> predNodes = analysis.callGraph.getPredNodes(node);
 			while (predNodes.hasNext()) {
-				CGNode predNode = (CGNode) predNodes.next();
-				if (inApplicationScope(predNode))
+				CGNode predNode = predNodes.next();
+				if (U.inApplicationScope(predNode))
 					addRaces(predNode, node, shallowRaces, r);
 				else
 					if(!visitedNodes.contains(predNode))
@@ -82,7 +70,7 @@ public class RaceSetTransformer {
 	private void addRaces(CGNode predNode, CGNode node, HashSet<Race> shallowRaces, Race r) {
 		Iterator<CallSiteReference> possibleSites = analysis.callGraph.getPossibleSites(predNode, node);
 		while (possibleSites.hasNext()) {
-			CallSiteReference callSiteReference = (CallSiteReference) possibleSites.next();
+			CallSiteReference callSiteReference = possibleSites.next();
 			IntIterator callInstructionIndices = predNode.getIR().getCallInstructionIndices(callSiteReference)
 					.intIterator();
 			while (callInstructionIndices.hasNext()) {
@@ -91,10 +79,5 @@ public class RaceSetTransformer {
 				shallowRaces.add(sr);
 			}
 		}
-	}
-
-	private boolean inApplicationScope(CGNode node) {
-		IClassLoader classLoader = node.getMethod().getDeclaringClass().getClassLoader();
-		return classLoader.getReference().equals(ClassLoaderReference.Application);
 	}
 }

@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.jar.JarFile;
 
+import sabazios.tests.DataRaceAnalysisTest;
+
 import com.ibm.wala.classLoader.BinaryDirectoryTreeModule;
 import com.ibm.wala.classLoader.Module;
 import com.ibm.wala.ipa.callgraph.AnalysisCache;
@@ -34,8 +36,12 @@ import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.config.FileOfClasses;
 import com.ibm.wala.util.io.FileProvider;
 
+import edu.illinois.reLooper.sabazios.log.Log;
+
 public class WalaAnalysis {
 
+	
+	public final static String MAIN_METHOD = "main([Ljava/lang/String;)V";
 	protected Entrypoint entrypoint;
 	protected PointerAnalysis pointerAnalysis;
 	protected CallGraph callGraph;
@@ -81,7 +87,7 @@ public class WalaAnalysis {
 		this.entryMethod = entryMethod;
 		AnalysisScope scope = getAnalysisScope();
 		scope.setExclusions(FileOfClasses.createFileOfClasses(new File("walaExclusions.txt")));
-
+		
 		IClassHierarchy cha = ClassHierarchy.make(scope);
 
 		Set<Entrypoint> entrypoints = new HashSet<Entrypoint>();
@@ -89,14 +95,14 @@ public class WalaAnalysis {
 				TypeName.string2TypeName(entryClass));
 		MethodReference methodReference = MethodReference.findOrCreate(typeReference,
 				entryMethod.substring(0, entryMethod.indexOf('(')), entryMethod.substring(entryMethod.indexOf('(')));
-
+		
 		entrypoint = new DefaultEntrypoint(methodReference, cha);
 		entrypoints.add(entrypoint);
-
+		
 		AnalysisOptions options = new AnalysisOptions(scope, entrypoints);
 		AnalysisCache cache = new AnalysisCache();
 		builder = makeCFABuilder(options, cache, cha, scope);
-
+		
 		callGraph = builder.makeCallGraph(options);
 		pointerAnalysis = builder.getPointerAnalysis();
 	}

@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 import com.ibm.wala.util.collections.Filter;
@@ -83,7 +82,8 @@ public class NodeFinder<T> {
       throw new IllegalArgumentException("src is not in graph " + src);
     }
     this.filter = new Filter<T>() {
-      public boolean accepts(T o) {
+      @Override
+	public boolean accepts(T o) {
         return target.equals(o);
       }
     };
@@ -107,7 +107,8 @@ public class NodeFinder<T> {
     this.roots = new NonNullSingletonIterator<T>(src);
 
     this.filter = new Filter<T>() {
-      public boolean accepts(T o) {
+      @Override
+	public boolean accepts(T o) {
         return ts.contains(o);
       }
     };
@@ -128,7 +129,8 @@ public class NodeFinder<T> {
     this.G = G;
     this.roots = sources;
     this.filter = new Filter<T>() {
-      public boolean accepts(T o) {
+      @Override
+	public boolean accepts(T o) {
         return target.equals(o);
       }
     };

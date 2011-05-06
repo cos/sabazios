@@ -1,11 +1,8 @@
 java\/awt\/.*
-javax\/swing\/.*
-sun\/awt\/.*
-sun\/swing\/.*
+javax\/.* 
 com\/sun\/.*
+com\/apple\/.*
 sun\/.*
 apple\/.*
-javax\/.*
-com\/apple\/.* 
 org\/eclipse\/.*
 apache\/.*

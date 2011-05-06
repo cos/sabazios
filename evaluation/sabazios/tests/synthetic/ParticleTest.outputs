@@ -1,0 +1,7 @@
+|verySimpleRace
+Loop: (synthetic/Particle.java:64)
+   Object : (synthetic/Particle.java:62) new Particle
+      Write accesses:
+        Write (synthetic/Particle.java:67) - .x
+      Other accesses:
+        Write (synthetic/Particle.java:67) - .x

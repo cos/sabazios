@@ -104,7 +104,7 @@ public class Analysis {
 			if (instanceKeys == null)
 				continue;
 			while (instanceKeys.hasNext()) {
-				Object object = (Object) instanceKeys.next();
+				Object object = instanceKeys.next();
 				if (object.equals(instanceKey))
 					return true;
 			}
@@ -134,10 +134,10 @@ public class Analysis {
 	}
 
 	public InstanceKey traceBackToShared(CGNode node, int ref) {
-		if (node.getContext().equals(Everywhere.EVERYWHERE))
+		if (!(node.getContext() instanceof FlexibleContext))
 			return null;
 		final FlexibleContext currentContext = (FlexibleContext) node.getContext();
-		if (currentContext.get(ArrayContextSelector.PARALLEL) == null)
+		if (currentContext.get(CS.PARALLEL) == null)
 			return null;
 
 		// the local pointer key the statement writes to
@@ -147,18 +147,18 @@ public class Analysis {
 		// the actual instance keys for this pointer key
 		Iterator<Object> instanceKeys = this.heapGraph.getSuccNodes(localPointerKey);
 
-		final Set<InstanceKey> currentElement;
-		Integer elementValue = (Integer) currentContext.getItem(ArrayContextSelector.ELEMENT_VALUE);
-		CGNode elementNode = (CGNode) currentContext.getItem(ArrayContextSelector.NODE);
+//		final Set<InstanceKey> currentElement;
+//		Integer elementValue = (Integer) currentContext.getItem(CS.ELEMENT_VALUE);
+//		CGNode elementNode = (CGNode) currentContext.getItem(CS.NODE);
 
-		currentElement = getInstanceKeysForLocalValue(elementNode, elementValue);
+//		currentElement = getInstanceKeysForLocalValue(elementNode, elementValue);
 
-		final Graph<Object> revertedHeap = GraphInverter.invert(this.heapGraph);
+//		final Graph<Object> revertedHeap = GraphInverter.invert(this.heapGraph);
 
 		AllocationSiteInNode sharedInstance = null;
 
 		while (instanceKeys.hasNext() && sharedInstance == null) {
-			Object object = (Object) instanceKeys.next();
+			Object object = instanceKeys.next();
 
 			if(object instanceof ConcreteTypeKey)
 				continue;
@@ -186,7 +186,7 @@ public class Analysis {
 		Iterator<Object> succNodes = heapGraph.getSuccNodes(callDefKey);
 		currentElement = new HashSet<InstanceKey>();
 		while (succNodes.hasNext()) {
-			Object object = (Object) succNodes.next();
+			Object object = succNodes.next();
 			currentElement.add((InstanceKey) object);
 		}
 		return currentElement;
@@ -196,8 +196,8 @@ public class Analysis {
 		AllocationSiteInNode allocationSite = (AllocationSiteInNode) iK;
 		Context instanceAllocationContext = allocationSite.getNode().getContext();
 		if (instanceAllocationContext.equals(Everywhere.EVERYWHERE)
-				|| !currentContext.equals(instanceAllocationContext, ArrayContextSelector.ARRAY)
-				|| !currentContext.equals(instanceAllocationContext, ArrayContextSelector.MAIN_ITERATION))
+				|| !currentContext.equals(instanceAllocationContext, CS.ARRAY)
+				|| !currentContext.equals(instanceAllocationContext, CS.MAIN_ITERATION))
 			return true;
 		else
 			return false;

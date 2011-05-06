@@ -3,14 +3,15 @@ package synthetic;
 import java.util.HashSet;
 import extra166y.Ops;
 import extra166y.ParallelArray;
+import extra166y.Ops.*;
 
 public class Particle {
-	double x, y;
-	Particle origin;
-	Particle origin1;
+	public double x, y, m;
+	Particle origin, origin1;
 
 	public void moveTo(double x, double y) {
-		this.x = x; this.y = y;
+		this.x = x;
+		this.y = y;
 	}
 
 	public void vacuouslyNoRace() {
@@ -317,7 +318,7 @@ public class Particle {
 			}
 		});
 	}
-	
+
 	public void noRaceIfFlowSensitive() {
 		final ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
 				ParallelArray.defaultExecutor());
@@ -328,25 +329,25 @@ public class Particle {
 				return new Particle();
 			}
 		});
-		
+
 		particles.apply(new Ops.Procedure<Particle>() {
 			@Override
 			public void op(Particle p) {
 				p.x = 10;
 			}
 		});
-		
+
 		final Particle s = new Particle();
 
 		particles.replaceWithGeneratedValueSeq(new Ops.Generator<Particle>() {
 			@Override
-			public Particle op() {				
+			public Particle op() {
 				return s;
 			}
 		});
 
 	}
-	
+
 	public void raceOnDifferntArrayIterationOneLoop() {
 		final ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
 				ParallelArray.defaultExecutor());
@@ -357,9 +358,9 @@ public class Particle {
 				return new Particle();
 			}
 		});
-		
+
 		final Particle s = new Particle();
-		
+
 		particles.apply(new Ops.Procedure<Particle>() {
 			@Override
 			public void op(Particle p) {
@@ -369,7 +370,7 @@ public class Particle {
 			}
 		});
 	}
-	
+
 	public void verySimpleRaceWithIndex() {
 		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
 				ParallelArray.defaultExecutor());
@@ -383,10 +384,11 @@ public class Particle {
 				return new Particle();
 			}
 		});
-	 }
-	
+	}
+
 	final static Particle staticShared = new Particle();
-	
+	protected static double df = 1.2;
+
 	public void verySimpleRaceToStatic() {
 		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
 				ParallelArray.defaultExecutor());
@@ -398,8 +400,8 @@ public class Particle {
 				return new Particle();
 			}
 		});
-	 }
-	
+	}
+
 	public void raceOnSharedFromStatic() {
 		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
 				ParallelArray.defaultExecutor());
@@ -412,28 +414,29 @@ public class Particle {
 				return new Particle();
 			}
 		});
-	 }
-	
+	}
+
 	public void raceInLibrary() {
 		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
 				ParallelArray.defaultExecutor());
 
 		final HashSet<Particle> sharedSet = new HashSet<Particle>();
-		
+
 		particles.replaceWithGeneratedValue(new Ops.Generator<Particle>() {
 			@Override
 			public Particle op() {
 				Particle particle = new Particle();
 				sharedSet.add(particle);
+				sharedSet.size();
 				return particle;
 			}
 		});
-	 }
-	
+	}
+
 	public void noRaceOnStringConcatenation() {
 		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
 				ParallelArray.defaultExecutor());
-		
+
 		particles.replaceWithGeneratedValue(new Ops.Generator<Particle>() {
 			@Override
 			public Particle op() {
@@ -442,15 +445,14 @@ public class Particle {
 				return p;
 			}
 		});
-	 }
-	
+	}
+
 	// should only report one race on "shared.origin = p"
 	public void noRaceOnObjectsFromTheCurrentIterationThatHaveOrWillEscape() {
 		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
 				ParallelArray.defaultExecutor());
-		
 		final Particle shared = new Particle();
-		
+
 		particles.replaceWithGeneratedValue(new Ops.Generator<Particle>() {
 			@Override
 			public Particle op() {
@@ -460,20 +462,189 @@ public class Particle {
 				return new Particle();
 			}
 		});
-	 }
-	
+	}
+
 	public void noRaceWhenPrintln() {
 		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
 				ParallelArray.defaultExecutor());
-		
-		
+
 		particles.replaceWithGeneratedValue(new Ops.Generator<Particle>() {
 			@Override
 			public Particle op() {
 				System.out.println("bla");
-				System.out.print("bla");
 				return new Particle();
 			}
 		});
-	 }
+	}
+
+	public void raceOnArray() {
+		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
+				ParallelArray.defaultExecutor());
+
+		final Particle[] shared = new Particle[1];
+
+		particles.replaceWithGeneratedValue(new Ops.Generator<Particle>() {
+			@Override
+			public Particle op() {
+				shared[0] = new Particle();
+				return new Particle();
+			}
+		});
+	}
+
+	public void raceByWriteOnSomethingInstantiatedInTheMainIteration() {
+		final ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
+				ParallelArray.defaultExecutor());
+
+		particles.replaceWithGeneratedValueSeq(new Ops.Generator<Particle>() {
+			@Override
+			public Particle op() {
+				Particle particle = new Particle();
+				particle.origin = particles.getArray()[3];
+				return particle;
+			}
+		});
+
+		final Particle s = new Particle();
+
+		particles.apply(new Ops.Procedure<Particle>() {
+			@Override
+			public void op(Particle p) {
+				p.x = 10;
+				double y = p.origin.x;
+			}
+		});
+	}
+
+	public void multipleArrays() {
+		final ParallelArray<Particle> particles1 = ParallelArray.createUsingHandoff(new Particle[10],
+				ParallelArray.defaultExecutor());
+		final ParallelArray<Particle> particles2 = ParallelArray.createUsingHandoff(new Particle[10],
+				ParallelArray.defaultExecutor());
+
+		particles1.replaceWithGeneratedValueSeq(new Ops.Generator<Particle>() {
+			@Override
+			public Particle op() {
+				return new Particle();
+			}
+		});
+
+		particles2.replaceWithGeneratedValueSeq(new Ops.Generator<Particle>() {
+			@Override
+			public Particle op() {
+				Particle particle = new Particle();
+				particle.origin = particles1.getArray()[0];
+				return particle;
+			}
+		});
+
+		particles2.apply(new Ops.Procedure<Particle>() {
+			@Override
+			public void op(Particle p) {
+				p.x = 10;
+				p.origin.y = 11;
+			}
+		});
+	}
+
+	public void multipleArrays1CFANeeded() {
+		final ParallelArray<Particle> particles1 = createArray();
+		final ParallelArray<Particle> particles2 = createArray();
+
+		particles1.replaceWithGeneratedValueSeq(new Ops.Generator<Particle>() {
+			@Override
+			public Particle op() {
+				return new Particle();
+			}
+		});
+
+		particles2.replaceWithGeneratedValueSeq(new Ops.Generator<Particle>() {
+			@Override
+			public Particle op() {
+				Particle particle = new Particle();
+				particle.origin = particles1.getArray()[0];
+				return particle;
+			}
+		});
+
+		particles2.apply(new Ops.Procedure<Particle>() {
+			@Override
+			public void op(Particle p) {
+				p.x = 10;
+				p.origin.y = 11;
+			}
+		});
+	}
+
+	private ParallelArray<Particle> createArray() {
+		return ParallelArray.createUsingHandoff(new Particle[10], ParallelArray.defaultExecutor());
+	}
+
+	protected double forceX;
+	protected double velX;
+	protected double forceY;
+	protected double velY;
+	static double deltaAcc = 1;
+	static double deltaTime = 1;
+
+	Particle c = new Particle();
+	private int noSteps;
+
+	public void example() {
+		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
+				ParallelArray.defaultExecutor());
+
+		particles.replaceWithGeneratedValue(new Generator<Particle>() {
+			public Particle op() {
+				Particle p = new Particle();
+				readParticle(p);
+				return p;
+			}
+		});
+
+		for (int i = 0; i < noSteps; i++) {
+
+			// ... compute force ...
+
+			particles.apply(new Procedure<Particle>() {
+				public void op(Particle p) {
+					p.velX += p.forceX * p.m * deltaAcc;
+					p.velY += p.forceY * p.m * deltaAcc;
+					p.x += p.velX * deltaTime;
+					p.y += p.velY * deltaTime;
+				}
+			});
+
+			particles.apply(new Procedure<Particle>() {
+				public void op(Particle p) {
+					Particle oldC = c;
+					c = new Particle();
+					c.m = oldC.m + p.m;
+					c.x = (oldC.x * oldC.m + p.x * p.m) / c.m;
+					c.y = (oldC.y * oldC.m + p.y * p.m) / c.m;
+				}
+			});
+		}
+	}
+	
+	class Computation {
+		Particle centerOfMass = new Particle();
+		
+		public Computation() {
+			Object lock = null;
+			synchronized(lock) {
+				foo();
+			}
+			foo();
+		}
+
+		private void foo() {
+			// TODO Auto-generated method stub
+			
+		}
+	}
+
+	private void readParticle(Particle p) {
+		// TODO Auto-generated method stub
+	}
 }

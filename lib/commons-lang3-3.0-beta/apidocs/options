@@ -1,0 +1,28 @@
+-classpath
+'/Users/hen/Keep/OSS/apache/commons-proper/LANG_3_0_B3/target/classes'
+-encoding
+'iso-8859-1'
+-protected
+-quiet
+-source
+'1.5'
+-sourcepath
+'/Users/hen/Keep/OSS/apache/commons-proper/LANG_3_0_B3/src/main/java'
+-author
+-bottom
+'Copyright &#169; 2001-2010 <a href="http://www.apache.org/">The Apache Software Foundation</a>. All Rights Reserved.'
+-charset
+'UTF-8'
+-d
+'/Users/hen/Keep/OSS/apache/commons-proper/LANG_3_0_B3/target/site/apidocs'
+-docencoding
+'UTF-8'
+-doctitle
+'Commons Lang 3.0-beta API'
+-link
+'http://java.sun.com/javase/6/docs/api'
+-linksource
+-use
+-version
+-windowtitle
+'Commons Lang 3.0-beta API'

@@ -1,10 +1,16 @@
 package edu.illinois.reLooper.sabazios;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
 
+import sabazios.util.U;
+
+import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.Context;
 import com.ibm.wala.ipa.callgraph.ContextItem;
 import com.ibm.wala.ipa.callgraph.ContextKey;
+import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 
 public class FlexibleContext implements Context {
 	HashMap<ContextKey, Object> items = new HashMap<ContextKey, Object>();
@@ -62,7 +68,21 @@ public class FlexibleContext implements Context {
 	
 	@Override
 	public String toString() {
-		return items.toString() + " | " + inner;
+		String s = "";
+		Set<ContextKey> keySet = items.keySet();
+		for (ContextKey contextKey : keySet) {
+			Object object = items.get(contextKey);
+			String s1;
+			if(object instanceof InstanceKey) {
+				InstanceKey i = (InstanceKey) object;
+				s1 = U.tos(i);
+			} else if(contextKey == CS.MAIN_ITERATION) 
+				s1 = ((Boolean)object) ? "[m]" : "[c]";
+			else
+				s1 = U.tos(object);
+			s+=contextKey + " => "+s1+", ";
+		}
+		return s+" | " + inner;
 	}
 	
 	public static class FlexibleContextItem implements ContextItem {

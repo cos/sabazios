@@ -1,8 +1,12 @@
 package edu.illinois.reLooper.sabazios;
 
+import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.classLoader.IClass;
+import com.ibm.wala.classLoader.IMethod;
+import com.ibm.wala.classLoader.NewSiteReference;
 import com.ibm.wala.classLoader.ShrikeBTMethod;
 import com.ibm.wala.ipa.callgraph.CGNode;
+import com.ibm.wala.ipa.callgraph.propagation.AllocationSiteInNode;
 import com.ibm.wala.ipa.slicer.NormalStatement;
 import com.ibm.wala.ipa.slicer.Statement;
 import com.ibm.wala.ipa.summaries.SummarizedMethod;
@@ -32,10 +36,14 @@ public class CodeLocation {
 		this.lineNo = lineNo;
 	}
 
+	@Override
 	public String toString() {
 		return (packageName + "." + klass).replace('/', '.') + "." + method
 				+ "(" + klass.toString().split("\\$")[0] + ".java:"
 				+ getLineNo() + ")";
+//		return 
+//		"(" +packageName+"/"+ klass.toString().split("\\$")[0] + ".java:"
+//		+ getLineNo() + ")";
 	}
 
 	public String getFullClassName() {
@@ -56,10 +64,7 @@ public class CodeLocation {
 
 			bytecodeIndex = method.getBytecodeIndex(i);
 
-			return make(cgNode, method.getLineNumber(bytecodeIndex));
-			// return
-			// declaringClass.getName().toString().substring(1).replace('/',
-			// '.')+"."+method.getName().toString()+"("+declaringClass.getName().getClassName().toString()+".java:"+lineNumber+")";
+			return make(cgNode, bytecodeIndex);
 		} catch (InvalidClassFileException e) {
 			e.printStackTrace();
 		} catch (ArrayIndexOutOfBoundsException e) {
@@ -76,13 +81,7 @@ public class CodeLocation {
 		try {
 			ShrikeBTMethod method = (ShrikeBTMethod) cgNode.getMethod();
 
-			int lineNumber = method.getLineNumber(bytecodeIndex);
-
-			IClass declaringClass = method.getDeclaringClass();
-
-			return new CodeLocation(declaringClass.getName().getPackage()
-					.toString(), declaringClass.getName().getClassName()
-					.toString(), method.getName().toString(), lineNumber);
+			return make(method, bytecodeIndex);
 
 			// return
 			// declaringClass.getName().toString().substring(1).replace('/',
@@ -94,6 +93,17 @@ public class CodeLocation {
 		} 
 		return null;
 	}
+
+	private static CodeLocation make(ShrikeBTMethod method, int bytecodeIndex) {
+		int lineNumber = method.getLineNumber(bytecodeIndex);
+
+		IClass declaringClass = method.getDeclaringClass();
+
+		return new CodeLocation(declaringClass.getName().getPackage()
+				.toString(), declaringClass.getName().getClassName()
+				.toString(), method.getName().toString(), lineNumber);
+	}
+	
 	public static CodeLocation make(Statement st) {
 		if(st.getNode().getMethod() instanceof SummarizedMethod)
 			return null;
@@ -184,4 +194,22 @@ public class CodeLocation {
 		return -1;
 	}
 
+	public static CodeLocation make(CGNode node, NewSiteReference site) {
+		return make(node, site.getProgramCounter());
+	}
+	
+	public static CodeLocation make(CGNode node, CallSiteReference site) {
+		return make(node, site.getProgramCounter());
+	}
+
+	public static CodeLocation make(AllocationSiteInNode asin) {
+		return make(asin.getNode(), asin.getSite());
+	}
+
+	public static CodeLocation make(IMethod iMethod, CallSiteReference site) {
+		if(iMethod instanceof ShrikeBTMethod)
+			return make((ShrikeBTMethod)iMethod, site.getProgramCounter());
+		else
+			return null;
+	}
 }
