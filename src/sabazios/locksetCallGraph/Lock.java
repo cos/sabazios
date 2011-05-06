@@ -8,7 +8,6 @@ import com.ibm.wala.fixpoint.IVariable;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.util.graph.impl.NodeWithNumber;
 
-import edu.illinois.reLooper.sabazios.CodeLocation;
 
 public class Lock extends NodeWithNumber implements IVariable<Lock> {
 	private static int nextHashCode = 0;

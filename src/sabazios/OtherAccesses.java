@@ -6,6 +6,7 @@ import sabazios.domains.FieldAccess;
 import sabazios.domains.ReadFieldAccess;
 import sabazios.domains.WriteFieldAccess;
 import sabazios.util.ArrayContents;
+import sabazios.util.FlexibleContext;
 import sabazios.util.U;
 
 import com.ibm.wala.classLoader.IField;
@@ -17,8 +18,6 @@ import com.ibm.wala.ssa.SSAGetInstruction;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSAPutInstruction;
 
-import edu.illinois.reLooper.sabazios.CS;
-import edu.illinois.reLooper.sabazios.FlexibleContext;
 
 public class OtherAccesses extends ObjectAccesses<FieldAccess> {
 

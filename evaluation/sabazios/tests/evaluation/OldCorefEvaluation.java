@@ -1,15 +1,11 @@
 package sabazios.tests.evaluation;
 
-import java.util.Iterator;
-
 import org.junit.Test;
 
 import sabazios.tests.DataRaceAnalysisTest;
 import sabazios.util.U;
 
 import com.ibm.wala.util.CancelException;
-
-import edu.illinois.reLooper.sabazios.raceObjects.Race;
 
 public class OldCorefEvaluation extends DataRaceAnalysisTest {
 

@@ -5,10 +5,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.TreeSet;
 
-import sabazios.domains.Loop;
 import sabazios.domains.ConcurrentAccess;
 import sabazios.domains.ConcurrentFieldAccess;
 import sabazios.domains.FieldAccess;
+import sabazios.domains.Loop;
 import sabazios.domains.WriteFieldAccess;
 import sabazios.util.U;
 
@@ -51,6 +51,7 @@ public class ConcurrentFieldAccesses extends ConcurrentAccesses {
 		reduceNonConcurrentAndSimilarLooking();
 	}
 
+	@SuppressWarnings("unused")
 	private void debugPrint(TreeSet<ConcurrentAccess> newCAS) {
 		InstanceKey o = newCAS.iterator().next().o;
 		System.out.println("-------");

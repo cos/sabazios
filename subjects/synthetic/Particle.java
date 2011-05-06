@@ -1,9 +1,11 @@
 package synthetic;
 
 import java.util.HashSet;
+
 import extra166y.Ops;
+import extra166y.Ops.Generator;
+import extra166y.Ops.Procedure;
 import extra166y.ParallelArray;
-import extra166y.Ops.*;
 
 public class Particle {
 	public double x, y, m;
@@ -442,6 +444,7 @@ public class Particle {
 			public Particle op() {
 				Particle p = new Particle();
 				String bla = "tralala" + p;
+				bla += "";
 				return p;
 			}
 		});
@@ -505,13 +508,12 @@ public class Particle {
 			}
 		});
 
-		final Particle s = new Particle();
-
 		particles.apply(new Ops.Procedure<Particle>() {
 			@Override
 			public void op(Particle p) {
 				p.x = 10;
 				double y = p.origin.x;
+				y++;
 			}
 		});
 	}

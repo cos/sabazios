@@ -1,11 +1,12 @@
 package sabazios.util;
 
+import sabazios.CS;
+
 import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.classLoader.IClassLoader;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.Context;
-import com.ibm.wala.ipa.callgraph.ContextItem;
 import com.ibm.wala.ipa.callgraph.propagation.AllocationSiteInNode;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.cfa.CallString;
@@ -13,9 +14,6 @@ import com.ibm.wala.ipa.callgraph.propagation.cfa.CallStringContext;
 import com.ibm.wala.ipa.callgraph.propagation.cfa.CallStringContextSelector;
 import com.ibm.wala.types.ClassLoaderReference;
 
-import edu.illinois.reLooper.sabazios.CS;
-import edu.illinois.reLooper.sabazios.CodeLocation;
-import edu.illinois.reLooper.sabazios.FlexibleContext;
 
 public class U {
 

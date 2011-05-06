@@ -3,8 +3,9 @@ package sabazios;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import sabazios.domains.Loop;
 import sabazios.domains.FieldAccess;
+import sabazios.domains.Loop;
+import sabazios.util.FlexibleContext;
 import sabazios.util.InstructionsGatherer;
 import sabazios.util.U;
 
@@ -12,8 +13,6 @@ import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 
-import edu.illinois.reLooper.sabazios.CS;
-import edu.illinois.reLooper.sabazios.FlexibleContext;
 
 public abstract class ObjectAccesses<T extends FieldAccess> extends InstructionsGatherer {
 	public ObjectAccesses(RaceAnalysis a) {

@@ -1,14 +1,10 @@
 package sabazios.tests.play;
 
-import java.util.Set;
-
 import org.junit.Test;
 
 import sabazios.tests.DataRaceAnalysisTest;
 
 import com.ibm.wala.util.CancelException;
-
-import edu.illinois.reLooper.sabazios.raceObjects.Race;
 
 public class LBJPOSEvaluation extends DataRaceAnalysisTest{
 
@@ -22,10 +18,8 @@ public class LBJPOSEvaluation extends DataRaceAnalysisTest{
 	
 	@Test
 	public void bla() throws CancelException {
-		Set<Race> races = findRaces("Ledu/illinois/cs/cogcomp/lbj/pos/POSTag", "main([Ljava/lang/String;)V");
+//		Set<Race> races = findRaces("Ledu/illinois/cs/cogcomp/lbj/pos/POSTag", "main([Ljava/lang/String;)V");
 		
-		System.out.println(races.size());
-		System.out.println(races.iterator().next().toDetailedString(analysis));
 	}
 
 }

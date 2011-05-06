@@ -1,12 +1,12 @@
 package sabazios.domains;
 
+import sabazios.util.CodeLocation;
 import sabazios.util.U;
 
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ssa.SSAInstruction;
 
-import edu.illinois.reLooper.sabazios.CodeLocation;
 
 public class ShallowAccess extends ObjectAccess {
 	public ShallowAccess(CGNode n, SSAInstruction i, InstanceKey o) {

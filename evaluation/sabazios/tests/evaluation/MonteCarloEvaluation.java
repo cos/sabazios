@@ -6,8 +6,6 @@ import sabazios.tests.DataRaceAnalysisTest;
 
 import com.ibm.wala.util.CancelException;
 
-import edu.illinois.reLooper.sabazios.raceObjects.Race;
-
 public class MonteCarloEvaluation extends DataRaceAnalysisTest{
 
 	public MonteCarloEvaluation() {

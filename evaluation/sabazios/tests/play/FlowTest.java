@@ -3,15 +3,13 @@ package sabazios.tests.play;
 import java.io.IOException;
 import java.util.Iterator;
 
+import sabazios.WalaAnalysis;
+
 import com.ibm.wala.analysis.pointers.HeapGraph;
-import com.ibm.wala.ipa.callgraph.CGNode;
-import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
-import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.util.CancelException;
 
-import edu.illinois.reLooper.sabazios.WalaAnalysis;
 
 public class FlowTest extends WalaAnalysis {
 	public static void main(String[] args) throws ClassHierarchyException, IllegalArgumentException, CancelException,

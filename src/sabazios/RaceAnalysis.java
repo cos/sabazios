@@ -5,13 +5,15 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
-import sabazios.domains.Loop;
 import sabazios.domains.ConcurrentAccess;
 import sabazios.domains.ConcurrentFieldAccess;
 import sabazios.domains.FieldAccess;
+import sabazios.domains.Loop;
 import sabazios.domains.ObjectAccess;
 import sabazios.domains.WriteFieldAccess;
 import sabazios.locksetCallGraph.Lock;
+import sabazios.util.CodeLocation;
+import sabazios.util.Log;
 import sabazios.util.U;
 
 import com.ibm.wala.analysis.pointers.HeapGraph;
@@ -20,14 +22,10 @@ import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
-import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.PropagationCallGraphBuilder;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.ssa.SSAInstruction;
-import com.ibm.wala.util.graph.GraphPrint;
 
-import edu.illinois.reLooper.sabazios.CodeLocation;
-import edu.illinois.reLooper.sabazios.log.Log;
 
 public class RaceAnalysis {
 
@@ -107,6 +105,7 @@ public class RaceAnalysis {
 		
 	}
 
+	@SuppressWarnings("unused")
 	private void debugPrintMethod(String regex) {
 		LocalPointerKey localPointerKey;
 		Set<CGNode> nodes = findNodes(regex);

@@ -1,5 +1,6 @@
 package sabazios.domains;
 
+import sabazios.util.CodeLocation;
 import sabazios.util.U;
 
 import com.ibm.wala.classLoader.IField;
@@ -7,7 +8,6 @@ import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ssa.SSAInstruction;
 
-import edu.illinois.reLooper.sabazios.CodeLocation;
 
 public class FieldAccess extends ObjectAccess {
 	public final IField f;

@@ -4,9 +4,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TreeSet;
 
-import sabazios.domains.Loop;
 import sabazios.domains.ConcurrentAccess;
-import sabazios.domains.ConcurrentFieldAccess;
+import sabazios.domains.Loop;
 import sabazios.util.U;
 
 public class ConcurrentAccesses {

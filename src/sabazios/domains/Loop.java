@@ -1,12 +1,12 @@
 package sabazios.domains;
 
+import sabazios.util.CodeLocation;
 import sabazios.util.U;
 
 import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 
-import edu.illinois.reLooper.sabazios.CodeLocation;
 
 public class Loop implements Comparable<Loop> {
 	public final InstanceKey array;
