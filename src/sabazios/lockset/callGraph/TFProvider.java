@@ -1,4 +1,4 @@
-package sabazios.locksetCallGraph;
+package sabazios.lockset.callGraph;
 
 import java.util.HashMap;
 import java.util.Iterator;

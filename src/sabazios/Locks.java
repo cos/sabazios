@@ -2,8 +2,8 @@ package sabazios;
 
 import java.util.HashMap;
 
-import sabazios.locksetCFG.Solver;
-import sabazios.locksetCallGraph.Lock;
+import sabazios.lockset.CFG.Solver;
+import sabazios.lockset.callGraph.Lock;
 import sabazios.util.IntSetVariable;
 
 import com.ibm.wala.classLoader.IMethod;
@@ -30,7 +30,7 @@ public class Locks {
 	}
 
 	private void inferInterProcedural() {
-		sabazios.locksetCallGraph.Solver solver = new sabazios.locksetCallGraph.Solver(this.callGraph,
+		sabazios.lockset.callGraph.Solver solver = new sabazios.lockset.callGraph.Solver(this.callGraph,
 				this.intraProceduralLocks);
 		try {
 			solver.solve(null);

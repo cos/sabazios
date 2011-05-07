@@ -1,4 +1,4 @@
-package sabazios.locksetCallGraph;
+package sabazios.lockset.callGraph;
 
 import com.ibm.wala.dataflow.graph.AbstractMeetOperator;
 import com.ibm.wala.fixpoint.IVariable;

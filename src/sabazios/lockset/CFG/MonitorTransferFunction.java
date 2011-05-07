@@ -1,4 +1,4 @@
-package sabazios.locksetCFG;
+package sabazios.lockset.CFG;
 
 import sabazios.util.IntSetVariable;
 

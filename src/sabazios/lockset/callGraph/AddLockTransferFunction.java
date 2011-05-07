@@ -1,4 +1,4 @@
-package sabazios.locksetCallGraph;
+package sabazios.lockset.callGraph;
 
 import sabazios.util.IntSetVariable;
 

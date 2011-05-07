@@ -20,63 +20,67 @@ import com.ibm.wala.ssa.SSAPutInstruction;
 
 
 public class OtherAccesses extends ObjectAccesses<FieldAccess> {
+	private static final long serialVersionUID = 6340026016860262601L;
 
 	public OtherAccesses(RaceAnalysis a) {
 		super(a);
+		oag = new ObjectAccessesGatherer(a) {
+			@Override
+			protected void visit(CGNode n, SSAInstruction i) {
+				if (i instanceof SSAGetInstruction) {
+					SSAGetInstruction pi = (SSAGetInstruction) i;
+					IField f = a.cha.resolveField(pi.getDeclaredField());
+					if(f == null)
+						return;
+					if (!pi.isStatic()) {
+						LocalPointerKey pk = a.pointerForValue.get(n, pi.getRef());
+						Iterator<Object> succNodes = a.heapGraph.getSuccNodes(pk);
+						while (succNodes.hasNext()) {
+							InstanceKey o = (InstanceKey) succNodes.next();
+							ReadFieldAccess w = new ReadFieldAccess(n, pi, o, f);
+							add(w);
+						}
+					} else {
+						ReadFieldAccess w = new ReadFieldAccess(n, pi, null, f);
+						add(w);
+					}
+				}
+
+				if (i instanceof SSAPutInstruction) {
+					SSAPutInstruction pi = (SSAPutInstruction) i;
+					IField f = a.cha.resolveField(pi.getDeclaredField());
+					if (!pi.isStatic()) {
+						LocalPointerKey pk = a.pointerForValue.get(n, pi.getRef());
+						Iterator<Object> succNodes = a.heapGraph.getSuccNodes(pk);
+						while (succNodes.hasNext()) {
+							InstanceKey o = (InstanceKey) succNodes.next();
+							WriteFieldAccess w = new WriteFieldAccess(n, pi, o, f);
+							add(w);
+						}
+					}else {
+						WriteFieldAccess w = new WriteFieldAccess(n, pi, null, f);
+						add(w);
+					}
+				}
+				
+				if(i instanceof SSAArrayStoreInstruction) {
+					SSAArrayStoreInstruction asi = (SSAArrayStoreInstruction) i;
+					LocalPointerKey pk = a.pointerForValue.get(n, asi.getArrayRef());
+					Iterator<Object> succNodes = a.heapGraph.getSuccNodes(pk);
+					IField f = ArrayContents.v();
+					while (succNodes.hasNext()) {
+						InstanceKey o = (InstanceKey) succNodes.next();
+						if (!U.isMainContext(o)) {
+							ReadFieldAccess w = new ReadFieldAccess(n, asi, o, f);
+							add(w);
+						}
+					}
+				}
+			}
+		};
 	}
 
-	@Override
-	protected void visit(CGNode n, SSAInstruction i) {
-		if (i instanceof SSAGetInstruction) {
-			SSAGetInstruction pi = (SSAGetInstruction) i;
-			IField f = a.cha.resolveField(pi.getDeclaredField());
-			if(f == null)
-				return;
-			if (!pi.isStatic()) {
-				LocalPointerKey pk = a.pointerForValue.get(n, pi.getRef());
-				Iterator<Object> succNodes = a.heapGraph.getSuccNodes(pk);
-				while (succNodes.hasNext()) {
-					InstanceKey o = (InstanceKey) succNodes.next();
-					ReadFieldAccess w = new ReadFieldAccess(n, pi, o, f);
-					this.add(w);
-				}
-			} else {
-				ReadFieldAccess w = new ReadFieldAccess(n, pi, null, f);
-				this.add(w);
-			}
-		}
-
-		if (i instanceof SSAPutInstruction) {
-			SSAPutInstruction pi = (SSAPutInstruction) i;
-			IField f = a.cha.resolveField(pi.getDeclaredField());
-			if (!pi.isStatic()) {
-				LocalPointerKey pk = a.pointerForValue.get(n, pi.getRef());
-				Iterator<Object> succNodes = a.heapGraph.getSuccNodes(pk);
-				while (succNodes.hasNext()) {
-					InstanceKey o = (InstanceKey) succNodes.next();
-					WriteFieldAccess w = new WriteFieldAccess(n, pi, o, f);
-					this.add(w);
-				}
-			}else {
-				WriteFieldAccess w = new WriteFieldAccess(n, pi, null, f);
-				this.add(w);
-			}
-		}
-		
-		if(i instanceof SSAArrayStoreInstruction) {
-			SSAArrayStoreInstruction asi = (SSAArrayStoreInstruction) i;
-			LocalPointerKey pk = a.pointerForValue.get(n, asi.getArrayRef());
-			Iterator<Object> succNodes = a.heapGraph.getSuccNodes(pk);
-			IField f = ArrayContents.v();
-			while (succNodes.hasNext()) {
-				InstanceKey o = (InstanceKey) succNodes.next();
-				if (!U.isMainContext(o)) {
-					ReadFieldAccess w = new ReadFieldAccess(n, asi, o, f);
-					this.add(w);
-				}
-			}
-		}
-	}
+	
 
 	@Override
 	protected boolean rightIteration(FlexibleContext c) {

@@ -1,4 +1,4 @@
-package synthetic;
+package sabazios.synthetic;
 
 import java.util.HashSet;
 

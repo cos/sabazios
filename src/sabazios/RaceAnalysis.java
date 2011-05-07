@@ -11,7 +11,7 @@ import sabazios.domains.FieldAccess;
 import sabazios.domains.Loop;
 import sabazios.domains.ObjectAccess;
 import sabazios.domains.WriteFieldAccess;
-import sabazios.locksetCallGraph.Lock;
+import sabazios.lockset.callGraph.Lock;
 import sabazios.util.CodeLocation;
 import sabazios.util.Log;
 import sabazios.util.U;
@@ -47,7 +47,7 @@ public class RaceAnalysis {
 		this.w = new WriteAccesses(this);
 		this.o = new OtherAccesses(this);
 		this.t = new AbstractThreads();
-		this.cfa = new ConcurrentFieldAccesses(this);
+		this.initialRaces = new ConcurrentFieldAccesses(this);
 		this.locks = new Locks(callGraph);
 	}
 
@@ -55,10 +55,10 @@ public class RaceAnalysis {
 	public WriteAccesses w;
 	public OtherAccesses o;
 	public AbstractThreads t;
-	public ConcurrentFieldAccesses cfa; // concurrent field accesses
-	public ConcurrentFieldAccesses ucfa; // unprotected concurrent field
+	public ConcurrentFieldAccesses initialRaces; // concurrent field accesses
+	public ConcurrentFieldAccesses deepRaces; // unprotected concurrent field
 											// accesses
-	public ConcurrentAccesses ca; // final list of concurrent accesses
+	public ConcurrentAccesses shallowRaces; // final list of concurrent accesses
 
 	public void compute() {
 		pointerForValue.compute();
@@ -68,12 +68,12 @@ public class RaceAnalysis {
 		Log.log("Found all relevant writes: "+w.size());
 		o.compute();
 		Log.log("Found all relevant other accesses: "+o.size());
-		cfa.compute();
+		initialRaces.compute();
 
 		System.out.println("---- Conccurent accesses ---- ");
 //		System.out.println(cfa.toString());
 		System.out.println();
-		Log.log("Concurrent instructions done. # = "+cfa.getNoPairs());
+		Log.log("Initial races. # = "+initialRaces.getNoPairs());
 
 		locks.compute();
 
@@ -90,15 +90,15 @@ public class RaceAnalysis {
 		System.out.println("---- Filtered conccurent accesses ---- ");
 //		System.out.println(ucfa.toString());
 		System.out.println();
-		Log.log("Deep races done. # = "+ucfa.getNoPairs());
+		Log.log("Deep races done. # = "+deepRaces.getNoPairs());
 
-		ca = ucfa.rippleUp();
+		shallowRaces = deepRaces.rippleUp();
 		Log.log("Rippleup up races in libraries");
 
-		ca.reduceNonConcurrentAndSimilarLooking();
+		shallowRaces.reduceNonConcurrentAndSimilarLooking();
 		System.out.println("---- Shallow conccurent accesses ---- ");
-		System.out.println(ca.toString());
-		Log.log("Deep races done. # = "+ca.getNoPairs());
+		System.out.println(shallowRaces.toString());
+		Log.log("Shallow races done. # = "+shallowRaces.getNoPairs());
 		
 		System.out.println("------- Other stuff ----------");
 		System.out.println(this.callGraph.getNumberOfNodes());
@@ -160,15 +160,11 @@ public class RaceAnalysis {
 		return nodes;
 	}
 
-	private CGNode findNode(String regex) {
-		return findNodes(regex).iterator().next();
-	}
-
 	private void filter() {
-		this.ucfa = new ConcurrentFieldAccesses(this);
-		for (Loop t : this.cfa.accesses.keySet()) {
+		this.deepRaces = new ConcurrentFieldAccesses(this);
+		for (Loop t : this.initialRaces.keySet()) {
 			TreeSet<ConcurrentAccess> newAccesses = new TreeSet<ConcurrentAccess>();
-			for (ConcurrentAccess ca : this.cfa.accesses.get(t)) {
+			for (ConcurrentAccess ca : this.initialRaces.get(t)) {
 				ConcurrentFieldAccess cfa = (ConcurrentFieldAccess) ca;
 				ConcurrentFieldAccess newCA = new ConcurrentFieldAccess(t, cfa.o, cfa.f);
 				for (ObjectAccess oa : cfa.writeAccesses) {
@@ -188,12 +184,12 @@ public class RaceAnalysis {
 					newAccesses.add(newCA);
 			}
 			if (!newAccesses.isEmpty())
-				ucfa.accesses.put(t, newAccesses);
+				deepRaces.put(t, newAccesses);
 		}
 	}
 
 	public ConcurrentAccesses getRaces() {
-		return ca;
+		return shallowRaces;
 	}
 
 	public Object traceBackToShared(CGNode predNode, int use) {

@@ -16,6 +16,7 @@ import com.ibm.wala.classLoader.IField;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 
 public class ConcurrentFieldAccesses extends ConcurrentAccesses {
+	private static final long serialVersionUID = 8609685673623357446L;
 
 	public ConcurrentFieldAccesses(RaceAnalysis a) {
 		super(a);
@@ -23,10 +24,10 @@ public class ConcurrentFieldAccesses extends ConcurrentAccesses {
 
 	public void compute() {
 
-		// add all write accesses
-		for (Loop t : a.w.accesses.keySet()) {
-			accesses.put(t, new TreeSet<ConcurrentAccess>());
-			HashMap<InstanceKey, HashSet<WriteFieldAccess>> localAccesses = a.w.accesses.get(t);
+		// add all write this
+		for (Loop t : a.w.keySet()) {
+			this.put(t, new TreeSet<ConcurrentAccess>());
+			HashMap<InstanceKey, HashSet<WriteFieldAccess>> localAccesses = a.w.get(t);
 			for (InstanceKey o : localAccesses.keySet()) {
 				HashSet<WriteFieldAccess> writes = localAccesses.get(o);
 				for (WriteFieldAccess w : writes) {
@@ -36,9 +37,9 @@ public class ConcurrentFieldAccesses extends ConcurrentAccesses {
 			}
 		}
 
-		// add all other accesses
-		for (Loop t : accesses.keySet()) {
-			HashMap<InstanceKey, HashSet<FieldAccess>> localAccesses = a.o.accesses.get(t);
+		// add all other this
+		for (Loop t : this.keySet()) {
+			HashMap<InstanceKey, HashSet<FieldAccess>> localAccesses = a.o.get(t);
 			for (InstanceKey o : localAccesses.keySet()) {
 				HashSet<FieldAccess> others = localAccesses.get(o);
 				for (FieldAccess oa : others) {
@@ -76,32 +77,32 @@ public class ConcurrentFieldAccesses extends ConcurrentAccesses {
 	}
 
 	private ConcurrentFieldAccess get(Loop t, InstanceKey o, IField f) {
-		if (!accesses.containsKey(t))
+		if (!this.containsKey(t))
 			return null;
 
-		TreeSet<ConcurrentAccess> localAccesses = accesses.get(t);
+		TreeSet<ConcurrentAccess> localAccesses = this.get(t);
 		for (ConcurrentAccess ca : localAccesses) {
 			ConcurrentFieldAccess cfa = (ConcurrentFieldAccess) ca;
 			if (cfa.f.equals(f) && ((ca.o == null && o == null) || (ca.o != null && ca.o.equals(o))))
 				return cfa;
 		}
 		ConcurrentFieldAccess ca = new ConcurrentFieldAccess(t, o, f);
-		accesses.get(t).add(ca);
+		this.get(t).add(ca);
 		return ca;
 	}
 	
 	public ConcurrentAccesses rippleUp() {
 		ConcurrentAccesses cas = new ConcurrentAccesses(a);
-		for (Loop t : accesses.keySet()) {
-			TreeSet<ConcurrentAccess> s = accesses.get(t);
+		for (Loop t : this.keySet()) {
+			TreeSet<ConcurrentAccess> s = this.get(t);
 			int i = 0;
 			for (ConcurrentAccess ca : s) {
 				ConcurrentFieldAccess cfa = (ConcurrentFieldAccess) ca;
 				System.out.println(i++);
 				ConcurrentAccess rippledUp = cfa.rippleUp(a);
-				if (!cas.accesses.containsKey(t))
-					cas.accesses.put(t, new TreeSet<ConcurrentAccess>());
-				TreeSet<ConcurrentAccess> treeSet = cas.accesses.get(t);
+				if (!cas.containsKey(t))
+					cas.put(t, new TreeSet<ConcurrentAccess>());
+				TreeSet<ConcurrentAccess> treeSet = cas.get(t);
 				if (treeSet.contains(rippledUp))
 					for (ConcurrentAccess concurrentAccess : treeSet) {
 						if (concurrentAccess.equals(rippledUp)) {
