@@ -2,7 +2,7 @@ package sabazios.lockset.CFG;
 
 import sabazios.util.IntSetVariable;
 import sabazios.util.IntSetVariableIdentity;
-import sabazios.util.IntSetVariableIntersection;
+import sabazios.util.IntSetVariableUnion;
 
 import com.ibm.wala.dataflow.graph.AbstractMeetOperator;
 import com.ibm.wala.dataflow.graph.ITransferFunctionProvider;
@@ -12,13 +12,22 @@ import com.ibm.wala.ssa.SSAMonitorInstruction;
 import com.ibm.wala.ssa.analysis.IExplodedBasicBlock;
 
 public class TFProvider implements ITransferFunctionProvider<IExplodedBasicBlock, IntSetVariable> {
+	
+	private final boolean enter;
+
+	public TFProvider(boolean enter) {
+		this.enter = enter;
+	}
 
 	@Override
 	public UnaryOperator<IntSetVariable> getNodeTransferFunction(IExplodedBasicBlock node) {
 		SSAInstruction instruction = node.getInstruction();
 		if (instruction instanceof SSAMonitorInstruction) {
 			SSAMonitorInstruction i = (SSAMonitorInstruction) instruction;
-			return MonitorTransferFunction.get(i.getRef(), i.isMonitorEnter());
+			if(i.isMonitorEnter() == enter) {
+				return MonitorTransferFunction.get(i.getRef());
+			} else
+				return IntSetVariableIdentity.instance;
 		} else {
 			return IntSetVariableIdentity.instance;
 		}
@@ -41,7 +50,7 @@ public class TFProvider implements ITransferFunctionProvider<IExplodedBasicBlock
 
 	@Override
 	public AbstractMeetOperator<IntSetVariable> getMeetOperator() {
-		return IntSetVariableIntersection.instance;
+		return IntSetVariableUnion.instance;
 	}
 
 }

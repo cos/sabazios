@@ -77,7 +77,7 @@ public class FlexibleContext implements Context {
 			} else if(contextKey == CS.MAIN_ITERATION) 
 				s1 = ((Boolean)object) ? "[m]" : "[c]";
 			else
-				s1 = U.tos(object);
+				s1 = object.toString();
 			s+=contextKey + " => "+s1+", ";
 		}
 		return s+" | " + inner;

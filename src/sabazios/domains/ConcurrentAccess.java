@@ -1,8 +1,10 @@
 package sabazios.domains;
 
 import java.util.HashSet;
+import java.util.Set;
 import java.util.TreeSet;
 
+import sabazios.Locks;
 import sabazios.util.ComparableTuple;
 import sabazios.util.U;
 
@@ -63,9 +65,11 @@ public class ConcurrentAccess implements Comparable<ConcurrentAccess> {
 		s.append(U.tos(o));
 		if(this.otherO.size() != 1)
 		{
-			s.append("\nOther objects:");
+			s.append("\n"+linePrefix+"Other objects:");
 			for (InstanceKey o : otherO) {
 				s.append("\n");
+				s.append(linePrefix);
+				s.append("  ");
 				s.append(U.tos(o));
 			}
 		}
@@ -77,22 +81,22 @@ public class ConcurrentAccess implements Comparable<ConcurrentAccess> {
 		s.append("\n");
 		s.append(linePrefix);
 		s.append("   Write accesses:");
-		for (ObjectAccess w : writeAccesses) {
+		accessesToString(writeAccesses, linePrefix, s);
+		s.append("\n");
+		s.append(linePrefix);
+		s.append("   Other accesses:");
+		accessesToString(otherAccesses, linePrefix, s);
+		return s.toString();
+	}
+
+
+	private static void accessesToString(Set<ObjectAccess>accesses, String linePrefix, StringBuffer s) {
+		for (ObjectAccess w : accesses) {
 			s.append("\n");
 			s.append(linePrefix);
 			s.append("     ");
 			s.append(w.toString(U.detailedResults));
 		}
-		s.append("\n");
-		s.append(linePrefix);
-		s.append("   Other accesses:");
-		for (ObjectAccess oa : otherAccesses) {
-			s.append("\n");
-			s.append(linePrefix);
-			s.append("     ");
-			s.append(oa.toString(U.detailedResults));
-		}
-		return s.toString();
 	}
 	
 	@Override
@@ -130,5 +134,17 @@ public class ConcurrentAccess implements Comparable<ConcurrentAccess> {
 		int w = this.writeAccesses.size();
 		int o = this.otherAccesses.size();
 		return w * o;
+	}
+
+
+	public void distributeLocks(Locks locks) {
+		distributeLocks(writeAccesses, locks);
+		distributeLocks(otherAccesses, locks);
+	}
+
+	private static void distributeLocks(TreeSet<ObjectAccess> writeAccesses2,Locks locks) {
+		for (ObjectAccess objectAccess : writeAccesses2) {
+			objectAccess.l = locks.get(objectAccess.n, objectAccess.i);
+		}
 	}
 }

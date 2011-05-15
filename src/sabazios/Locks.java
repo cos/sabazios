@@ -1,6 +1,7 @@
 package sabazios;
 
 import java.util.HashMap;
+import java.util.Iterator;
 
 import sabazios.lockset.CFG.Solver;
 import sabazios.lockset.callGraph.Lock;
@@ -13,6 +14,8 @@ import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.analysis.ExplodedControlFlowGraph;
 import com.ibm.wala.ssa.analysis.IExplodedBasicBlock;
 import com.ibm.wala.util.CancelException;
+import com.ibm.wala.util.graph.GraphPrint;
+import com.ibm.wala.util.intset.IntSetUtil;
 
 public class Locks {
 	private final CallGraph callGraph;
@@ -52,21 +55,35 @@ public class Locks {
 			if (n.getIR() == null)
 				continue;
 			ExplodedControlFlowGraph explodedCFG = ExplodedControlFlowGraph.make(n.getIR());
-			Solver solver = new Solver(explodedCFG);
+			Solver solverEnter = new Solver(explodedCFG, true);
 			try {
-				solver.solve(null);
+				solverEnter.solve(null);
+			} catch (CancelException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			Solver solverExit = new Solver(explodedCFG, false);
+			try {
+				solverExit.solve(null);
 			} catch (CancelException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			insideLocks = new HashMap<SSAInstruction, IntSetVariable>();
-			intraProceduralLocks.put(n.getMethod(), insideLocks);
 
-			for (IExplodedBasicBlock iExplodedBasicBlock : explodedCFG) {
+			for (IExplodedBasicBlock iExplodedBasicBlock : explodedCFG) {	
 				SSAInstruction i = iExplodedBasicBlock.getInstruction();
-				IntSetVariable lock = solver.getOut(iExplodedBasicBlock);
-				insideLocks.put(i, lock);
+				IntSetVariable lockEnter = solverEnter.getOut(iExplodedBasicBlock).clone();
+				IntSetVariable lockExit = solverExit.getOut(iExplodedBasicBlock);
+				lockEnter.diff(lockExit);
+//				if(n.getMethod().toString().contains("BufferedWriter, write(Ljava/lang/String;II)"))  {
+//					System.out.println(" FINAL "+iExplodedBasicBlock.getGraphNodeId()+" : "+i+"   :   "+lockEnter);
+//				}
+				if(i!=null) {
+					insideLocks.put(i, lockEnter);
+				}
 			}
+			intraProceduralLocks.put(n.getMethod(), insideLocks);
 		}
 	}
 
@@ -76,8 +93,9 @@ public class Locks {
 
 	public Lock get(CGNode n, SSAInstruction i) {
 		Lock result = (Lock) get(n).clone();
-		if (intraProceduralLocks.containsKey(n)) {
-			IntSetVariable intSetVariable = intraProceduralLocks.get(n).get(i);
+		if (intraProceduralLocks.containsKey(n.getMethod())) {
+			HashMap<SSAInstruction, IntSetVariable> hashMap = intraProceduralLocks.get(n.getMethod());
+			IntSetVariable intSetVariable = hashMap.get(i);
 			result.addNewVars(n, intSetVariable);
 		}
 		return result;

@@ -320,4 +320,17 @@ public class ParticleTest extends DataRaceAnalysisTest {
 				"      Other accesses:\n" + 
 				"        Write sabazios.synthetic.Particle$43.op(Particle.java:576) - .y\n");
 	}
+	
+	@Test
+	public void staticMethod() {
+		assertCAs("Loop: sabazios.synthetic.Particle.staticMethod(Particle.java:639)\n" + 
+				"   Object : sabazios.synthetic.Particle.<clinit>(Particle.java:391) new Particle\n" + 
+				"      Write accesses:\n" + 
+				"        Write sabazios.synthetic.Particle.thisisstatic(Particle.java:649) - .forceX\n" + 
+				"      Other accesses:\n" + 
+				"        Read sabazios.synthetic.Particle.thisisstatic(Particle.java:649) - .forceX\n" + 
+				"        Write sabazios.synthetic.Particle.thisisstatic(Particle.java:649) - .forceX\n" + 
+				"");
+	}
+	
 }

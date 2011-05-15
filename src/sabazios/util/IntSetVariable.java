@@ -1,10 +1,13 @@
 package sabazios.util;
 
+import java.util.Iterator;
+
 import com.ibm.wala.fixpoint.AbstractVariable;
+import com.ibm.wala.util.intset.IntIterator;
 import com.ibm.wala.util.intset.IntSetUtil;
 import com.ibm.wala.util.intset.MutableIntSet;
 
-public class IntSetVariable extends AbstractVariable<IntSetVariable> {
+public class IntSetVariable extends AbstractVariable<IntSetVariable> implements Iterable<Integer> {
 
 	MutableIntSet intSet = IntSetUtil.getDefaultIntSetFactory().make();
 	boolean isTop = false;
@@ -23,7 +26,7 @@ public class IntSetVariable extends AbstractVariable<IntSetVariable> {
 	@Override
 	public void copyState(IntSetVariable v) {
 		this.isTop = v.isTop;
-		intSet.copySet(v.intSet);
+		this.intSet = IntSetUtil.getDefaultIntSetFactory().makeCopy(v.intSet);
 	}
 
 	public boolean equals(Object obj) {
@@ -87,5 +90,43 @@ public class IntSetVariable extends AbstractVariable<IntSetVariable> {
 			return "TOP";
 		else
 			return intSet.toString();
+	}
+
+	public IntIterator intIterator() {
+		return intSet.intIterator();
+	}
+
+	public void diff(IntSetVariable other) {
+		IntIterator intIterator = other.intIterator();
+		while(intIterator.hasNext()) 
+			intSet.remove(intIterator.next());
+	}
+
+	@Override
+	public Iterator<Integer> iterator() {
+		return new IntSetIterator(this.intSet.intIterator());
+	}
+	
+	private final class IntSetIterator implements Iterator<Integer> {
+		private final IntIterator intIterator;
+
+		public IntSetIterator(IntIterator intIterator) {
+			this.intIterator = intIterator;
+		}
+
+		@Override
+		public boolean hasNext() {
+			return intIterator.hasNext();
+		}
+
+		@Override
+		public Integer next() {
+			return intIterator.next();
+		}
+
+		@Override
+		public void remove() {
+			throw new RuntimeException("NOT IMPLEMENTED");
+		}
 	}
 }

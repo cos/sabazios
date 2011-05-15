@@ -3,11 +3,11 @@ package sabazios.util;
 import com.ibm.wala.dataflow.graph.AbstractMeetOperator;
 import com.ibm.wala.fixpoint.IVariable;
 
-public class IntSetVariableIntersection extends AbstractMeetOperator<IntSetVariable> {
+public class IntSetVariableUnion extends AbstractMeetOperator<IntSetVariable> {
 	
-	public final static IntSetVariableIntersection instance = new IntSetVariableIntersection();
+	public final static IntSetVariableUnion instance = new IntSetVariableUnion();
 
-	private IntSetVariableIntersection() {
+	private IntSetVariableUnion() {
 	}
 	
 	@Override
@@ -22,7 +22,7 @@ public class IntSetVariableIntersection extends AbstractMeetOperator<IntSetVaria
 
 	@Override
 	public String toString() {
-		return "INTERSECTION";
+		return "UNION";
 	}
 
 	@SuppressWarnings({"rawtypes" })
@@ -36,7 +36,7 @@ public class IntSetVariableIntersection extends AbstractMeetOperator<IntSetVaria
 		}
 		IntSetVariable newV = (IntSetVariable) ((IntSetVariable)rhs[0]).clone();
 		for (IVariable v : rhs) {
-			newV.intersect((IntSetVariable)v);
+			newV.union((IntSetVariable)v);
 		}
 		if (!lhs.equals(newV)) {
 			lhs.copyState(newV);

@@ -3,8 +3,11 @@ package sabazios.util;
 import sabazios.CS;
 
 import com.ibm.wala.classLoader.CallSiteReference;
+import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IClassLoader;
 import com.ibm.wala.classLoader.IMethod;
+import com.ibm.wala.classLoader.ShrikeBTMethod;
+import com.ibm.wala.classLoader.ShrikeClass;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.Context;
 import com.ibm.wala.ipa.callgraph.propagation.AllocationSiteInNode;
@@ -104,7 +107,9 @@ public class U {
 		return classLoader.getReference().equals(ClassLoaderReference.Primordial);
 	}
 
-	public static String tos(Object object) {
-		return object.toString();
+	public static String tos(IMethod method) {
+		ShrikeBTMethod m = (ShrikeBTMethod) method;
+		
+		return CodeLocation.make(m, 0).toString();
 	}
 }

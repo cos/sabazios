@@ -80,4 +80,18 @@ public class ConcurrentAccesses extends HashMap<Loop, TreeSet<ConcurrentAccess>>
 			}
 		}
 	}
+
+	/**
+	 * This uses the Locks object to tell each method which lock protects it.
+	 * This way we don't have to query the outside Locks object each time we need to see 
+	 * which lock protects a certain access. 
+	 * @param raceAnalysis
+	 */
+	public void distributeLocks() {
+		for (TreeSet<ConcurrentAccess> cas : this.values()) {
+			for (ConcurrentAccess concurrentAccess : cas) {
+				concurrentAccess.distributeLocks(a.locks);
+			}
+		}
+	}
 }

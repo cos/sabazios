@@ -2,10 +2,13 @@ package sabazios.lockset.callGraph;
 
 import java.util.HashMap;
 
+import sabazios.util.CodeLocation;
 import sabazios.util.IntSetVariable;
+import sabazios.util.U;
 
 import com.ibm.wala.fixpoint.IVariable;
 import com.ibm.wala.ipa.callgraph.CGNode;
+import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.util.graph.impl.NodeWithNumber;
 
 
@@ -137,11 +140,16 @@ public class Lock extends NodeWithNumber implements IVariable<Lock> {
 			StringBuffer s = new StringBuffer();
 			s.append("{ ");
 			for(CGNode n: locks.keySet()) {
-				s.append(n.getMethod());
-				s.append(" -> ");
-				s.append(locks.get(n));
-				s.append(" , ");
+				IntSetVariable locValues = locks.get(n);
+				for (Integer v : locValues) {
+//					s.append(v);
+//					s.append(": ");
+					SSAInstruction def = n.getDU().getDef(v);
+					s.append(CodeLocation.make(n, def));
+					s.append(" , ");
+				}
 			}
+			s.delete(s.length()-3, s.length());
 			s.append(" }");
 			return s.toString();
 		}

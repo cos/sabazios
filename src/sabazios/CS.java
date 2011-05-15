@@ -132,17 +132,17 @@ public final class CS extends nCFAContextSelector {
 			return Everywhere.EVERYWHERE;
 
 		if (U.inApplicationScope(caller) && U.inPrimordialScope(callee) && isInterestingForUs(callee)) {
-			FlexibleContext c = new FlexibleContext(context);
-			c.putItem(RECEIVER_INSTANCE, receiver);
-			return c;
+//			FlexibleContext c = new FlexibleContext(context);
+//			c.putItem(RECEIVER_INSTANCE, receiver);
+//			System.out.println("here 1");
+//			return c;
 
-			// if (context instanceof FlexibleContext && ((FlexibleContext)
-			// context).getItem(RECEIVER_INSTANCE) != null) {
-			// FlexibleContext c = new FlexibleContext(context);
-			// c.putItem(RECEIVER_INSTANCE, receiver);
-			// return c;
-			// } else
-			// return context;
+			if (context instanceof FlexibleContext && ((FlexibleContext) context).getItem(RECEIVER_INSTANCE) != null) {
+				FlexibleContext c = new FlexibleContext(context);
+				c.putItem(RECEIVER_INSTANCE, receiver);
+				return c;
+			} else
+				return context;
 		}
 
 		if (callee.toString().contains("createUsingHandoff")) {
@@ -169,7 +169,7 @@ public final class CS extends nCFAContextSelector {
 //		if (NCFA == 0)
 //			return context;
 //		else 
-			if (caller.getContext() instanceof FlexibleContext)
+		if (caller.getContext() instanceof FlexibleContext)
 			return context;
 		else
 			return super.getCalleeTarget(caller, site, callee, receiver);

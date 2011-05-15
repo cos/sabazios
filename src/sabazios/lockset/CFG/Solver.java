@@ -17,8 +17,8 @@ public class Solver extends DataflowSolver<IExplodedBasicBlock, IntSetVariable> 
 		}
 	}
 	
-	public Solver(ExplodedControlFlowGraph flowGraph) {
-		super(new Problem(flowGraph, new TFProvider()));
+	public Solver(ExplodedControlFlowGraph flowGraph, boolean enter) {
+		super(new Problem(flowGraph, new TFProvider(enter)));
 	}
 
 	@Override

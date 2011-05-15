@@ -628,25 +628,24 @@ public class Particle {
 			});
 		}
 	}
-	
-	class Computation {
-		Particle centerOfMass = new Particle();
-		
-		public Computation() {
-			Object lock = null;
-			synchronized(lock) {
-				foo();
-			}
-			foo();
-		}
-
-		private void foo() {
-			// TODO Auto-generated method stub
-			
-		}
-	}
 
 	private void readParticle(Particle p) {
-		// TODO Auto-generated method stub
+	}
+	
+	public void staticMethod() {
+		final ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
+				ParallelArray.defaultExecutor());
+
+		particles.replaceWithGeneratedValue(new Ops.Generator<Particle>() {
+			@Override
+			public Particle op() {
+				thisisstatic();
+				return new Particle();
+			}
+		});
+	}
+
+	private synchronized static void thisisstatic() {
+		staticShared.forceX ++;
 	}
 }

@@ -55,6 +55,6 @@ public abstract class DataRaceAnalysisTest extends WalaAnalysis {
 	}
 
 	public void assertCAs(String string) {
-		Assert.assertEquals(string, this.foundCA.toString());
+		Assert.assertEquals("",string, this.foundCA.toString());
 	}
 }

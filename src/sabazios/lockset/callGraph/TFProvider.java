@@ -21,9 +21,9 @@ public class TFProvider implements ITransferFunctionProvider<CGNode, Lock> {
 	private final HashMap<IMethod, HashMap<SSAInstruction, IntSetVariable>> intraProceduralLocks;
 	private final CallGraph callGraph;
 
-	public TFProvider(CallGraph callGraph, HashMap<IMethod, HashMap<SSAInstruction, IntSetVariable>> intraProceduralLocks2) {
+	public TFProvider(CallGraph callGraph, HashMap<IMethod, HashMap<SSAInstruction, IntSetVariable>> intraProceduralLocks) {
 		this.callGraph = callGraph;
-		this.intraProceduralLocks = intraProceduralLocks2;
+		this.intraProceduralLocks = intraProceduralLocks;
 	}
 	@Override
 	public boolean hasNodeTransferFunctions() {

@@ -94,7 +94,7 @@ public class CodeLocation {
 		return null;
 	}
 
-	private static CodeLocation make(ShrikeBTMethod method, int bytecodeIndex) {
+	public static CodeLocation make(ShrikeBTMethod method, int bytecodeIndex) {
 		int lineNumber = method.getLineNumber(bytecodeIndex);
 
 		IClass declaringClass = method.getDeclaringClass();
