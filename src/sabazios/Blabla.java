@@ -21,10 +21,10 @@ import com.ibm.wala.util.intset.IntIterator;
  * @author cosminradoi
  *
  */
-public class LockIdentity {
+public class Blabla {
 	private final RaceAnalysis a;
 	
-	public LockIdentity(RaceAnalysis a) {
+	public Blabla(RaceAnalysis a) {
 		this.a = a;
 	}
 	

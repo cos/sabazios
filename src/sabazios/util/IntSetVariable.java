@@ -15,8 +15,12 @@ public class IntSetVariable extends AbstractVariable<IntSetVariable> implements 
 	public IntSetVariable() {
 	}
 
-	public IntSetVariable(boolean b) {
+	private IntSetVariable(boolean b) {
 		isTop = b;
+	}
+	
+	public static IntSetVariable newTop() {
+		return new IntSetVariable(true);
 	}
 
 	public boolean isTop() {

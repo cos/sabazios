@@ -16,6 +16,8 @@ import sabazios.util.CodeLocation;
 import sabazios.util.IntSetVariable;
 import sabazios.util.Log;
 import sabazios.util.U;
+import sabazios.util.wala.viz.DotUtil;
+import sabazios.util.wala.viz.PDFViewUtil;
 
 import com.ibm.wala.analysis.pointers.HeapGraph;
 import com.ibm.wala.ipa.callgraph.CGNode;
@@ -31,6 +33,7 @@ import com.ibm.wala.ssa.SSACFG;
 import com.ibm.wala.ssa.SSAGetInstruction;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.util.intset.IntIterator;
+import com.ibm.wala.util.warnings.WalaException;
 
 
 public class RaceAnalysis {
@@ -67,54 +70,92 @@ public class RaceAnalysis {
 	public ConcurrentAccesses shallowRaces; // final list of concurrent accesses
 
 	public void compute() {
+		PDFViewUtil.raceAnalysis = this;
 		
+		System.out.println("---- Compute map value -> PointerKey ------------------- ");
 		pointerForValue.compute();
 		Log.log("Function CGNode x SSAvalue -> Object precomputed");
-
+		System.out.println("-------------------------------------------------------- \n");
+		
+		
+		System.out.println("---- Reads and writes ---------------------------------- ");
 		w.compute();
 		Log.log("Found all relevant writes: "+w.size());
 		o.compute();
 		Log.log("Found all relevant other accesses: "+o.size());
-		initialRaces.compute();
-
-		System.out.println("---- Initial races ---- ");
-		System.out.println(initialRaces.toString());
-		System.out.println();
-		Log.log("Initial races. # = "+initialRaces.getNoPairs());
-
+		System.out.println("-------------------------------------------------------- \n");
+		
+		
+		System.out.println("---- Compute locks ------------------------------------- ");
 		locks.compute();
-
 		for (CGNode n : locks.locksForCGNodes.keySet()) {
 			Lock lock = locks.locksForCGNodes.get(n);
 			if (!lock.isEmpty())
 				System.out.println(n + " -- " + lock);
 		}
-
+		dotCallGraph();
+		dorIRFor(".*op().*");
 		Log.log("Computed locks");
+		System.out.println("-------------------------------------------------------- \n");
 		
+		System.out.println("---- Initial races ------------------------------------- ");
+		initialRaces.compute();
+		System.out.println(initialRaces.toString());
+		System.out.println();
+		// Distribute locks
 		initialRaces.distributeLocks();
-		
+		Log.log("Initial races. # = "+initialRaces.getNoPairs());
+		System.out.println("-------------------------------------------------------- \n");
 
+		
+		System.out.println("---- Deep races ---------------------------------------- ");
+		// Lock identity
 //		LockIdentity li = new LockIdentity(this);
 //		li.compute();
 		this.deepRaces = this.initialRaces;
-
-		System.out.println("---- Races (after very very simple filter) ---- ");
 		System.out.println(deepRaces.toString());
 		System.out.println();
 		Log.log("Deep races done. # = "+deepRaces.getNoPairs());
+		System.out.println("-------------------------------------------------------- \n");
 
+		System.out.println("---- Shallow races ------------------------------------- ");
+		// Bubble up races
 		shallowRaces = deepRaces.rippleUp();
 		Log.log("Rippleup up races in libraries");
-
 		shallowRaces.reduceNonConcurrentAndSimilarLooking();
 		System.out.println("---- Shallow races ---- ");
 		System.out.println(shallowRaces.toString());
 		Log.log("Shallow races done. # = "+shallowRaces.getNoPairs());
+		System.out.println("-------------------------------------------------------- \n");
 		
-		System.out.println("------- Other stuff ----------");
+		// Other stuff
+		System.out.println("------- Other stuff ------------------------------------ ");
 		System.out.println(this.callGraph.getNumberOfNodes());
-		
+		System.out.println("-------------------------------------------------------- \n");
+	}
+
+	private void dorIRFor(String s) {
+		for (CGNode cgNode : callGraph) {
+			if(cgNode.getMethod().toString().matches(s))
+				try {
+					System.out.println("Generated: "+"debug/irPdf"+cgNode.getGraphNodeId());
+					
+					PDFViewUtil.ghostviewIR(cha, cgNode, "debug/irPdf"+cgNode.getGraphNodeId(), "./debug/irDot"+cgNode.getGraphNodeId(), "/opt/local/bin/dot", "open");
+				} catch (WalaException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		}
+	}
+
+	private void dotCallGraph() {
+		try {
+			DotUtil.dotify(this.callGraph, new CGNodeDecorator(this), "debug/dotFile", "./debug/pdfFile", "/opt/local/bin/dot");
+			PDFViewUtil.launchPDFView("./debug/pdfFile", "open");
+		} catch (WalaException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@SuppressWarnings("unused")

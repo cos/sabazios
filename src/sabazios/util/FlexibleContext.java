@@ -70,17 +70,38 @@ public class FlexibleContext implements Context {
 		Set<ContextKey> keySet = items.keySet();
 		for (ContextKey contextKey : keySet) {
 			Object object = items.get(contextKey);
-			String s1;
 			if(object instanceof InstanceKey) {
 				InstanceKey i = (InstanceKey) object;
-				s1 = U.tos(i);
+				s+= "["+contextKey + " => " + U.tos(i) + "]";
 			} else if(contextKey == CS.MAIN_ITERATION) 
-				s1 = ((Boolean)object) ? "[m]" : "[c]";
+				s += ((Boolean)object) ? "[m]" : "[c]";
+			else if(contextKey == CS.PARALLEL) 
+				s += ((Boolean)object) ? "[P]" : "[S]";
 			else
-				s1 = object.toString();
-			s+=contextKey + " => "+s1+", ";
+				s += "["+contextKey + " => "+object.toString()+"]"; 
 		}
-		return s+" | " + inner;
+		return s + inner;
+	}
+	
+	public String toDotString() {
+		String s = "";
+		Set<ContextKey> keySet = items.keySet();
+		for (ContextKey contextKey : keySet) {
+			Object object = items.get(contextKey);
+			if(object instanceof InstanceKey) {
+				InstanceKey i = (InstanceKey) object;
+				s+= "["+contextKey + " => " + U.tos(i) + "]\\n";
+			} else if(contextKey == CS.MAIN_ITERATION) 
+				s += ((Boolean)object) ? "[main]\\n" : "[check]\\n";
+			else if(contextKey == CS.PARALLEL) 
+				s += ((Boolean)object) ? "[par]" : "[seq]\\n";
+			else
+				s += "["+contextKey + " => "+object.toString()+"]\\n"; 
+		}
+		if(inner instanceof FlexibleContext)
+			return s + ((FlexibleContext) inner).toDotString();
+		else
+			return s + inner;
 	}
 	
 	public static class FlexibleContextItem implements ContextItem {

@@ -20,6 +20,7 @@ public class Lacate {
 		});
 	}
 	
+
 	public void lockUsingSynchronizedBlock() {
 		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
 				ParallelArray.defaultExecutor());
@@ -29,14 +30,17 @@ public class Lacate {
 		particles.replaceWithGeneratedValue(new Ops.Generator<Particle>() {
 			@Override
 			public Particle op() {
-				synchronized (this) {					
+				synchronized (this) {
 					shared.x = 10;
 				}
 				return new Particle();
 			}
 		});
 	}
-	
+
+	/**
+	 * this checks whether the locks are propagated well through methods
+	 */
 	public void lockUsingSynchronizedBlockInAnotherMethod() {
 		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
 				ParallelArray.defaultExecutor());
@@ -46,7 +50,7 @@ public class Lacate {
 		particles.replaceWithGeneratedValue(new Ops.Generator<Particle>() {
 			@Override
 			public Particle op() {
-				synchronized (this) {					
+				synchronized (this) {
 					someMethod(shared);
 				}
 				return new Particle();
@@ -54,6 +58,47 @@ public class Lacate {
 
 			private void someMethod(final Particle shared) {
 				shared.x = 10;
+			}
+		});
+	}
+
+	/**
+	 * this checks whether the locks take into account the situation where the
+	 * method is called from both a synched and unsynched place
+	 */
+	public void lockFromBothSynchronizedAndUnsynchronized() {
+		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
+				ParallelArray.defaultExecutor());
+
+		final Particle shared = new Particle();
+
+		particles.replaceWithGeneratedValue(new Ops.Generator<Particle>() {
+			@Override
+			public Particle op() {
+				synchronized (this) {
+					someMethod(shared);
+				}
+				someMethod(shared);
+				return new Particle();
+			}
+
+			private void someMethod(final Particle shared) {
+				shared.x = 10;
+			}
+		});
+	}
+
+	public void synchronizedMethod() {
+		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
+				ParallelArray.defaultExecutor());
+
+		final Particle shared = new Particle();
+
+		particles.replaceWithGeneratedValue(new Ops.Generator<Particle>() {
+			@Override
+			public synchronized Particle op() {
+				shared.x = 10;
+				return new Particle();
 			}
 		});
 	}

@@ -5,12 +5,17 @@ import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.classLoader.NewSiteReference;
 import com.ibm.wala.classLoader.ShrikeBTMethod;
+import com.ibm.wala.classLoader.ShrikeCTMethod;
+import com.ibm.wala.classLoader.ShrikeClass;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.propagation.AllocationSiteInNode;
 import com.ibm.wala.ipa.slicer.NormalStatement;
 import com.ibm.wala.ipa.slicer.Statement;
 import com.ibm.wala.ipa.summaries.SummarizedMethod;
 import com.ibm.wala.shrikeCT.InvalidClassFileException;
+import com.ibm.wala.ssa.ISSABasicBlock;
+import com.ibm.wala.ssa.SSACFG;
+import com.ibm.wala.ssa.SSACFG.BasicBlock;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSAPhiInstruction;
 import com.ibm.wala.util.debug.UnimplementedError;
@@ -57,6 +62,8 @@ public class CodeLocation {
 	public static CodeLocation make(CGNode cgNode,
 			SSAInstruction instruction) {
 
+		if(instruction == null)
+			return null;
 		try {
 			int i = getSSAInstructionNo(cgNode, instruction);
 			ShrikeBTMethod method = (ShrikeBTMethod) cgNode.getMethod();
@@ -211,5 +218,19 @@ public class CodeLocation {
 			return make((ShrikeBTMethod)iMethod, site.getProgramCounter());
 		else
 			return null;
+	}
+
+	public static Object make(CGNode n) {
+		ShrikeCTMethod m = (ShrikeCTMethod) n.getMethod();
+		int lineNumber = m.getLineNumber(0)-1;
+
+		IClass declaringClass = m.getDeclaringClass();
+
+		if(lineNumber == 0)
+			return null;
+		
+		return new CodeLocation(declaringClass.getName().getPackage()
+				.toString(), declaringClass.getName().getClassName()
+				.toString(), m.getName().toString(), lineNumber);
 	}
 }

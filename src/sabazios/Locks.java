@@ -42,7 +42,7 @@ public class Locks {
 			e.printStackTrace();
 		}
 		for (CGNode n : callGraph) {
-			this.locksForCGNodes.put(n, solver.getIn(n));
+			this.locksForCGNodes.put(n, solver.getOut(n));
 		}
 	}
 

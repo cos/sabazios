@@ -3,6 +3,7 @@ package sabazios.lockset.callGraph;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import sabazios.Blabla;
 import sabazios.util.IntSetVariable;
 
 import com.ibm.wala.classLoader.CallSiteReference;
@@ -17,21 +18,36 @@ import com.ibm.wala.ssa.SSAInstruction;
 
 public class TFProvider implements ITransferFunctionProvider<CGNode, Lock> {
 
-	//	private static final UnaryOperator<Lock> lockIdentity = new IntSetIdentity<Lock>();
+	// private static final UnaryOperator<Lock> lockIdentity = new
+	// IntSetIdentity<Lock>();
 	private final HashMap<IMethod, HashMap<SSAInstruction, IntSetVariable>> intraProceduralLocks;
 	private final CallGraph callGraph;
 
-	public TFProvider(CallGraph callGraph, HashMap<IMethod, HashMap<SSAInstruction, IntSetVariable>> intraProceduralLocks) {
+	public TFProvider(CallGraph callGraph,
+			HashMap<IMethod, HashMap<SSAInstruction, IntSetVariable>> intraProceduralLocks) {
 		this.callGraph = callGraph;
 		this.intraProceduralLocks = intraProceduralLocks;
 	}
+
 	@Override
 	public boolean hasNodeTransferFunctions() {
-		return false;
+		return true;
 	}
+
 	@Override
 	public UnaryOperator<Lock> getNodeTransferFunction(CGNode node) {
-		return null;
+		if (node.getMethod().isSynchronized()) {
+			if(!node.getMethod().isStatic()) {
+				IntSetVariable var = new IntSetVariable();
+				var.add(1);
+				return new AddLockTransferFunction(node, var);				
+			} else {
+				IntSetVariable var = new IntSetVariable();
+				var.add(-1);
+				return new AddLockTransferFunction(node, var);
+			}
+		} else 
+			return LockIdentity.instance;
 	}
 
 	@Override
@@ -42,11 +58,11 @@ public class TFProvider implements ITransferFunctionProvider<CGNode, Lock> {
 	@Override
 	public UnaryOperator<Lock> getEdgeTransferFunction(CGNode src, CGNode dst) {
 		Iterator<CallSiteReference> possibleSites = callGraph.getPossibleSites(src, dst);
-		IntSetVariable var = new IntSetVariable(true);
+		IntSetVariable var = IntSetVariable.newTop();
 		while (possibleSites.hasNext()) {
 			CallSiteReference callSiteReference = possibleSites.next();
 			SSAAbstractInvokeInstruction[] calls = src.getIR().getCalls(callSiteReference);
-			for(SSAAbstractInvokeInstruction ii : calls) {
+			for (SSAAbstractInvokeInstruction ii : calls) {
 				IntSetVariable l = this.intraProceduralLocks.get(src.getMethod()).get(ii);
 				var.intersect(l);
 			}

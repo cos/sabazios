@@ -8,6 +8,7 @@ import sabazios.util.U;
 
 import com.ibm.wala.fixpoint.IVariable;
 import com.ibm.wala.ipa.callgraph.CGNode;
+import com.ibm.wala.ssa.SSACFG;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.util.graph.impl.NodeWithNumber;
 
@@ -140,16 +141,23 @@ public class Lock extends NodeWithNumber implements IVariable<Lock> {
 			StringBuffer s = new StringBuffer();
 			s.append("{ ");
 			for(CGNode n: locks.keySet()) {
+//				s.append(n);
 				IntSetVariable locValues = locks.get(n);
 				for (Integer v : locValues) {
-//					s.append(v);
-//					s.append(": ");
+					s.append(v);
+					s.append(": ");
 					SSAInstruction def = n.getDU().getDef(v);
-					s.append(CodeLocation.make(n, def));
+					if(def != null)
+						s.append(CodeLocation.make(n, def));
+					else {
+						SSACFG cfg = n.getIR().getControlFlowGraph();
+						s.append(CodeLocation.make(n));
+					}
 					s.append(" , ");
 				}
 			}
-			s.delete(s.length()-3, s.length());
+			if(s.toString().contains(" , "))
+				s.delete(s.length()-3, s.length());
 			s.append(" }");
 			return s.toString();
 		}

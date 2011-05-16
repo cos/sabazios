@@ -17,18 +17,16 @@ import com.ibm.wala.ipa.callgraph.propagation.cfa.ZeroXInstanceKeys;
 import com.ibm.wala.ipa.callgraph.propagation.cfa.nCFAContextSelector;
 import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
 
-
 public final class CS extends nCFAContextSelector {
 
 	// public static final ContextKey NODE = new
 	// FlexibleContext.NamedContextKey("NODE");
-	public static final ContextKey ELEMENT_VALUE = new FlexibleContext.NamedContextKey("ELEMENT_VALUE");
+//	public static final ContextKey ELEMENT_VALUE = new FlexibleContext.NamedContextKey("ELEMENT_VALUE");
 	public static final ContextKey MAIN_ITERATION = new FlexibleContext.NamedContextKey("MAIN_ITERATION");
 	public static final ContextKey PARALLEL = new FlexibleContext.NamedContextKey("PARALLEL");
-	public static final ContextKey ARRAY = new FlexibleContext.NamedContextKey("ARRAY");
-	public static final ContextKey OPERATOR_CALL_SITE_REFERENCE = new FlexibleContext.NamedContextKey(
-			"OPERATOR_CALL_SITE_REFERENCE");
-	public static final ContextKey OPERATOR_CALLER = new FlexibleContext.NamedContextKey("OPERATOR_CALLER");
+	public static final ContextKey ARRAY = new FlexibleContext.NamedContextKey("ARR");
+	public static final ContextKey OPERATOR_CALL_SITE_REFERENCE = new FlexibleContext.NamedContextKey("OP_CALL_SITE");
+	public static final ContextKey OPERATOR_CALLER = new FlexibleContext.NamedContextKey("OP_CALLER");
 	public static final ContextKey RECEIVER_INSTANCE = new FlexibleContext.NamedContextKey("RECEIVER_INSTANCE");
 	public static final ContextKey EXTRA_CONTEXT = new FlexibleContext.NamedContextKey("EXTRA_CONTEXT");
 	public static int NCFA = 0;
@@ -61,7 +59,7 @@ public final class CS extends nCFAContextSelector {
 			// System.out.println(calleeString);
 			FlexibleContext c = new FlexibleContext(context);
 			SSAAbstractInvokeInstruction invoke = caller.getIR().getCalls(site)[0];
-			c.putItem(ELEMENT_VALUE, invoke.getDef());
+//			c.putItem(ELEMENT_VALUE, invoke.getDef());
 			c.putItem(MAIN_ITERATION, invoke.getDef() == 5);
 			c.putItem(PARALLEL, false);
 			// System.out.println(c);
@@ -73,7 +71,7 @@ public final class CS extends nCFAContextSelector {
 			// System.out.println(calleeString);
 			FlexibleContext c = new FlexibleContext(context);
 			SSAAbstractInvokeInstruction invoke = caller.getIR().getCalls(site)[0];
-			c.putItem(ELEMENT_VALUE, invoke.getDef());
+//			c.putItem(ELEMENT_VALUE, invoke.getDef());
 			c.putItem(MAIN_ITERATION, invoke.getDef() == 5);
 			c.putItem(PARALLEL, true);
 			// System.out.println(c);
@@ -85,7 +83,7 @@ public final class CS extends nCFAContextSelector {
 			// System.out.println(calleeString);
 			FlexibleContext c = new FlexibleContext(context);
 			SSAAbstractInvokeInstruction invoke = caller.getIR().getCalls(site)[0];
-			c.putItem(ELEMENT_VALUE, invoke.getDef());
+//			c.putItem(ELEMENT_VALUE, invoke.getDef());
 			c.putItem(MAIN_ITERATION, invoke.getDef() == 6);
 			c.putItem(PARALLEL, false);
 			// System.out.println(c);
@@ -97,7 +95,7 @@ public final class CS extends nCFAContextSelector {
 			// System.out.println(calleeString);
 			FlexibleContext c = new FlexibleContext(context);
 			SSAAbstractInvokeInstruction invoke = caller.getIR().getCalls(site)[0];
-			c.putItem(ELEMENT_VALUE, invoke.getDef());
+//			c.putItem(ELEMENT_VALUE, invoke.getDef());
 			c.putItem(MAIN_ITERATION, invoke.getDef() == 6);
 			c.putItem(PARALLEL, true);
 			// System.out.println(c);
@@ -109,7 +107,7 @@ public final class CS extends nCFAContextSelector {
 			// System.out.println(calleeString);
 			FlexibleContext c = new FlexibleContext(context);
 			SSAAbstractInvokeInstruction invoke = caller.getIR().getCalls(site)[0];
-			c.putItem(ELEMENT_VALUE, invoke.getUse(1));
+//			c.putItem(ELEMENT_VALUE, invoke.getUse(1));
 			c.putItem(MAIN_ITERATION, invoke.getUse(1) == 4);
 			c.putItem(PARALLEL, false);
 			System.out.println(c);
@@ -120,7 +118,7 @@ public final class CS extends nCFAContextSelector {
 			System.out.println(calleeString);
 			FlexibleContext c = new FlexibleContext(context);
 			SSAAbstractInvokeInstruction invoke = caller.getIR().getCalls(site)[0];
-			c.putItem(ELEMENT_VALUE, invoke.getUse(1));
+//			c.putItem(ELEMENT_VALUE, invoke.getUse(1));
 			c.putItem(MAIN_ITERATION, invoke.getUse(1) == 4);
 			c.putItem(PARALLEL, true);
 			System.out.println(c);
@@ -132,10 +130,10 @@ public final class CS extends nCFAContextSelector {
 			return Everywhere.EVERYWHERE;
 
 		if (U.inApplicationScope(caller) && U.inPrimordialScope(callee) && isInterestingForUs(callee)) {
-//			FlexibleContext c = new FlexibleContext(context);
-//			c.putItem(RECEIVER_INSTANCE, receiver);
-//			System.out.println("here 1");
-//			return c;
+			// FlexibleContext c = new FlexibleContext(context);
+			// c.putItem(RECEIVER_INSTANCE, receiver);
+			// System.out.println("here 1");
+			// return c;
 
 			if (context instanceof FlexibleContext && ((FlexibleContext) context).getItem(RECEIVER_INSTANCE) != null) {
 				FlexibleContext c = new FlexibleContext(context);
@@ -166,9 +164,9 @@ public final class CS extends nCFAContextSelector {
 		// } else
 		// return context;
 
-//		if (NCFA == 0)
-//			return context;
-//		else 
+		// if (NCFA == 0)
+		// return context;
+		// else
 		if (caller.getContext() instanceof FlexibleContext)
 			return context;
 		else
