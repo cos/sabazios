@@ -32,51 +32,72 @@ public class LockTest extends DataRaceAnalysisTest {
 
 	@Test
 	public void noLocks() {
-		assertCAs("Loop: sabazios.synthetic.Lacate.noLocks(Lacate.java:14)\n" + 
-				"   Object : sabazios.synthetic.Lacate.noLocks(Lacate.java:12) new Particle\n" + 
+		assertCAs("Loop: sabazios.synthetic.Lacate.noLocks(Lacate.java:25)\n" + 
+				"   Object : sabazios.synthetic.Lacate.noLocks(Lacate.java:23) new Particle\n" + 
 				"      Write accesses:\n" + 
-				"        Write sabazios.synthetic.Lacate$1.op(Lacate.java:17) - .x\n" + 
+				"        Write sabazios.synthetic.Lacate$1.op(Lacate.java:28) - .x\n" + 
 				"      Other accesses:\n" + 
-				"        Write sabazios.synthetic.Lacate$1.op(Lacate.java:17) - .x\n");
+				"        Write sabazios.synthetic.Lacate$1.op(Lacate.java:28) - .x\n");
 	}
 	
 	@Test
 	public void lockUsingSynchronizedBlock() {
-		assertCAs("Loop: sabazios.synthetic.Lacate.lockUsingSynchronizedBlock(Lacate.java:29)\n" + 
-				"   Object : sabazios.synthetic.Lacate.lockUsingSynchronizedBlock(Lacate.java:27) new Particle\n" + 
+		assertCAs("Loop: sabazios.synthetic.Lacate.lockUsingSynchronizedBlock(Lacate.java:40)\n" + 
+				"   Object : sabazios.synthetic.Lacate.lockUsingSynchronizedBlock(Lacate.java:38) new Particle\n" + 
 				"      Write accesses:\n" + 
-				"        Write sabazios.synthetic.Lacate$2.op(Lacate.java:33) - .x { 1: sabazios.synthetic.Lacate$2.op(Lacate.java:31) }\n" + 
+				"        Write sabazios.synthetic.Lacate$2.op(Lacate.java:44) - .x { 1: sabazios.synthetic.Lacate$2.op(Lacate.java:43) }\n" + 
 				"      Other accesses:\n" + 
-				"        Write sabazios.synthetic.Lacate$2.op(Lacate.java:33) - .x { 1: sabazios.synthetic.Lacate$2.op(Lacate.java:31) }\n");
+				"        Write sabazios.synthetic.Lacate$2.op(Lacate.java:44) - .x { 1: sabazios.synthetic.Lacate$2.op(Lacate.java:43) }\n");
 	}
 	
 	@Test
 	public void lockUsingSynchronizedBlockInAnotherMethod() {
-		assertCAs("Loop: sabazios.synthetic.Lacate.lockUsingSynchronizedBlockInAnotherMethod(Lacate.java:49)\n" + 
-				"   Object : sabazios.synthetic.Lacate.lockUsingSynchronizedBlockInAnotherMethod(Lacate.java:47) new Particle\n" + 
+		assertCAs("Loop: sabazios.synthetic.Lacate.lockUsingSynchronizedBlockInAnotherMethod(Lacate.java:60)\n" + 
+				"   Object : sabazios.synthetic.Lacate.lockUsingSynchronizedBlockInAnotherMethod(Lacate.java:58) new Particle\n" + 
 				"      Write accesses:\n" + 
-				"        Write sabazios.synthetic.Lacate$3.someMethod(Lacate.java:59) - .x { sabazios.synthetic.Lacate$3.op(Lacate.java:52) }\n" + 
+				"        Write sabazios.synthetic.Lacate$3.someMethod(Lacate.java:70) - .x { 1: sabazios.synthetic.Lacate$3.op(Lacate.java:63) }\n" + 
 				"      Other accesses:\n" + 
-				"        Write sabazios.synthetic.Lacate$3.someMethod(Lacate.java:59) - .x { sabazios.synthetic.Lacate$3.op(Lacate.java:52) }\n");
+				"        Write sabazios.synthetic.Lacate$3.someMethod(Lacate.java:70) - .x { 1: sabazios.synthetic.Lacate$3.op(Lacate.java:63) }\n");
 	}
 	
 	@Test
 	public void lockFromBothSynchronizedAndUnsynchronized() {
-		assertCAs("Loop: sabazios.synthetic.Lacate.lockFromBothSynchronizedAndUnsynchronized(Lacate.java:73)\n" + 
-				"   Object : sabazios.synthetic.Lacate.lockFromBothSynchronizedAndUnsynchronized(Lacate.java:71) new Particle\n" + 
+		assertCAs("Loop: sabazios.synthetic.Lacate.lockFromBothSynchronizedAndUnsynchronized(Lacate.java:85)\n" + 
+				"   Object : sabazios.synthetic.Lacate.lockFromBothSynchronizedAndUnsynchronized(Lacate.java:83) new Particle\n" + 
 				"      Write accesses:\n" + 
-				"        Write sabazios.synthetic.Lacate$4.someMethod(Lacate.java:84) - .x\n" + 
+				"        Write sabazios.synthetic.Lacate$4.someMethod(Lacate.java:96) - .x\n" + 
 				"      Other accesses:\n" + 
-				"        Write sabazios.synthetic.Lacate$4.someMethod(Lacate.java:84) - .x\n");
+				"        Write sabazios.synthetic.Lacate$4.someMethod(Lacate.java:96) - .x\n");
 	}
 	
 	@Test
 	public void synchronizedMethod() {
-		assertCAs("Loop: sabazios.synthetic.Lacate.synchronizedMethod(Lacate.java:96)\n" + 
-				"   Object : sabazios.synthetic.Lacate.synchronizedMethod(Lacate.java:94) new Particle\n" + 
+		assertCAs("Loop: sabazios.synthetic.Lacate.synchronizedMethod(Lacate.java:107)\n" + 
+				"   Object : sabazios.synthetic.Lacate.synchronizedMethod(Lacate.java:105) new Particle\n" + 
 				"      Write accesses:\n" + 
-				"        Write sabazios.synthetic.Lacate$5.op(Lacate.java:99) - .x { 1: sabazios.synthetic.Lacate$5.op(Lacate.java:98) , 1: null }\n" + 
+				"        Write sabazios.synthetic.Lacate$5.op(Lacate.java:110) - .x { 1: null , 1: sabazios.synthetic.Lacate$5.op(Lacate.java:109) }\n" + 
 				"      Other accesses:\n" + 
-				"        Write sabazios.synthetic.Lacate$5.op(Lacate.java:99) - .x { 1: null , 1: sabazios.synthetic.Lacate$5.op(Lacate.java:98) }\n");
+				"        Write sabazios.synthetic.Lacate$5.op(Lacate.java:110) - .x { 1: null , 1: sabazios.synthetic.Lacate$5.op(Lacate.java:109) }\n");
+	}
+	
+	@Test
+	public void synchronizedStaticMethod() {
+		assertCAs("Loop: sabazios.synthetic.Lacate.synchronizedStaticMethod(Lacate.java:122)\n" + 
+				"   Object : sabazios.synthetic.Lacate.synchronizedStaticMethod(Lacate.java:120) new Particle\n" + 
+				"      Write accesses:\n" + 
+				"        Write sabazios.synthetic.Lacate.raceBabyRace(Lacate.java:132) - .x { S : Lsabazios/synthetic/Lacate }\n" + 
+				"      Other accesses:\n" + 
+				"        Write sabazios.synthetic.Lacate.raceBabyRace(Lacate.java:132) - .x { S : Lsabazios/synthetic/Lacate }\n");
+	}
+	
+	@Ignore
+	@Test
+	public void reenterantLock() {
+		assertCAs("");
+	}
+	
+	
+	public void templateMethod() {
+		assertCAs("");
 	}
 }

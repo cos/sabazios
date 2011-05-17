@@ -93,8 +93,8 @@ public class RaceAnalysis {
 			if (!lock.isEmpty())
 				System.out.println(n + " -- " + lock);
 		}
-		dotCallGraph();
-		dorIRFor(".*op().*");
+//		dotCallGraph();
+//		dotIRFor(".*op().*");
 		Log.log("Computed locks");
 		System.out.println("-------------------------------------------------------- \n");
 		
@@ -134,7 +134,7 @@ public class RaceAnalysis {
 		System.out.println("-------------------------------------------------------- \n");
 	}
 
-	private void dorIRFor(String s) {
+	private void dotIRFor(String s) {
 		for (CGNode cgNode : callGraph) {
 			if(cgNode.getMethod().toString().matches(s))
 				try {

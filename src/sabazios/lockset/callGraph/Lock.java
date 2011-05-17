@@ -1,6 +1,8 @@
 package sabazios.lockset.callGraph;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Set;
 
 import sabazios.util.CodeLocation;
 import sabazios.util.IntSetVariable;
@@ -10,25 +12,26 @@ import com.ibm.wala.fixpoint.IVariable;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ssa.SSACFG;
 import com.ibm.wala.ssa.SSAInstruction;
+import com.ibm.wala.ssa.SSAMonitorInstruction;
+import com.ibm.wala.util.collections.ArraySet;
 import com.ibm.wala.util.graph.impl.NodeWithNumber;
-
 
 public class Lock extends NodeWithNumber implements IVariable<Lock> {
 	private static int nextHashCode = 0;
-	private HashMap<CGNode, IntSetVariable> locks = null;
+	private LinkedHashMap<CGNode, IntSetVariable> locks = null;
 	private int orderNumber;
 	private final int hashCode;
 
 	public Lock(boolean top) {
 		hashCode = nextHash();
 		if (!top)
-			locks = new HashMap<CGNode, IntSetVariable>();
+			locks = new LinkedHashMap<CGNode, IntSetVariable>();
 	}
-	
+
 	public boolean containsNode(CGNode n) {
 		return locks.containsKey(n);
 	}
-	
+
 	public IntSetVariable get(CGNode n) {
 		return locks.get(n);
 	}
@@ -46,7 +49,7 @@ public class Lock extends NodeWithNumber implements IVariable<Lock> {
 		if (v.isTop())
 			this.locks = null;
 		else {
-			this.locks = new HashMap<CGNode, IntSetVariable>();
+			this.locks = new LinkedHashMap<CGNode, IntSetVariable>();
 			for (CGNode n : v.locks.keySet())
 				this.locks.put(n, v.locks.get(n));
 		}
@@ -77,7 +80,7 @@ public class Lock extends NodeWithNumber implements IVariable<Lock> {
 		if (other.isTop())
 			return;
 
-		HashMap<CGNode, IntSetVariable> newLocks = new HashMap<CGNode, IntSetVariable>();
+		LinkedHashMap<CGNode, IntSetVariable> newLocks = new LinkedHashMap<CGNode, IntSetVariable>();
 		for (CGNode n : this.locks.keySet())
 			if (other.locks.keySet().contains(n)) {
 				this.locks.get(n).intersect(other.locks.get(n));
@@ -115,51 +118,82 @@ public class Lock extends NodeWithNumber implements IVariable<Lock> {
 	public static synchronized int nextHash() {
 		return nextHashCode++;
 	}
-	
+
 	public void addNewVars(CGNode src, IntSetVariable var) {
-		if(var.isEmpty())
+		if (var.isEmpty())
 			return;
 		// handle the case the method is part of a recursion
 		IntSetVariable selfLock = this.locks.get(src);
-		if(selfLock != null)
+		if (selfLock != null)
 			selfLock.union(var);
 		else
 			this.locks.put(src, var);
 	}
 
 	public boolean isEmpty() {
-		if(isTop())
+		if (isTop())
 			return false;
 		return locks.isEmpty();
 	}
-	
+
 	@Override
 	public String toString() {
-		if(isTop())
+		if (isTop())
 			return "TOP";
 		else {
 			StringBuffer s = new StringBuffer();
 			s.append("{ ");
-			for(CGNode n: locks.keySet()) {
-//				s.append(n);
+			for (CGNode n : locks.keySet()) {
+				// s.append(n);
 				IntSetVariable locValues = locks.get(n);
 				for (Integer v : locValues) {
-					s.append(v);
-					s.append(": ");
-					SSAInstruction def = n.getDU().getDef(v);
-					if(def != null)
-						s.append(CodeLocation.make(n, def));
-					else {
-						SSACFG cfg = n.getIR().getControlFlowGraph();
-						s.append(CodeLocation.make(n));
+					if (v == -1) {
+						s.append("S : ");
+						s.append(n.getMethod().getDeclaringClass().getName());
+					} else {
+
+						s.append(v);
+						s.append(": ");
+						Set<SSAMonitorInstruction> monitorAquires = getMonitorAquires(n, v);
+
+						if (monitorAquires.size() == 0)
+							if (v == 1)
+								s.append(CodeLocation.make(n));
+							else
+								throw new RuntimeException("ups...");
+						if (monitorAquires.size() == 1)
+							s.append(CodeLocation.make(n, monitorAquires.iterator().next()));
+						if (monitorAquires.size() > 1) {
+							s.append("MultipleLockEnters{");
+							for (SSAMonitorInstruction ssaMonitorInstruction : monitorAquires) {
+								s.append(CodeLocation.make(n, ssaMonitorInstruction));
+								s.append(",");
+							}
+							s.delete(s.length() - 1, s.length());
+							s.append("}");
+						}
+						s.append(" , ");
 					}
-					s.append(" , ");
 				}
 			}
-			if(s.toString().contains(" , "))
-				s.delete(s.length()-3, s.length());
+			if (s.toString().contains(" , "))
+				s.delete(s.length() - 3, s.length());
 			s.append(" }");
 			return s.toString();
 		}
+	}
+
+	private Set<SSAMonitorInstruction> getMonitorAquires(CGNode n, Integer v) {
+		ArraySet<SSAMonitorInstruction> ms = new ArraySet<SSAMonitorInstruction>();
+
+		SSAInstruction[] instructions = n.getIR().getInstructions();
+		for (SSAInstruction i : instructions) {
+			if (i instanceof SSAMonitorInstruction) {
+				SSAMonitorInstruction mi = (SSAMonitorInstruction) i;
+				if (mi.isMonitorEnter() && mi.getRef() == v)
+					ms.add(mi);
+			}
+		}
+		return ms;
 	}
 }
