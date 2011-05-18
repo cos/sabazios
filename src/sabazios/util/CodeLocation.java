@@ -150,22 +150,22 @@ public class CodeLocation {
 		return codeLocationString;
 	}
 
-	public static String variableName(Integer destValue, CGNode cgNode,
+	public static String variableName(Integer v, CGNode cgNode,
 			SSAInstruction instruction) {
 		if(instruction instanceof SSAPhiInstruction)
 			return null;
 		
 		int ssaInstructionNo = CodeLocation.getSSAInstructionNo(cgNode,
 				instruction);
-		return variableName(destValue, cgNode, ssaInstructionNo);
+		return variableName(v, cgNode, ssaInstructionNo);
 	}
 
-	public static String variableName(Integer destValue, CGNode cgNode,
+	public static String variableName(Integer v, CGNode cgNode,
 			int ssaInstructionNo) {
 		String[] localNames;
 		try {
 			localNames = cgNode.getIR().getLocalNames(ssaInstructionNo,
-					destValue);
+					v);
 		} catch (Exception e) {
 			localNames = null;
 		} catch (UnimplementedError e) {

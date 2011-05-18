@@ -33,6 +33,11 @@ public class Tuple<Head, Tail>  {
 		public T2 p2() {
 			return tail;
 		}
+		
+		@Override
+		protected Object clone() throws CloneNotSupportedException {
+			return new Pair<T1, T2>(head, tail);
+		}
 	}
 
 	public static class Triple<T1, T2 , T3 > extends Tuple<T1, Tuple<T2, T3>> {
@@ -72,7 +77,7 @@ public class Tuple<Head, Tail>  {
 		if(tail instanceof Tuple)
 			s += ((Tuple<?, ?>) tail).nakedString();
 		else
-			s += tail.toString();
+			s += tail;
 		return s;
 	}
 

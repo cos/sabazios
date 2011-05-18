@@ -16,20 +16,27 @@ import extra166y.ParallelArray;
 
 public class Incuiate {
 
+	static Particle staticParticle = new Particle();
+	
 	public void simple() {
-		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
-				ParallelArray.defaultExecutor());
-
-		final Particle shared = new Particle();
-
-		particles.replaceWithGeneratedValue(new Ops.Generator<Particle>() {
-			@Override
-			public Particle op() {
-				synchronized (this) {
-					shared.x = 10;					
-				}
-				return new Particle();
-			}
-		});
+		Particle p = new Particle();
+		p.origin = new Particle();
+		Particle y = p.origin;
+		y.origin = Incuiate.staticParticle;
+		
+//		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
+//				ParallelArray.defaultExecutor());
+//
+//		final Particle shared = new Particle();
+//
+//		particles.replaceWithGeneratedValue(new Ops.Generator<Particle>() {
+//			@Override
+//			public Particle op() {
+//				synchronized (this) {
+//					shared.x = 10;					
+//				}
+//				return new Particle();
+//			}
+//		});
 	}
 }
