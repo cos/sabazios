@@ -20,6 +20,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 
+import sabazios.util.U;
+
 import com.ibm.wala.util.collections.Iterator2Collection;
 import com.ibm.wala.util.debug.Assertions;
 import com.ibm.wala.util.graph.Graph;
@@ -72,7 +74,7 @@ public class DotUtil {
 	/**
 	 * Some versions of dot appear to croak on long labels. Reduce this if so.
 	 */
-	private final static int MAX_LABEL_LENGTH = Integer.MAX_VALUE;
+	private final static int MAX_LABEL_LENGTH = 30;
 
 	/**
    */
@@ -228,7 +230,7 @@ public class DotUtil {
 						result.append(" -> ");
 						result.append(getPort(s, labels));
 						result.append("[label=\"");
-						result.append(l);
+						result.append(U.tos(l));
 						result.append("\"]");
 					}
 					result.append(" \n");
@@ -300,7 +302,7 @@ public class DotUtil {
 	}
 
 	private static String getPort(Object o, NodeDecorator d) throws WalaException {
-		return "\"" + getLabel(o, d) + "\"";
+		return "\"" + getLabel(U.tos(o), d) + "\"";
 
 	}
 

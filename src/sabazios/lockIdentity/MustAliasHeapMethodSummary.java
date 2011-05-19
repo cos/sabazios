@@ -20,9 +20,12 @@ import com.ibm.wala.ssa.SSAGetInstruction;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSAPutInstruction;
 import com.ibm.wala.ssa.SymbolTable;
+import com.ibm.wala.types.FieldReference;
+import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.util.graph.labeled.SlowSparseNumberedLabeledGraph;
+import com.ibm.wala.util.strings.Atom;
 
-public class MustAliasHeapMethodSummary extends SlowSparseNumberedLabeledGraph<ValueNode, FieldEdge> {
+public class MustAliasHeapMethodSummary extends SlowSparseNumberedLabeledGraph<Integer, FieldReference> {
 
 	public final static LinkedHashMap<IR, MustAliasHeapMethodSummary> cached = new LinkedHashMap<IR, MustAliasHeapMethodSummary>();
 
@@ -38,7 +41,7 @@ public class MustAliasHeapMethodSummary extends SlowSparseNumberedLabeledGraph<V
 	private final IR ir;
 
 	private MustAliasHeapMethodSummary(IR ir) {
-		super(new FieldEdge(null, false));
+		super(FieldReference.findOrCreate(TypeReference.Unknown, Atom.findOrCreateAsciiAtom("unknown"), TypeReference.Unknown));
 		this.ir = ir;
 		compute();
 	}
@@ -46,14 +49,11 @@ public class MustAliasHeapMethodSummary extends SlowSparseNumberedLabeledGraph<V
 	private void compute() {
 		SSAInstruction[] instructions = ir.getInstructions();
 		SymbolTable symbolTable = ir.getSymbolTable();
-		this.addNode(new ValueNode(null, 0));
-		for (int v = 1; v <= symbolTable.getMaxValueNumber(); v++) {
-			this.addNode(new ValueNode(null, v));
-		}
+		for (int v = 0; v <= symbolTable.getMaxValueNumber(); v++) 
+			this.addNode(v);
+		
 
 		for (SSAInstruction i : instructions) {
-			if (i instanceof SSAPutInstruction)
-				addEdge((SSAPutInstruction) i);
 			if (i instanceof SSAGetInstruction)
 				addEdge((SSAGetInstruction) i);
 		}
@@ -61,13 +61,9 @@ public class MustAliasHeapMethodSummary extends SlowSparseNumberedLabeledGraph<V
 
 	private void addEdge(SSAGetInstruction i) {
 		if (!i.isStatic())
-			this.addEdge(this.getNode(i.getRef()), this.getNode(i.getDef()), new FieldEdge(i.getDeclaredField(), false));
+			this.addEdge(i.getRef(), i.getDef(), i.getDeclaredField());
 		else {
-			this.addEdge(this.getNode(0), this.getNode(i.getDef()), new FieldEdge(i.getDeclaredField(), false));
+			this.addEdge(0, i.getDef(), i.getDeclaredField());
 		}
-	}
-
-	private void addEdge(SSAPutInstruction i) {
-		this.addEdge(this.getNode(i.getRef()), this.getNode(i.getVal()), new FieldEdge(i.getDeclaredField(), true));
 	}
 }

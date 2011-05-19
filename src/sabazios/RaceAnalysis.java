@@ -5,23 +5,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.TreeSet;
 
-import sabazios.domains.ConcurrentAccess;
-import sabazios.domains.ConcurrentFieldAccess;
-import sabazios.domains.FieldAccess;
-import sabazios.domains.Loop;
-import sabazios.domains.ObjectAccess;
-import sabazios.domains.WriteFieldAccess;
-import sabazios.lockIdentity.FieldEdge;
 import sabazios.lockIdentity.InferDereferences;
-import sabazios.lockIdentity.MustAliasHeapMethodSummary;
-import sabazios.lockIdentity.ValueNode;
 import sabazios.lockset.callGraph.Lock;
-import sabazios.util.CodeLocation;
-import sabazios.util.IntSetVariable;
 import sabazios.util.Log;
-import sabazios.util.Tuple;
 import sabazios.util.Tuple.Pair;
 import sabazios.util.U;
 import sabazios.util.wala.viz.DotUtil;
@@ -31,22 +18,11 @@ import sabazios.util.wala.viz.PDFViewUtil;
 import com.ibm.wala.analysis.pointers.HeapGraph;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
-import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
-import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
 import com.ibm.wala.ipa.callgraph.propagation.PropagationCallGraphBuilder;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
-import com.ibm.wala.model.java.lang.reflect.Array;
-import com.ibm.wala.ssa.DefUse;
-import com.ibm.wala.ssa.ISSABasicBlock;
-import com.ibm.wala.ssa.SSACFG;
-import com.ibm.wala.ssa.SSAGetInstruction;
-import com.ibm.wala.ssa.SSAInstruction;
-import com.ibm.wala.util.collections.Filter;
+import com.ibm.wala.types.FieldReference;
 import com.ibm.wala.util.graph.Graph;
-import com.ibm.wala.util.graph.GraphSlicer;
-import com.ibm.wala.util.graph.GraphUtil;
-import com.ibm.wala.util.intset.IntIterator;
 import com.ibm.wala.util.warnings.WalaException;
 
 public class RaceAnalysis {
@@ -87,22 +63,22 @@ public class RaceAnalysis {
 
 		CGNode node = findNodes(".*simple.*").iterator().next();
 		InferDereferences id = new InferDereferences(node, 8);
-		LinkedHashSet<ArrayDeque<Pair<ValueNode, FieldEdge>>> infer = id.infer();
-		for (ArrayDeque<Pair<ValueNode, FieldEdge>> arrayDeque : infer) {
-			System.out.println(arrayDeque.peek().p1());
-			for (Pair<ValueNode, FieldEdge> pair : arrayDeque) {
-				FieldEdge p2 = pair.p2();
-				if (p2 != null)
-					System.out.print("." + p2.f.getName());
+		LinkedHashSet<ArrayDeque<InferDereferences.Deref>> infer = id.infer();
+		for (ArrayDeque<InferDereferences.Deref> arrayDeque : infer) {
+			System.out.println(arrayDeque.peek().v);
+			for (InferDereferences.Deref pair : arrayDeque) {
+				FieldReference p2 = pair.f;
+				System.out.print(U.tos(p2));
 			}
 			System.out.println();
 		}
-//		Graph<ValueNode> prunedM = GraphSlicer.prune(m, new Filter<ValueNode>() {
-//			@Override
-//			public boolean accepts(ValueNode o) {
-//				return m.getSuccNodeCount(o) > 0 || m.getPredNodeCount(o) > 0;
-//			}
-//		});
+		// Graph<Integer> prunedM = GraphSlicer.prune(m, new
+		// Filter<Integer>() {
+		// @Override
+		// public boolean accepts(Integer o) {
+		// return m.getSuccNodeCount(o) > 0 || m.getPredNodeCount(o) > 0;
+		// }
+		// });
 
 		System.out.println("---- Compute map value -> PointerKey ------------------- ");
 		pointerForValue.compute();

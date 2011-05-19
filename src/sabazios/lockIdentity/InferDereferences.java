@@ -5,61 +5,62 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 
 import com.ibm.wala.ipa.callgraph.CGNode;
+import com.ibm.wala.types.FieldReference;
 
 import sabazios.RaceAnalysis;
 import sabazios.util.Tuple;
 import sabazios.util.Tuple.Pair;
 
 public class InferDereferences {
-	
-	static class Deref {
-		public final ValueNode v;
-		public final FieldEdge f;
+
+	public static class Deref {
 		public final CGNode n;
-		
-		public Deref(CGNode n, ValueNode v, FieldEdge f) {
+		public final Integer v;
+		public final FieldReference f;
+
+		public Deref(CGNode n, Integer v, FieldReference f) {
 			this.n = n;
 			this.v = v;
 			this.f = f;
 		}
 	}
-	
+
 	private final CGNode n;
 	private final int v;
+
 	public InferDereferences(CGNode n, int v) {
 		this.n = n;
 		this.v = v;
-		w = new LinkedHashSet<ArrayDeque<Pair<ValueNode, FieldEdge>>>();
-		ArrayDeque<Tuple.Pair<ValueNode, FieldEdge>> start = new ArrayDeque<Tuple.Pair<ValueNode, FieldEdge>>();
-		start.add(new Pair<ValueNode, FieldEdge>(new ValueNode(n, v), null));
+		w = new LinkedHashSet<ArrayDeque<Deref>>();
+		ArrayDeque<Deref> start = new ArrayDeque<Deref>();
+		start.add(new Deref(n,v, null));
 		w.add(start);
 	}
-	
-	LinkedHashSet<ArrayDeque<Pair<ValueNode, FieldEdge>>> w;
-	public LinkedHashSet<ArrayDeque<Pair<ValueNode, FieldEdge>>> infer() {
+
+	LinkedHashSet<ArrayDeque<Deref>> w;
+
+	public LinkedHashSet<ArrayDeque<Deref>> infer() {
 		MustAliasHeapMethodSummary ma = MustAliasHeapMethodSummary.get(n.getIR());
 		RaceAnalysis.dotGraph(ma, "mustAlias", null);
 		boolean notFinished = true;
 		while (notFinished) {
 			notFinished = false;
-			LinkedHashSet<ArrayDeque<Pair<ValueNode, FieldEdge>>> newW = new LinkedHashSet<ArrayDeque<Pair<ValueNode, FieldEdge>>>();
-			for (ArrayDeque<Pair<ValueNode, FieldEdge>> l : w) {
-				Pair<ValueNode, FieldEdge> head = l.peek();
-				ValueNode node = ma.getNode(head.p1().v);
-				Iterator<? extends FieldEdge> predLabels = ma.getPredLabels(node);
+			LinkedHashSet<ArrayDeque<Deref>> newW = new LinkedHashSet<ArrayDeque<Deref>>();
+			for (ArrayDeque<Deref> l : w) {
+				Deref head = l.peek();
+				Integer node = head.v;
+				Iterator<? extends FieldReference> predLabels = ma.getPredLabels(node);
 				boolean processed = false;
 				while (predLabels.hasNext()) {
-					FieldEdge fieldEdge = (FieldEdge) predLabels.next();
-					if (!fieldEdge.isW) {
-						ArrayDeque<Pair<ValueNode, FieldEdge>> newL = l.clone();
-						ValueNode pred = ma.getPredNodes(node, fieldEdge).next();
-						Pair<ValueNode, FieldEdge> newPair = new Pair<ValueNode, FieldEdge>(pred, fieldEdge);
-						if (newL.contains(newPair))
-							return null;
-						newL.push(newPair);
-						newW.add(newL);
-						processed = true;
-					}
+					FieldReference FieldReference = (FieldReference) predLabels.next();
+					ArrayDeque<Deref> newL = l.clone();
+					Integer pred = ma.getPredNodes(node, FieldReference).next();
+					Deref newPair = new Deref(n, pred, FieldReference);
+					if (newL.contains(newPair))
+						throw new RuntimeException("not possible");
+					newL.push(newPair);
+					newW.add(newL);
+					processed = true;
 				}
 				if (processed)
 					notFinished = true;

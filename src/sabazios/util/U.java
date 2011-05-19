@@ -16,6 +16,7 @@ import com.ibm.wala.ipa.callgraph.propagation.cfa.CallString;
 import com.ibm.wala.ipa.callgraph.propagation.cfa.CallStringContext;
 import com.ibm.wala.ipa.callgraph.propagation.cfa.CallStringContextSelector;
 import com.ibm.wala.types.ClassLoaderReference;
+import com.ibm.wala.types.FieldReference;
 
 
 public class U {
@@ -111,5 +112,16 @@ public class U {
 		ShrikeBTMethod m = (ShrikeBTMethod) method;
 		
 		return CodeLocation.make(m, 0).toString();
+	}
+
+	public static String tos(Object o) {
+		if(o instanceof FieldReference)
+			return tosFieldReference((FieldReference) o);
+		else
+			return ""+o;
+	}
+
+	private static String tosFieldReference(FieldReference o) {
+		return "."+o.getName();
 	}
 }
