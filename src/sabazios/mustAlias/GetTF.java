@@ -2,8 +2,6 @@ package sabazios.mustAlias;
 
 import com.ibm.wala.fixpoint.UnaryOperator;
 import com.ibm.wala.ssa.SSAGetInstruction;
-import com.ibm.wala.ssa.SSAInstruction;
-import com.ibm.wala.ssa.SSAPutInstruction;
 
 public class GetTF extends UnaryOperator<ObjectVariable> {
 

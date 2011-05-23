@@ -64,7 +64,8 @@ public class WalaAnalysis {
 		DefaultContextSelector appContextSelector = new DefaultContextSelector(options);
 
 		return new SmartCFABuilder(cha, options, cache, appContextSelector, new DefaultSSAInterpreter(options, cache),
-				ZeroXInstanceKeys.SMUSH_STRINGS | ZeroXInstanceKeys.ALLOCATIONS);
+				ZeroXInstanceKeys.SMUSH_STRINGS | 
+				ZeroXInstanceKeys.ALLOCATIONS);
 		// ZeroXInstanceKeys.SMUSH_MANY |
 		// ZeroXInstanceKeys.SMUSH_THROWABLES |
 	}

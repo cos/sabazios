@@ -1,7 +1,6 @@
 package sabazios;
 
 import java.util.HashMap;
-import java.util.Iterator;
 
 import sabazios.lockset.CFG.Solver;
 import sabazios.lockset.callGraph.Lock;
@@ -14,8 +13,6 @@ import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.analysis.ExplodedControlFlowGraph;
 import com.ibm.wala.ssa.analysis.IExplodedBasicBlock;
 import com.ibm.wala.util.CancelException;
-import com.ibm.wala.util.graph.GraphPrint;
-import com.ibm.wala.util.intset.IntSetUtil;
 
 public class Locks {
 	private final CallGraph callGraph;

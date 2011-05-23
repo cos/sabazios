@@ -1,10 +1,5 @@
 package sabazios.mustAlias;
 
-import java.util.HashSet;
-
-import sabazios.mustAlias.ObjectVariable.Representation;
-import sabazios.util.Relation;
-
 import com.ibm.wala.dataflow.graph.AbstractMeetOperator;
 import com.ibm.wala.fixpoint.IVariable;
 

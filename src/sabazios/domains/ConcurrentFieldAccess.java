@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import sabazios.RaceAnalysis;
+import sabazios.A;
 import sabazios.util.ComparableTuple;
 import sabazios.util.Relation;
 import sabazios.util.Tuple;
@@ -48,14 +48,14 @@ public class ConcurrentFieldAccess extends ConcurrentAccess {
 		return postfixToString(linePrefix, s);
 	}
 
-	public ConcurrentAccess rippleUp(RaceAnalysis a) {
+	public ConcurrentAccess rippleUp() {
 		HashSet<ObjectAccess> was = new HashSet<ObjectAccess>();
 		HashSet<ObjectAccess> oas = new HashSet<ObjectAccess>();
 		for (ObjectAccess w : this.writeAccesses) {
-			was.addAll(rippleUp((FieldAccess) w, a));
+			was.addAll(rippleUp((FieldAccess) w));
 		}
 		for (ObjectAccess w : this.otherAccesses) {
-			oas.addAll(rippleUp((FieldAccess) w, a));
+			oas.addAll(rippleUp((FieldAccess) w));
 		}
 		boolean ugly = false;
 		for (ObjectAccess oa : was)
@@ -82,7 +82,7 @@ public class ConcurrentFieldAccess extends ConcurrentAccess {
 		return ca;
 	}
 
-	private Set<ObjectAccess> rippleUp(FieldAccess w, RaceAnalysis a) {
+	private Set<ObjectAccess> rippleUp(FieldAccess w) {
 		CGNode n = w.n;
 		if (U.inApplicationScope(n))
 			return Sets.newHashSet((ObjectAccess) w);
@@ -99,18 +99,18 @@ public class ConcurrentFieldAccess extends ConcurrentAccess {
 			n = todo.p1();
 			workList.remove(todo);
 			visitedAccesses.add(todo);
-			Iterator<CGNode> predNodes = a.callGraph.getPredNodes(n);
+			Iterator<CGNode> predNodes = A.callGraph.getPredNodes(n);
 			while (predNodes.hasNext()) {
 				CGNode n1 = predNodes.next();
-				Iterator<CallSiteReference> possibleSites = a.callGraph.getPossibleSites(n1, n);
+				Iterator<CallSiteReference> possibleSites = A.callGraph.getPossibleSites(n1, n);
 				while (possibleSites.hasNext()) {
 					CallSiteReference csr = possibleSites.next();
 					SSAAbstractInvokeInstruction[] calls = n1.getIR().getCalls(csr);
 					for (SSAAbstractInvokeInstruction i : calls) {
 						if (U.inApplicationScope(n1)) {
 							if (!i.isStatic()) {
-								LocalPointerKey p = a.pointerForValue.get(n1, i.getReceiver());
-								Iterator<Object> succNodes = a.heapGraph.getSuccNodes(p);
+								LocalPointerKey p = A.pointerForValue.get(n1, i.getReceiver());
+								Iterator<Object> succNodes = A.heapGraph.getSuccNodes(p);
 								while (succNodes.hasNext()) {
 									Object o1 = succNodes.next();
 									sa.add(new ShallowAccess(n1, i, (InstanceKey) o1));

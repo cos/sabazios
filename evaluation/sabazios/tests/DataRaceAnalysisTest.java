@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import junit.framework.Assert;
 import sabazios.ConcurrentAccesses;
-import sabazios.RaceAnalysis;
+import sabazios.A;
 import sabazios.WalaAnalysis;
 import sabazios.util.Log;
 
@@ -46,7 +46,7 @@ public abstract class DataRaceAnalysisTest extends WalaAnalysis {
 
 		Log.log("Pointer analysis done");
 
-		RaceAnalysis analysis = new RaceAnalysis(callGraph, pointerAnalysis, builder);
+		A analysis = new A(callGraph, pointerAnalysis, builder);
 
 		analysis.compute();
 		Log.log("New Race analysis done");

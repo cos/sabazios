@@ -18,19 +18,18 @@ import com.ibm.wala.ssa.SSAPutInstruction;
 public class WriteAccesses extends ObjectAccesses<WriteFieldAccess> {
 	private static final long serialVersionUID = 3482224366938834900L;
 
-	public WriteAccesses(RaceAnalysis a) {
-		super(a);
-		oag = new ObjectAccessesGatherer(a) {
+	public WriteAccesses() {
+		oag = new ObjectAccessesGatherer() {
 
 			@Override
 			protected void visit(CGNode n, SSAInstruction i) {
 				if (i instanceof SSAPutInstruction) {
 
 					SSAPutInstruction pi = (SSAPutInstruction) i;
-					IField f = a.cha.resolveField(pi.getDeclaredField());
+					IField f = A.cha.resolveField(pi.getDeclaredField());
 					if (!pi.isStatic()) {
-						LocalPointerKey pk = a.pointerForValue.get(n, pi.getRef());
-						Iterator<Object> succNodes = a.heapGraph.getSuccNodes(pk);
+						LocalPointerKey pk = A.pointerForValue.get(n, pi.getRef());
+						Iterator<Object> succNodes = A.heapGraph.getSuccNodes(pk);
 						while (succNodes.hasNext()) {
 							InstanceKey o = (InstanceKey) succNodes.next();
 							// if (!U.isMainContext(o)) {
@@ -45,8 +44,8 @@ public class WriteAccesses extends ObjectAccesses<WriteFieldAccess> {
 				}
 				if (i instanceof SSAArrayStoreInstruction) {
 					SSAArrayStoreInstruction asi = (SSAArrayStoreInstruction) i;
-					LocalPointerKey pk = a.pointerForValue.get(n, asi.getArrayRef());
-					Iterator<Object> succNodes = a.heapGraph.getSuccNodes(pk);
+					LocalPointerKey pk = A.pointerForValue.get(n, asi.getArrayRef());
+					Iterator<Object> succNodes = A.heapGraph.getSuccNodes(pk);
 					IField f = ArrayContents.v();
 					while (succNodes.hasNext()) {
 						InstanceKey o = (InstanceKey) succNodes.next();

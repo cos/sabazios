@@ -3,7 +3,6 @@ package sabazios.lockset.callGraph;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import sabazios.Blabla;
 import sabazios.util.IntSetVariable;
 
 import com.ibm.wala.classLoader.CallSiteReference;

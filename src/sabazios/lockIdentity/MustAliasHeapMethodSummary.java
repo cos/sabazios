@@ -1,24 +1,10 @@
 package sabazios.lockIdentity;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
 
-import sabazios.util.Tuple;
-import sabazios.util.Tuple.Pair;
-
-import com.ibm.wala.classLoader.IMethod;
-import com.ibm.wala.ipa.callgraph.CGNode;
-import com.ibm.wala.ssa.DefUse;
 import com.ibm.wala.ssa.IR;
 import com.ibm.wala.ssa.SSAGetInstruction;
 import com.ibm.wala.ssa.SSAInstruction;
-import com.ibm.wala.ssa.SSAPutInstruction;
 import com.ibm.wala.ssa.SymbolTable;
 import com.ibm.wala.types.FieldReference;
 import com.ibm.wala.types.TypeReference;
@@ -35,6 +21,7 @@ public class MustAliasHeapMethodSummary extends SlowSparseNumberedLabeledGraph<I
 			result = new MustAliasHeapMethodSummary(im);
 			cached.put(im, result);
 		}
+//		RaceAnalysis.dotGraph(result, "mustAlias_"+im.getMethod().getName(), null);
 		return result;
 	}
 

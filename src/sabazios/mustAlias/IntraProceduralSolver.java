@@ -1,9 +1,6 @@
 package sabazios.mustAlias;
-import sabazios.util.IntSetVariable;
-
 import com.ibm.wala.dataflow.graph.BasicFramework;
 import com.ibm.wala.dataflow.graph.DataflowSolver;
-import com.ibm.wala.dataflow.graph.IKilldallFramework;
 import com.ibm.wala.ssa.analysis.ExplodedControlFlowGraph;
 import com.ibm.wala.ssa.analysis.IExplodedBasicBlock;
 

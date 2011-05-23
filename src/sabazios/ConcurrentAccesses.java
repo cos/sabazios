@@ -10,10 +10,8 @@ import sabazios.util.U;
 
 public class ConcurrentAccesses extends HashMap<Loop, TreeSet<ConcurrentAccess>>{
 	private static final long serialVersionUID = -962627971686357883L;
-	protected final RaceAnalysis a;
 
-	public ConcurrentAccesses(RaceAnalysis a) {
-		this.a = a;
+	public ConcurrentAccesses() {
 	}
 
 	@Override
@@ -90,7 +88,7 @@ public class ConcurrentAccesses extends HashMap<Loop, TreeSet<ConcurrentAccess>>
 	public void distributeLocks() {
 		for (TreeSet<ConcurrentAccess> cas : this.values()) {
 			for (ConcurrentAccess concurrentAccess : cas) {
-				concurrentAccess.distributeLocks(a.locks);
+				concurrentAccess.distributeLocks(A.locks);
 			}
 		}
 	}

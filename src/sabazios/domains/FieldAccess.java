@@ -26,9 +26,7 @@ public class FieldAccess extends ObjectAccess {
 
 	@Override
 	public String toString(boolean withObj) {
-		if(U.detailedResults)
-			return CodeLocation.make(n, i) + n.toString() + " - ."+ f.getName() + (withObj? " / "+ (o != null?U.tos(o):f.getClass().getName()):"");
-		else
-			return CodeLocation.make(n, i) + " - ."+ f.getName() + (withObj? " / "+ (o != null?U.tos(o):f.getClass().getName()):"")+(this.l != null && !this.l.isEmpty() ? " "+this.l : "");
+		withObj = false;
+		return CodeLocation.make(n, i) + " - ."+ f.getName() + (withObj? " / "+ (o != null?U.tos(o):f.getClass().getName()):"")+(this.l != null && !this.l.isEmpty() ? " "+this.l : "");
 	}
 }

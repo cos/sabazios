@@ -1,16 +1,16 @@
 package sabazios.lockset.callGraph;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
+import sabazios.lockIdentity.Dereferences;
 import sabazios.util.CodeLocation;
 import sabazios.util.IntSetVariable;
 import sabazios.util.U;
 
 import com.ibm.wala.fixpoint.IVariable;
 import com.ibm.wala.ipa.callgraph.CGNode;
-import com.ibm.wala.ssa.SSACFG;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSAMonitorInstruction;
 import com.ibm.wala.util.collections.ArraySet;
@@ -21,6 +21,15 @@ public class Lock extends NodeWithNumber implements IVariable<Lock> {
 	private LinkedHashMap<CGNode, IntSetVariable> locks = null;
 	private int orderNumber;
 	private final int hashCode;
+	
+	public static class Individual {
+		public final CGNode n;
+		public final int v;
+		public Individual(CGNode n, int v) {
+			this.n = n;
+			this.v = v;
+		}
+	}
 
 	public Lock(boolean top) {
 		hashCode = nextHash();
@@ -172,6 +181,9 @@ public class Lock extends NodeWithNumber implements IVariable<Lock> {
 							s.delete(s.length() - 1, s.length());
 							s.append("}");
 						}
+						if(U.detailedResults) {
+							s.append(" "+Dereferences.get(n, v));
+						}
 						s.append(" , ");
 					}
 				}
@@ -195,5 +207,17 @@ public class Lock extends NodeWithNumber implements IVariable<Lock> {
 			}
 		}
 		return ms;
+	}
+
+	public Set<Individual> getIndividualLocks() {
+		LinkedHashSet<Individual> l = new LinkedHashSet<Lock.Individual>();
+		for (CGNode n :this.locks.keySet()) {
+			IntSetVariable intSetVariable = this.locks.get(n);
+			for (Integer v : intSetVariable) {
+				l.add(new Individual(n,v));
+			}
+		}
+		
+		return l;
 	}
 }

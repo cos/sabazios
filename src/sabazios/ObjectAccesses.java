@@ -18,9 +18,6 @@ public abstract class ObjectAccesses<T extends FieldAccess> extends HashMap<Loop
 	private static final long serialVersionUID = -5571882875222007305L;
 
 	protected abstract class ObjectAccessesGatherer extends InstructionsGatherer {
-		public ObjectAccessesGatherer(RaceAnalysis a) {
-			super(a);
-		}
 
 		@Override
 		protected boolean shouldVisit(CGNode n) {
@@ -41,11 +38,9 @@ public abstract class ObjectAccesses<T extends FieldAccess> extends HashMap<Loop
 		}
 
 	}
-	private RaceAnalysis a;
 	protected ObjectAccessesGatherer oag;
 
-	public ObjectAccesses(RaceAnalysis a) {
-		this.a = a;
+	public ObjectAccesses() {
 	}
 
 	@Override
@@ -74,8 +69,9 @@ public abstract class ObjectAccesses<T extends FieldAccess> extends HashMap<Loop
 
 	String[] threadSafeMethods = new String[] { 
 //			"java/util/regex/Pattern", "java/lang/System, exit",
-//			"java/io/PrintStream, print",
-//			"java/lang/Throwable, printStackTrace",
+			"java/io/PrintStream, write",
+			"java/io/PrintStream, print",
+			"java/lang/Throwable, printStackTrace",
 			"java/security/AccessControlContext, getDebug", // not relevant
 //			"java.io.PrintStream, format", 
 //			"java/util/Random, <init>" , "Integer, <init>",
@@ -83,7 +79,7 @@ public abstract class ObjectAccesses<T extends FieldAccess> extends HashMap<Loop
 
 	protected void add(T w) {
 		FlexibleContext c = (FlexibleContext) w.n.getContext();
-		Loop t = a.t.get((InstanceKey) c.getItem(CS.ARRAY),
+		Loop t = A.t.get((InstanceKey) c.getItem(CS.ARRAY),
 				(CGNode) c.getItem(CS.OPERATOR_CALLER), (CallSiteReference) c.getItem(CS.OPERATOR_CALL_SITE_REFERENCE));
 		
 		HashMap<InstanceKey, HashSet<T>> localAcccess;

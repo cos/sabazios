@@ -13,7 +13,7 @@ package sabazios.util.wala.viz;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import sabazios.RaceAnalysis;
+import sabazios.A;
 
 import com.ibm.wala.cfg.CFGSanitizer;
 import com.ibm.wala.ipa.callgraph.CGNode;
@@ -21,12 +21,12 @@ import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.ssa.IR;
 import com.ibm.wala.ssa.ISSABasicBlock;
 import com.ibm.wala.ssa.SSACFG;
+import com.ibm.wala.ssa.SSACFG.BasicBlock;
+import com.ibm.wala.ssa.SSACFG.ExceptionHandlerBasicBlock;
 import com.ibm.wala.ssa.SSAGetCaughtExceptionInstruction;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSAPhiInstruction;
 import com.ibm.wala.ssa.SSAPiInstruction;
-import com.ibm.wala.ssa.SSACFG.BasicBlock;
-import com.ibm.wala.ssa.SSACFG.ExceptionHandlerBasicBlock;
 import com.ibm.wala.util.collections.HashMapFactory;
 import com.ibm.wala.util.graph.Graph;
 import com.ibm.wala.util.strings.StringStuff;
@@ -37,7 +37,7 @@ import com.ibm.wala.util.warnings.WalaException;
  */
 public class PDFViewUtil {
 
-  public static RaceAnalysis raceAnalysis;
+  public static A raceAnalysis;
 
 /**
    * spawn a process to view a WALA IR

@@ -8,13 +8,13 @@ import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 import com.ibm.wala.util.collections.SparseVector;
 
 public class PointerForValue {
-	private RaceAnalysis a;
+	private A a;
 	private boolean computed = false;
 
 	private HashMap<CGNode, SparseVector<LocalPointerKey>> pointedObjects = new HashMap<CGNode, SparseVector<LocalPointerKey>>();
 //	private HashMap<IClass, ConcreteTypeKey> classToInstanceKey = new HashMap<IClass, ConcreteTypeKey>(); 
 
-	public PointerForValue(RaceAnalysis raceAnalysis) {
+	public PointerForValue(A raceAnalysis) {
 		this.a = raceAnalysis;
 	}
 

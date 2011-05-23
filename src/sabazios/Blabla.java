@@ -4,7 +4,6 @@ import java.util.TreeSet;
 
 import sabazios.domains.ConcurrentAccess;
 import sabazios.domains.ConcurrentFieldAccess;
-import sabazios.domains.FieldAccess;
 import sabazios.domains.Loop;
 import sabazios.domains.ObjectAccess;
 import sabazios.domains.WriteFieldAccess;
@@ -22,9 +21,9 @@ import com.ibm.wala.util.intset.IntIterator;
  *
  */
 public class Blabla {
-	private final RaceAnalysis a;
+	private final A a;
 	
-	public Blabla(RaceAnalysis a) {
+	public Blabla(A a) {
 		this.a = a;
 	}
 	
@@ -33,7 +32,7 @@ public class Blabla {
 	}
 	
 	private void filter() {
-		a.deepRaces = new ConcurrentFieldAccesses(a);
+		a.deepRaces = new ConcurrentFieldAccesses();
 		for (Loop t : a.initialRaces.keySet()) {
 			TreeSet<ConcurrentAccess> newAccesses = new TreeSet<ConcurrentAccess>();
 			for (ConcurrentAccess ca : a.initialRaces.get(t)) {
