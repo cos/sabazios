@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import sabazios.A;
@@ -23,9 +24,9 @@ public class ConcurrentFieldAccesses extends ConcurrentAccesses<ConcurrentFieldA
 		// add all write this
 		for (Loop t : A.write.keySet()) {
 			this.put(t, new LinkedHashSet<ConcurrentFieldAccess>());
-			HashMap<InstanceKey, HashSet<WriteFieldAccess>> localAccesses = A.write.get(t);
+			Map<InstanceKey, Set<WriteFieldAccess>> localAccesses = A.write.get(t);
 			for (InstanceKey o : localAccesses.keySet()) {
-				HashSet<WriteFieldAccess> writes = localAccesses.get(o);
+				Set<WriteFieldAccess> writes = localAccesses.get(o);
 				for (WriteFieldAccess w : writes) {
 					ConcurrentFieldAccess ca = get(t, o, w.f);
 					ca.alphaAccesses.add(w);
@@ -35,9 +36,9 @@ public class ConcurrentFieldAccesses extends ConcurrentAccesses<ConcurrentFieldA
 
 		// add all other this
 		for (Loop t : this.keySet()) {
-			HashMap<InstanceKey, HashSet<FieldAccess>> localAccesses = A.o.get(t);
+			Map<InstanceKey, Set<FieldAccess>> localAccesses = A.o.get(t);
 			for (InstanceKey o : localAccesses.keySet()) {
-				HashSet<FieldAccess> others = localAccesses.get(o);
+				Set<FieldAccess> others = localAccesses.get(o);
 				for (FieldAccess oa : others) {
 					ConcurrentFieldAccess ca = get(t, o, oa.f);
 					ca.betaAccesses.add(oa);

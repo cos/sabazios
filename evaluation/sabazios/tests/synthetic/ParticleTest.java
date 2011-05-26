@@ -140,17 +140,17 @@ public class ParticleTest extends DataRaceAnalysisTest {
 	@Test
 	public void raceBecauseOfOutsideInterference() {
 		assertCAs("Loop: sabazios.synthetic.Particle.raceBecauseOfOutsideInterference(Particle.java:231)\n" + 
-				"   Object : sabazios.synthetic.Particle$15.op(Particle.java:234) new Particle\n" + 
-				"      Write accesses:\n" + 
-				"        Write sabazios.synthetic.Particle$15.op(Particle.java:235) - .x\n" + 
-				"      Other accesses:\n" + 
-				"        Write sabazios.synthetic.Particle$15.op(Particle.java:235) - .x\n" + 
 				"   Object : sabazios.synthetic.Particle.raceBecauseOfOutsideInterference(Particle.java:228) new Particle\n" + 
 				"      Write accesses:\n" + 
 				"        Write sabazios.synthetic.Particle$15.op(Particle.java:234) - .origin\n" + 
 				"      Other accesses:\n" + 
 				"        Read sabazios.synthetic.Particle$15.op(Particle.java:235) - .origin\n" + 
-				"        Write sabazios.synthetic.Particle$15.op(Particle.java:234) - .origin\n");
+				"        Write sabazios.synthetic.Particle$15.op(Particle.java:234) - .origin\n" + 
+				"   Object : sabazios.synthetic.Particle$15.op(Particle.java:234) new Particle\n" + 
+				"      Write accesses:\n" + 
+				"        Write sabazios.synthetic.Particle$15.op(Particle.java:235) - .x\n" + 
+				"      Other accesses:\n" + 
+				"        Write sabazios.synthetic.Particle$15.op(Particle.java:235) - .x\n");
 	}
 
 	@Test
@@ -222,17 +222,17 @@ public class ParticleTest extends DataRaceAnalysisTest {
 	@Test
 	public void raceOnDifferntArrayIterationOneLoop() {
 		assertCAs("Loop: sabazios.synthetic.Particle.raceOnDifferntArrayIterationOneLoop(Particle.java:366)\n" + 
+				"   Object : sabazios.synthetic.Particle$27.op(Particle.java:370) new Particle\n" + 
+				"      Write accesses:\n" + 
+				"        Write sabazios.synthetic.Particle$27.op(Particle.java:369) - .x\n" + 
+				"      Other accesses:\n" + 
+				"        Write sabazios.synthetic.Particle$27.op(Particle.java:369) - .x\n" + 
 				"   Object : sabazios.synthetic.Particle.raceOnDifferntArrayIterationOneLoop(Particle.java:364) new Particle\n" + 
 				"      Write accesses:\n" + 
 				"        Write sabazios.synthetic.Particle$27.op(Particle.java:370) - .origin\n" + 
 				"      Other accesses:\n" + 
 				"        Read sabazios.synthetic.Particle$27.op(Particle.java:371) - .origin\n" + 
-				"        Write sabazios.synthetic.Particle$27.op(Particle.java:370) - .origin\n" + 
-				"   Object : sabazios.synthetic.Particle$27.op(Particle.java:370) new Particle\n" + 
-				"      Write accesses:\n" + 
-				"        Write sabazios.synthetic.Particle$27.op(Particle.java:369) - .x\n" + 
-				"      Other accesses:\n" + 
-				"        Write sabazios.synthetic.Particle$27.op(Particle.java:369) - .x\n");
+				"        Write sabazios.synthetic.Particle$27.op(Particle.java:370) - .origin\n");
 	}
 
 	@Test
@@ -248,7 +248,7 @@ public class ParticleTest extends DataRaceAnalysisTest {
 	@Test
 	public void raceInLibrary() {
 		assertCAs("Loop: sabazios.synthetic.Particle.raceInLibrary(Particle.java:427)\n" + 
-				"   Object : sabazios.synthetic.Particle.raceInLibrary(Particle.java:425) new HashSet\n" + 
+				"   Shallow | Object : sabazios.synthetic.Particle.raceInLibrary(Particle.java:425) new HashSet\n" + 
 				"      Write accesses:\n" + 
 				"        sabazios.synthetic.Particle$31.op(Particle.java:431)\n" + 
 				"      Other accesses:\n" + 
@@ -321,10 +321,10 @@ public class ParticleTest extends DataRaceAnalysisTest {
 		assertCAs("Loop: sabazios.synthetic.Particle.staticMethod(Particle.java:639)\n" + 
 				"   Object : sabazios.synthetic.Particle.<clinit>(Particle.java:391) new Particle\n" + 
 				"      Write accesses:\n" + 
-				"        Write sabazios.synthetic.Particle.thisisstatic(Particle.java:649) - .forceX { S : Lsabazios/synthetic/Particle }\n" + 
+				"        Write sabazios.synthetic.Particle.thisisstatic(Particle.java:649) - .forceX\n" + 
 				"      Other accesses:\n" + 
-				"        Write sabazios.synthetic.Particle.thisisstatic(Particle.java:649) - .forceX { S : Lsabazios/synthetic/Particle }\n" + 
-				"        Read sabazios.synthetic.Particle.thisisstatic(Particle.java:649) - .forceX { S : Lsabazios/synthetic/Particle }\n");
+				"        Write sabazios.synthetic.Particle.thisisstatic(Particle.java:649) - .forceX\n" + 
+				"        Read sabazios.synthetic.Particle.thisisstatic(Particle.java:649) - .forceX\n");
 	}
 	
 }

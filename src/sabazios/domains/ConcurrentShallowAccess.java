@@ -6,7 +6,7 @@ import sabazios.util.U;
 
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 
-public class ConcurrentShallowAccess extends ConcurrentAccess {
+public class ConcurrentShallowAccess extends ConcurrentAccess<ObjectAccess> {
 	public final LinkedHashSet<InstanceKey> objects = new LinkedHashSet<InstanceKey>();
 
 	public ConcurrentShallowAccess(Loop t) {
@@ -22,7 +22,7 @@ public class ConcurrentShallowAccess extends ConcurrentAccess {
 	}
 
 	@Override
-	public boolean sameTarget(ConcurrentAccess obj) {
+	public boolean sameTarget(ConcurrentAccess<?> obj) {
 		if (obj == null)
 			return false;
 		if (obj.getClass() != this.getClass())

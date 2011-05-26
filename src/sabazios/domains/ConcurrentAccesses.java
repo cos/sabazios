@@ -7,7 +7,7 @@ import java.util.Set;
 
 import sabazios.A;
 
-public abstract class ConcurrentAccesses<T extends ConcurrentAccess> extends LinkedHashMap<Loop, Set<T>>{
+public abstract class ConcurrentAccesses<T extends ConcurrentAccess<?>> extends LinkedHashMap<Loop, Set<T>>{
 	private static final long serialVersionUID = -962627971686357883L;
 
 	public ConcurrentAccesses() {
@@ -18,7 +18,7 @@ public abstract class ConcurrentAccesses<T extends ConcurrentAccess> extends Lin
 		StringBuffer s = new StringBuffer();
 		for (Loop t : this.keySet()) {
 			s.append("Loop: " + t);
-			for (ConcurrentAccess concurrentAccess : this.get(t)) {
+			for (ConcurrentAccess<?> concurrentAccess : this.get(t)) {
 				s.append("\n");
 				s.append(concurrentAccess.toString("   "));
 			}
@@ -30,7 +30,7 @@ public abstract class ConcurrentAccesses<T extends ConcurrentAccess> extends Lin
 	public int getNoPairs() {
 		int n = 0;
 		for (Set<T> accs : this.values()) {
-			for (ConcurrentAccess concurrentAccess : accs) {
+			for (ConcurrentAccess<?> concurrentAccess : accs) {
 				n += concurrentAccess.getNoPairs();
 			}
 		}
@@ -45,7 +45,7 @@ public abstract class ConcurrentAccesses<T extends ConcurrentAccess> extends Lin
 	 */
 	public void distributeLocks() {
 		for (Set<T> cas : this.values()) {
-			for (ConcurrentAccess concurrentAccess : cas) {
+			for (ConcurrentAccess<?> concurrentAccess : cas) {
 				concurrentAccess.distributeLocks(A.locks);
 			}
 		}

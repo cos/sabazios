@@ -34,7 +34,7 @@ public class Incuiate {
 			}
 		});
 	}
-	
+
 	public void oneLevelLocalVar() {
 		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
 				ParallelArray.defaultExecutor());
@@ -51,7 +51,7 @@ public class Incuiate {
 			}
 		});
 	}
-	
+
 	public void stillARace() {
 		ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
 				ParallelArray.defaultExecutor());
@@ -68,7 +68,7 @@ public class Incuiate {
 			}
 		});
 	}
-	
+
 	public void syncedOnParallelArray() {
 		final ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
 				ParallelArray.defaultExecutor());
@@ -85,7 +85,7 @@ public class Incuiate {
 			}
 		});
 	}
-	
+
 	public void syncedOnSomeField() {
 		final ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
 				ParallelArray.defaultExecutor());
@@ -102,7 +102,7 @@ public class Incuiate {
 			}
 		});
 	}
-	
+
 	public void syncedOnSomeChangedField() {
 		final ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
 				ParallelArray.defaultExecutor());
@@ -120,12 +120,12 @@ public class Incuiate {
 			}
 		});
 	}
-	
+
 	static class Lacat {
 	}
-	
+
 	Lacat lacatStatic;
-	
+
 	public void syncedOnStatic() {
 		final ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
 				ParallelArray.defaultExecutor());
@@ -142,7 +142,7 @@ public class Incuiate {
 			}
 		});
 	}
-	
+
 	public void syncedOnChangedStatic() {
 		final ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
 				ParallelArray.defaultExecutor());
@@ -160,7 +160,7 @@ public class Incuiate {
 			}
 		});
 	}
-	
+
 	public void vectorDefaultSync() {
 		final ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
 				ParallelArray.defaultExecutor());
@@ -176,7 +176,7 @@ public class Incuiate {
 			}
 		});
 	}
-	
+
 	public void printStream() {
 		final ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
 				ParallelArray.defaultExecutor());
@@ -189,7 +189,7 @@ public class Incuiate {
 			}
 		});
 	}
-	
+
 	public void regexPatternCompile() {
 		final ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
 				ParallelArray.defaultExecutor());
@@ -201,7 +201,7 @@ public class Incuiate {
 			}
 		});
 	}
-	
+
 	public void systemExit() {
 		final ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
 				ParallelArray.defaultExecutor());
@@ -212,5 +212,24 @@ public class Incuiate {
 				return null;
 			}
 		});
+	}
+
+	public void staticSynchedMethod() {
+		final ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
+				ParallelArray.defaultExecutor());
+
+		final Particle shared = new Particle();
+
+		particles.replaceWithGeneratedValue(new Ops.Generator<Particle>() {
+			@Override
+			public Particle op() {
+				thisIsSynched(shared);
+				return new Particle();
+			}
+		});
+	}
+
+	private static synchronized void thisIsSynched(final Particle shared) {
+		shared.x = 10;
 	}
 }

@@ -2,6 +2,9 @@ package sabazios.domains;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 import sabazios.A;
 import sabazios.util.FlexibleContext;
@@ -14,7 +17,7 @@ import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 
 
-public abstract class ObjectAccesses<T extends FieldAccess> extends HashMap<Loop, HashMap<InstanceKey, HashSet<T>>> {
+public abstract class ObjectAccesses<T extends FieldAccess> extends LinkedHashMap<Loop, Map<InstanceKey, Set<T>>> {
 	private static final long serialVersionUID = -5571882875222007305L;
 
 	protected abstract class ObjectAccessesGatherer extends InstructionsGatherer {
@@ -54,7 +57,7 @@ public abstract class ObjectAccesses<T extends FieldAccess> extends HashMap<Loop
 			
 			s.append(linePrefix + "Thread: "+t);
 			
-			HashMap<InstanceKey, HashSet<T>> thisWithinThread = this.get(t);
+			Map<InstanceKey, Set<T>> thisWithinThread = this.get(t);
 			for (InstanceKey o : thisWithinThread.keySet()) {
 				s.append("\n"+linePrefix+"    Object: ");
 				s.append(U.tos(o));
@@ -68,13 +71,12 @@ public abstract class ObjectAccesses<T extends FieldAccess> extends HashMap<Loop
 	}
 
 	String[] threadSafeMethods = new String[] { 
-//			"java/util/regex/Pattern", "java/lang/System, exit",
-//			"java/io/PrintStream, write",
-//			"java/io/PrintStream, print",
-//			"java/lang/Throwable, printStackTrace",
-//			"java/security/AccessControlContext, getDebug", // not relevant
-//			"java.io.PrintStream, format", 
-//			"java/util/Random, <init>" , "Integer, <init>",
+			"java/util/regex/Pattern", "java/lang/System, exit",
+			"java/io/PrintStream, ",
+			"java/util/Vector, ",
+			"java/lang/Throwable, printStackTrace",
+			"java/security/AccessControlContext, getDebug", // not relevant
+			"java/util/Random, <init>" , "Integer, <init>",
 			};
 
 	protected void add(T w) {
@@ -82,25 +84,25 @@ public abstract class ObjectAccesses<T extends FieldAccess> extends HashMap<Loop
 		Loop t = A.loops.get((InstanceKey) c.getItem(CS.ARRAY),
 				(CGNode) c.getItem(CS.OPERATOR_CALLER), (CallSiteReference) c.getItem(CS.OPERATOR_CALL_SITE_REFERENCE));
 		
-		HashMap<InstanceKey, HashSet<T>> localAcccess;
+		Map<InstanceKey, Set<T>> localAcccess;
 		if(this.containsKey(t)) 			
 			localAcccess = this.get(t);
 		else {
-			localAcccess = new HashMap<InstanceKey, HashSet<T>>();
+			localAcccess = new LinkedHashMap<InstanceKey, Set<T>>();
 			this.put(t, localAcccess);
 		}
 		
 
 		if (!localAcccess.containsKey(w.o))
 			localAcccess.put(w.o, new HashSet<T>());
-		HashSet<T> set = localAcccess.get(w.o);
+		Set<T> set = localAcccess.get(w.o);
 		set.add(w);
 	}
 	
 	public int size() {
 		int n = 0;
-		for(HashMap<InstanceKey, HashSet<T>> x : this.values()) {
-			for(HashSet<T> y : x.values()) {
+		for(Map<InstanceKey, Set<T>> x : this.values()) {
+			for(Set<T> y : x.values()) {
 				n += y.size();
 			}
 		}

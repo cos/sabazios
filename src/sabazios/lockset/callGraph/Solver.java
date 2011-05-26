@@ -1,6 +1,7 @@
 package sabazios.lockset.callGraph;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import sabazios.util.IntSetVariable;
 
@@ -20,7 +21,7 @@ public class Solver extends DataflowSolver<CGNode, LockSetVariable> {
 		}
 	}
 	
-	public Solver(CallGraph callGraph, HashMap<IMethod, HashMap<SSAInstruction, IntSetVariable>> intraProceduralLocks) {
+	public Solver(CallGraph callGraph, Map<IMethod, Map<SSAInstruction, IntSetVariable>> intraProceduralLocks) {
 		super(new Problem(callGraph, new TFProvider(callGraph, intraProceduralLocks)));
 	}
 

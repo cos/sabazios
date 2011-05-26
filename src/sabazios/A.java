@@ -115,7 +115,7 @@ public class A {
 
 		System.out.println("---- Shallow races ------------------------------------- ");
 		// Bubble up races
-		ConcurrentAccesses<ConcurrentAccess> shallowRaces = ConcurrentShallowAccesses.rippleUp(deepRaces);
+		ConcurrentAccesses<ConcurrentAccess<?>> shallowRaces = ConcurrentShallowAccesses.rippleUp(deepRaces);
 		Log.log("Rippleup up races in libraries");
 		shallowRaces.reduceNonConcurrent();
 		System.out.println("---- Shallow races ---- ");

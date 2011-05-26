@@ -1,10 +1,7 @@
 package sabazios.domains;
 
-import java.util.Set;
-
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import sabazios.lockset.Lock;
 import sabazios.lockset.LockSet;
 
 import com.ibm.wala.ipa.callgraph.CGNode;

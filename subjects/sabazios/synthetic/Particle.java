@@ -645,7 +645,7 @@ public class Particle {
 		});
 	}
 
-	private synchronized static void thisisstatic() {
+	private static void thisisstatic() {
 		staticShared.forceX ++;
 	}
 }

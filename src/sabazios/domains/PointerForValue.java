@@ -2,6 +2,8 @@ package sabazios.domains;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import sabazios.A;
 
@@ -12,7 +14,7 @@ import com.ibm.wala.util.collections.SparseVector;
 public class PointerForValue {
 	private boolean computed = false;
 
-	private HashMap<CGNode, SparseVector<LocalPointerKey>> pointedObjects = new HashMap<CGNode, SparseVector<LocalPointerKey>>();
+	private Map<CGNode, SparseVector<LocalPointerKey>> pointedObjects = new LinkedHashMap<CGNode, SparseVector<LocalPointerKey>>();
 //	private HashMap<IClass, ConcreteTypeKey> classToInstanceKey = new HashMap<IClass, ConcreteTypeKey>(); 
 
 	public void compute() {

@@ -1,9 +1,10 @@
 package sabazios.domains;
 
-import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 import sabazios.A;
 import sabazios.deref.Deref;
@@ -21,10 +22,10 @@ public class FilterSafe {
 		for (Loop l : races.keySet()) {
 			Iterator<ConcurrentFieldAccess> iterca = races.get(l).iterator();
 			while (iterca.hasNext()) {
-				ConcurrentAccess ca = (ConcurrentAccess) iterca.next();				
+				ConcurrentFieldAccess ca = iterca.next();				
 				for (ObjectAccess oa1 : ca.alphaAccesses) {
 					LockSet lockSet1 = oa1.l;
-					Iterator<ObjectAccess> iter = ca.betaAccesses.iterator();
+					Iterator<FieldAccess> iter = ca.betaAccesses.iterator();
 					while (iter.hasNext()) {
 						ObjectAccess oa2 = (ObjectAccess) iter.next();
 						LockSet lockSet2 = oa2.l;
@@ -51,10 +52,10 @@ public class FilterSafe {
 				InstanceKey ik = (InstanceKey) iks.next();
 				for (Loop loop : A.write.keySet()) {
 					if (loop.operatorCaller.equals(cgn)) {
-						HashMap<InstanceKey, HashSet<WriteFieldAccess>> hashMap = A.write.get(loop);
+						Map<InstanceKey, Set<WriteFieldAccess>> hashMap = A.write.get(loop);
 						if(hashMap.containsKey(ik))
 						{
-							HashSet<WriteFieldAccess> hashSet = hashMap.get(ik);
+							Set<WriteFieldAccess> hashSet = hashMap.get(ik);
 							for (WriteFieldAccess wf : hashSet) {
 								if(wf.f.getReference().equals(d.f))
 									return false;

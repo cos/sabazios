@@ -23,7 +23,6 @@ public class LockSetVariable implements IVariable<LockSetVariable>, Iterable<Loc
 	private LinkedHashMap<CGNode, IntSetVariable> locks = null;
 	private int orderNumber;
 	private final int hashCode;
-	private Set<DerefRep> deref;
 
 	public LockSetVariable(boolean top) {
 		hashCode = nextHash();

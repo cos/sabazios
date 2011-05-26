@@ -1,6 +1,6 @@
 package sabazios.lockset;
-
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import sabazios.lockset.CFG.Solver;
 import sabazios.util.IntSetVariable;
@@ -20,8 +20,8 @@ public class Locks {
 		this.callGraph = callGraph;
 	}
 
-	public HashMap<CGNode, LockSet> locksForCGNodes = new HashMap<CGNode, LockSet>();
-	HashMap<IMethod, HashMap<SSAInstruction, IntSetVariable>> intraProceduralLocks = new HashMap<IMethod, HashMap<SSAInstruction, IntSetVariable>>();
+	public Map<CGNode, LockSet> locksForCGNodes = new LinkedHashMap<CGNode, LockSet>();
+	Map<IMethod, Map<SSAInstruction, IntSetVariable>> intraProceduralLocks = new LinkedHashMap<IMethod, Map<SSAInstruction, IntSetVariable>>();
 
 	public void compute() {
 		inferIntraProcedural();
@@ -45,7 +45,7 @@ public class Locks {
 
 	private void inferIntraProcedural() {
 		for (CGNode n : this.callGraph) {
-			HashMap<SSAInstruction, IntSetVariable> insideLocks = intraProceduralLocks.get(n.getMethod());
+			Map<SSAInstruction, IntSetVariable> insideLocks = intraProceduralLocks.get(n.getMethod());
 			if (insideLocks != null)
 				continue;
 
@@ -66,7 +66,7 @@ public class Locks {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			insideLocks = new HashMap<SSAInstruction, IntSetVariable>();
+			insideLocks = new LinkedHashMap<SSAInstruction, IntSetVariable>();
 
 			for (IExplodedBasicBlock iExplodedBasicBlock : explodedCFG) {	
 				SSAInstruction i = iExplodedBasicBlock.getInstruction();
@@ -92,7 +92,7 @@ public class Locks {
 		LockSet lockSet = new LockSet();
 		lockSet.addAll(get(n));
 		if (intraProceduralLocks.containsKey(n.getMethod())) {
-			HashMap<SSAInstruction, IntSetVariable> hashMap = intraProceduralLocks.get(n.getMethod());
+			Map<SSAInstruction, IntSetVariable> hashMap = intraProceduralLocks.get(n.getMethod());
 			IntSetVariable intSetVariable = hashMap.get(i);
 			for (Integer v : intSetVariable) {
 				lockSet.add(new Lock(n, v));

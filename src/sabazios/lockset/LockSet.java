@@ -1,16 +1,8 @@
 package sabazios.lockset;
 
 import java.util.LinkedHashSet;
-import java.util.Set;
-
-import com.ibm.wala.ipa.callgraph.CGNode;
-import com.ibm.wala.ssa.SSAMonitorInstruction;
 
 import sabazios.deref.DerefRep;
-import sabazios.deref.Dereferences;
-import sabazios.util.CodeLocation;
-import sabazios.util.IntSetVariable;
-import sabazios.util.U;
 
 public class LockSet extends LinkedHashSet<Lock> {
 	private static final long serialVersionUID = 7287923114066974811L;

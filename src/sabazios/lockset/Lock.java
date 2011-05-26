@@ -38,7 +38,7 @@ public class Lock {
 	@Override
 	public String toString() {
 		StringBuffer s = new StringBuffer();
-		if (v == -1) {
+		if (v == 0) {
 			s.append("S : ");
 			s.append(n.getMethod().getDeclaringClass().getName());
 		} else {

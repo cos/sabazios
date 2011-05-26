@@ -1,6 +1,6 @@
 package sabazios.lockset.callGraph;
 
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Iterator;
 
 import sabazios.util.IntSetVariable;
@@ -19,11 +19,11 @@ public class TFProvider implements ITransferFunctionProvider<CGNode, LockSetVari
 
 	// private static final UnaryOperator<Lock> lockIdentity = new
 	// IntSetIdentity<Lock>();
-	private final HashMap<IMethod, HashMap<SSAInstruction, IntSetVariable>> intraProceduralLocks;
+	private final Map<IMethod, Map<SSAInstruction, IntSetVariable>> intraProceduralLocks;
 	private final CallGraph callGraph;
 
 	public TFProvider(CallGraph callGraph,
-			HashMap<IMethod, HashMap<SSAInstruction, IntSetVariable>> intraProceduralLocks) {
+			Map<IMethod, Map<SSAInstruction, IntSetVariable>> intraProceduralLocks) {
 		this.callGraph = callGraph;
 		this.intraProceduralLocks = intraProceduralLocks;
 	}
@@ -42,7 +42,7 @@ public class TFProvider implements ITransferFunctionProvider<CGNode, LockSetVari
 				return new AddLockTransferFunction(node, var);				
 			} else {
 				IntSetVariable var = new IntSetVariable();
-				var.add(-1);
+				var.add(0);
 				return new AddLockTransferFunction(node, var);
 			}
 		} else 

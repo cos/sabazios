@@ -21,7 +21,7 @@ public class IncuiateTest extends DataRaceAnalysisTest {
 		DEBUG = true;
 		this.addBinaryDependency("sabazios/synthetic");
 		this.addBinaryDependency("../lib/parallelArray.mock");
-		U.detailedResults = false;
+		U.detailedResults = true;
 	}
 
 	@Before
@@ -57,17 +57,17 @@ public class IncuiateTest extends DataRaceAnalysisTest {
 	@Test
 	public void syncedOnChangedStatic() {
 		assertCAs("Loop: sabazios.synthetic.Incuiate.syncedOnChangedStatic(Incuiate.java:152)\n" + 
-				"   Object : sabazios.synthetic.Incuiate.syncedOnChangedStatic(Incuiate.java:150) new Particle\n" + 
-				"      Write accesses:\n" + 
-				"        Write sabazios.synthetic.Incuiate$8.op(Incuiate.java:157) - .x [7: sabazios.synthetic.Incuiate$8.op(Incuiate.java:156)]\n" + 
-				"      Other accesses:\n" + 
-				"        Write sabazios.synthetic.Incuiate$8.op(Incuiate.java:157) - .x [7: sabazios.synthetic.Incuiate$8.op(Incuiate.java:156)]\n" + 
 				"   Object : null new Incuiate\n" + 
 				"      Write accesses:\n" + 
 				"        Write sabazios.synthetic.Incuiate$8.op(Incuiate.java:155) - .lacatStatic\n" + 
 				"      Other accesses:\n" + 
 				"        Read sabazios.synthetic.Incuiate$8.op(Incuiate.java:156) - .lacatStatic\n" + 
-				"        Write sabazios.synthetic.Incuiate$8.op(Incuiate.java:155) - .lacatStatic\n");
+				"        Write sabazios.synthetic.Incuiate$8.op(Incuiate.java:155) - .lacatStatic\n" + 
+				"   Object : sabazios.synthetic.Incuiate.syncedOnChangedStatic(Incuiate.java:150) new Particle\n" + 
+				"      Write accesses:\n" + 
+				"        Write sabazios.synthetic.Incuiate$8.op(Incuiate.java:157) - .x [7: sabazios.synthetic.Incuiate$8.op(Incuiate.java:156)]\n" + 
+				"      Other accesses:\n" + 
+				"        Write sabazios.synthetic.Incuiate$8.op(Incuiate.java:157) - .x [7: sabazios.synthetic.Incuiate$8.op(Incuiate.java:156)]\n");
 	}
 	
 	@Test
@@ -101,25 +101,33 @@ public class IncuiateTest extends DataRaceAnalysisTest {
 		assertCAs("");
 	}
 	
-	// our algorithm cannot prove this at this point. See Relooper.Log entry on 26th of May
-	@Ignore
+	// our algorithm cannot prove this at this point. See Relooper.Log entry on 23rd of May
+	// it currently works because the accesses in knows thread-safe methods are ignored
 	@Test
 	public void printStream() {
 		assertCAs("");
 	}
 	
-	@Ignore
+	// our algorithm cannot prove this at this point. See Relooper.Log entry on 26th of May
+	// it currently works because the accesses in knows thread-safe methods are ignored
 	@Test
 	public void regexPatternCompile() {
 		assertCAs("");
 	}
 	
-	@Ignore
+	// our algorithm cannot prove this at this point. See Relooper.Log entry on 26th of May
+	// it currently works because the accesses in knows thread-safe methods are ignored
 	@Test
 	public void systemExit() {
 		assertCAs("");
 	}
 	
+	@Test
+	public void staticSynchedMethod() {
+		assertCAs("");
+	}
+	
+	// just a template method to copy around
 	@Ignore
 	@Test
 	public void templateMethod() {

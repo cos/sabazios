@@ -60,7 +60,6 @@ public final class CS extends nCFAContextSelector {
 			// System.out.println(calleeString);
 			FlexibleContext c = new FlexibleContext(context);
 			SSAAbstractInvokeInstruction invoke = caller.getIR().getCalls(site)[0];
-//			c.putItem(ELEMENT_VALUE, invoke.getDef());
 			c.putItem(MAIN_ITERATION, invoke.getDef() == 5);
 			c.putItem(PARALLEL, false);
 			// System.out.println(c);
@@ -72,7 +71,6 @@ public final class CS extends nCFAContextSelector {
 			// System.out.println(calleeString);
 			FlexibleContext c = new FlexibleContext(context);
 			SSAAbstractInvokeInstruction invoke = caller.getIR().getCalls(site)[0];
-//			c.putItem(ELEMENT_VALUE, invoke.getDef());
 			c.putItem(MAIN_ITERATION, invoke.getDef() == 5);
 			c.putItem(PARALLEL, true);
 			// System.out.println(c);
@@ -84,7 +82,6 @@ public final class CS extends nCFAContextSelector {
 			// System.out.println(calleeString);
 			FlexibleContext c = new FlexibleContext(context);
 			SSAAbstractInvokeInstruction invoke = caller.getIR().getCalls(site)[0];
-//			c.putItem(ELEMENT_VALUE, invoke.getDef());
 			c.putItem(MAIN_ITERATION, invoke.getDef() == 6);
 			c.putItem(PARALLEL, false);
 			// System.out.println(c);
@@ -96,7 +93,6 @@ public final class CS extends nCFAContextSelector {
 			// System.out.println(calleeString);
 			FlexibleContext c = new FlexibleContext(context);
 			SSAAbstractInvokeInstruction invoke = caller.getIR().getCalls(site)[0];
-//			c.putItem(ELEMENT_VALUE, invoke.getDef());
 			c.putItem(MAIN_ITERATION, invoke.getDef() == 6);
 			c.putItem(PARALLEL, true);
 			// System.out.println(c);
@@ -111,7 +107,7 @@ public final class CS extends nCFAContextSelector {
 //			c.putItem(ELEMENT_VALUE, invoke.getUse(1));
 			c.putItem(MAIN_ITERATION, invoke.getUse(1) == 4);
 			c.putItem(PARALLEL, false);
-			System.out.println(c);
+//			System.out.println(c);
 			return c;
 		}
 		if (callerMethod.contains("apply(Lextra166y/Ops$Procedure;)V") && calleeString.contains("op")) {
@@ -119,10 +115,9 @@ public final class CS extends nCFAContextSelector {
 			System.out.println(calleeString);
 			FlexibleContext c = new FlexibleContext(context);
 			SSAAbstractInvokeInstruction invoke = caller.getIR().getCalls(site)[0];
-//			c.putItem(ELEMENT_VALUE, invoke.getUse(1));
 			c.putItem(MAIN_ITERATION, invoke.getUse(1) == 4);
 			c.putItem(PARALLEL, true);
-			System.out.println(c);
+//			System.out.println(c);
 			// System.out.println(invoke.getUse(1));
 			return c;
 		}

@@ -6,11 +6,11 @@ import java.util.Set;
 import sabazios.lockset.Locks;
 import sabazios.util.U;
 
-public abstract class ConcurrentAccess {
+public abstract class ConcurrentAccess<T extends ObjectAccess> {
 
 	public final Loop t;
-	public final LinkedHashSet<ObjectAccess> alphaAccesses = new LinkedHashSet<ObjectAccess>();
-	public final LinkedHashSet<ObjectAccess> betaAccesses = new LinkedHashSet<ObjectAccess>();
+	public final LinkedHashSet<T> alphaAccesses = new LinkedHashSet<T>();
+	public final LinkedHashSet<T> betaAccesses = new LinkedHashSet<T>();
 
 	public ConcurrentAccess(Loop t) {
 		this.t = t;
@@ -30,7 +30,7 @@ public abstract class ConcurrentAccess {
 		return s.toString();
 	}
 
-	private static void accessesToString(Set<ObjectAccess> accesses, String linePrefix, StringBuffer s) {
+	private static <T extends ObjectAccess> void accessesToString(Set<T> accesses, String linePrefix, StringBuffer s) {
 		for (ObjectAccess w : accesses) {
 			s.append("\n");
 			s.append(linePrefix);
@@ -46,7 +46,8 @@ public abstract class ConcurrentAccess {
 		if (!(obj instanceof ConcurrentAccess))
 			return false;
 
-		ConcurrentAccess other = (ConcurrentAccess) obj;
+		@SuppressWarnings("unchecked")
+		ConcurrentAccess<T> other = (ConcurrentAccess<T>) obj;
 		if (!(this.t.equals(other.t) && this.alphaAccesses.equals(other.alphaAccesses) && this.betaAccesses
 				.equals(other.betaAccesses)))
 			return false;
@@ -76,11 +77,11 @@ public abstract class ConcurrentAccess {
 		distributeLocks(betaAccesses, locks);
 	}
 
-	private static void distributeLocks(Set<ObjectAccess> writeAccesses2, Locks locks) {
+	private static <T extends ObjectAccess> void distributeLocks(Set<T> writeAccesses2, Locks locks) {
 		for (ObjectAccess objectAccess : writeAccesses2) {
 			objectAccess.l = locks.get(objectAccess.n, objectAccess.i);
 		}
 	}
 
-	public abstract boolean sameTarget(ConcurrentAccess rippledUp);
+	public abstract boolean sameTarget(ConcurrentAccess<?> rippledUp);
 }
