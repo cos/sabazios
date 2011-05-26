@@ -15,7 +15,7 @@ import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
 import com.ibm.wala.ssa.SSAInstruction;
 
-public class TFProvider implements ITransferFunctionProvider<CGNode, Lock> {
+public class TFProvider implements ITransferFunctionProvider<CGNode, LockSetVariable> {
 
 	// private static final UnaryOperator<Lock> lockIdentity = new
 	// IntSetIdentity<Lock>();
@@ -34,7 +34,7 @@ public class TFProvider implements ITransferFunctionProvider<CGNode, Lock> {
 	}
 
 	@Override
-	public UnaryOperator<Lock> getNodeTransferFunction(CGNode node) {
+	public UnaryOperator<LockSetVariable> getNodeTransferFunction(CGNode node) {
 		if (node.getMethod().isSynchronized()) {
 			if(!node.getMethod().isStatic()) {
 				IntSetVariable var = new IntSetVariable();
@@ -55,7 +55,7 @@ public class TFProvider implements ITransferFunctionProvider<CGNode, Lock> {
 	}
 
 	@Override
-	public UnaryOperator<Lock> getEdgeTransferFunction(CGNode src, CGNode dst) {
+	public UnaryOperator<LockSetVariable> getEdgeTransferFunction(CGNode src, CGNode dst) {
 		Iterator<CallSiteReference> possibleSites = callGraph.getPossibleSites(src, dst);
 		IntSetVariable var = IntSetVariable.newTop();
 		while (possibleSites.hasNext()) {
@@ -63,14 +63,15 @@ public class TFProvider implements ITransferFunctionProvider<CGNode, Lock> {
 			SSAAbstractInvokeInstruction[] calls = src.getIR().getCalls(callSiteReference);
 			for (SSAAbstractInvokeInstruction ii : calls) {
 				IntSetVariable l = this.intraProceduralLocks.get(src.getMethod()).get(ii);
-				var.intersect(l);
+				if(l != null)
+					var.intersect(l);
 			}
 		}
 		return new AddLockTransferFunction(src, var);
 	}
 
 	@Override
-	public AbstractMeetOperator<Lock> getMeetOperator() {
+	public AbstractMeetOperator<LockSetVariable> getMeetOperator() {
 		return LockIntersection.instance;
 	}
 

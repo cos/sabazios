@@ -1,9 +1,8 @@
-package sabazios;
+package sabazios.lockset;
 
 import java.util.HashMap;
 
 import sabazios.lockset.CFG.Solver;
-import sabazios.lockset.callGraph.Lock;
 import sabazios.util.IntSetVariable;
 
 import com.ibm.wala.classLoader.IMethod;
@@ -17,11 +16,11 @@ import com.ibm.wala.util.CancelException;
 public class Locks {
 	private final CallGraph callGraph;
 
-	Locks(CallGraph callGraph) {
+	public Locks(CallGraph callGraph) {
 		this.callGraph = callGraph;
 	}
 
-	HashMap<CGNode, Lock> locksForCGNodes = new HashMap<CGNode, Lock>();
+	public HashMap<CGNode, LockSet> locksForCGNodes = new HashMap<CGNode, LockSet>();
 	HashMap<IMethod, HashMap<SSAInstruction, IntSetVariable>> intraProceduralLocks = new HashMap<IMethod, HashMap<SSAInstruction, IntSetVariable>>();
 
 	public void compute() {
@@ -39,7 +38,8 @@ public class Locks {
 			e.printStackTrace();
 		}
 		for (CGNode n : callGraph) {
-			this.locksForCGNodes.put(n, solver.getOut(n));
+			LockSet out = solver.getOut(n).getIndividualLocks();
+			this.locksForCGNodes.put(n, out);
 		}
 	}
 
@@ -84,17 +84,20 @@ public class Locks {
 		}
 	}
 
-	public Lock get(CGNode n) {
+	public LockSet get(CGNode n) {
 		return locksForCGNodes.get(n);
 	}
 
-	public Lock get(CGNode n, SSAInstruction i) {
-		Lock result = (Lock) get(n).clone();
+	public LockSet get(CGNode n, SSAInstruction i) {
+		LockSet lockSet = new LockSet();
+		lockSet.addAll(get(n));
 		if (intraProceduralLocks.containsKey(n.getMethod())) {
 			HashMap<SSAInstruction, IntSetVariable> hashMap = intraProceduralLocks.get(n.getMethod());
 			IntSetVariable intSetVariable = hashMap.get(i);
-			result.addNewVars(n, intSetVariable);
+			for (Integer v : intSetVariable) {
+				lockSet.add(new Lock(n, v));
+			}
 		}
-		return result;
+		return lockSet;
 	}
 }

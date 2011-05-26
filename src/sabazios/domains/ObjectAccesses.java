@@ -1,13 +1,13 @@
-package sabazios;
+package sabazios.domains;
 
 import java.util.HashMap;
 import java.util.HashSet;
 
-import sabazios.domains.FieldAccess;
-import sabazios.domains.Loop;
+import sabazios.A;
 import sabazios.util.FlexibleContext;
 import sabazios.util.InstructionsGatherer;
 import sabazios.util.U;
+import sabazios.wala.CS;
 
 import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.ipa.callgraph.CGNode;
@@ -69,17 +69,17 @@ public abstract class ObjectAccesses<T extends FieldAccess> extends HashMap<Loop
 
 	String[] threadSafeMethods = new String[] { 
 //			"java/util/regex/Pattern", "java/lang/System, exit",
-			"java/io/PrintStream, write",
-			"java/io/PrintStream, print",
-			"java/lang/Throwable, printStackTrace",
-			"java/security/AccessControlContext, getDebug", // not relevant
+//			"java/io/PrintStream, write",
+//			"java/io/PrintStream, print",
+//			"java/lang/Throwable, printStackTrace",
+//			"java/security/AccessControlContext, getDebug", // not relevant
 //			"java.io.PrintStream, format", 
 //			"java/util/Random, <init>" , "Integer, <init>",
 			};
 
 	protected void add(T w) {
 		FlexibleContext c = (FlexibleContext) w.n.getContext();
-		Loop t = A.t.get((InstanceKey) c.getItem(CS.ARRAY),
+		Loop t = A.loops.get((InstanceKey) c.getItem(CS.ARRAY),
 				(CGNode) c.getItem(CS.OPERATOR_CALLER), (CallSiteReference) c.getItem(CS.OPERATOR_CALL_SITE_REFERENCE));
 		
 		HashMap<InstanceKey, HashSet<T>> localAcccess;

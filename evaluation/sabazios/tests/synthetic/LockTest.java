@@ -7,7 +7,6 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 
 import sabazios.tests.DataRaceAnalysisTest;
-import sabazios.tests.RaceAssert;
 import sabazios.util.U;
 
 import com.ibm.wala.util.CancelException;

@@ -1,6 +1,6 @@
 package sabazios.util;
 
-import sabazios.CS;
+import sabazios.wala.CS;
 
 import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.classLoader.IClassLoader;
@@ -73,7 +73,7 @@ public class U {
 		return tos(array)+((Boolean) context.getItem(CS.MAIN_ITERATION) ? "- m]" : "- c]");
 	}
 
-	public static boolean isMainContext(InstanceKey o) {
+	public static boolean isAlphaIteration(InstanceKey o) {
 		if (!(o instanceof AllocationSiteInNode))
 			return false;
 

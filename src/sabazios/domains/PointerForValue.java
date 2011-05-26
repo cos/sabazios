@@ -1,25 +1,22 @@
-package sabazios;
+package sabazios.domains;
 
 import java.util.HashMap;
 import java.util.Iterator;
+
+import sabazios.A;
 
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 import com.ibm.wala.util.collections.SparseVector;
 
 public class PointerForValue {
-	private A a;
 	private boolean computed = false;
 
 	private HashMap<CGNode, SparseVector<LocalPointerKey>> pointedObjects = new HashMap<CGNode, SparseVector<LocalPointerKey>>();
 //	private HashMap<IClass, ConcreteTypeKey> classToInstanceKey = new HashMap<IClass, ConcreteTypeKey>(); 
 
-	public PointerForValue(A raceAnalysis) {
-		this.a = raceAnalysis;
-	}
-
 	public void compute() {
-		Iterator<Object> iterator = a.heapGraph.iterator();
+		Iterator<Object> iterator = A.heapGraph.iterator();
 		while (iterator.hasNext()) {
 			Object ik = iterator.next();
 			if (ik instanceof LocalPointerKey) {

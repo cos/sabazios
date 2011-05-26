@@ -7,7 +7,6 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 
 import sabazios.tests.DataRaceAnalysisTest;
-import sabazios.tests.RaceAssert;
 import sabazios.util.U;
 
 import com.ibm.wala.util.CancelException;
@@ -22,7 +21,7 @@ public class IncuiateTest extends DataRaceAnalysisTest {
 		DEBUG = true;
 		this.addBinaryDependency("sabazios/synthetic");
 		this.addBinaryDependency("../lib/parallelArray.mock");
-		U.detailedResults = true;
+		U.detailedResults = false;
 	}
 
 	@Before
@@ -60,9 +59,9 @@ public class IncuiateTest extends DataRaceAnalysisTest {
 		assertCAs("Loop: sabazios.synthetic.Incuiate.syncedOnChangedStatic(Incuiate.java:152)\n" + 
 				"   Object : sabazios.synthetic.Incuiate.syncedOnChangedStatic(Incuiate.java:150) new Particle\n" + 
 				"      Write accesses:\n" + 
-				"        Write sabazios.synthetic.Incuiate$8.op(Incuiate.java:157) - .x { 7: sabazios.synthetic.Incuiate$8.op(Incuiate.java:156) }\n" + 
+				"        Write sabazios.synthetic.Incuiate$8.op(Incuiate.java:157) - .x [7: sabazios.synthetic.Incuiate$8.op(Incuiate.java:156)]\n" + 
 				"      Other accesses:\n" + 
-				"        Write sabazios.synthetic.Incuiate$8.op(Incuiate.java:157) - .x { 7: sabazios.synthetic.Incuiate$8.op(Incuiate.java:156) }\n" + 
+				"        Write sabazios.synthetic.Incuiate$8.op(Incuiate.java:157) - .x [7: sabazios.synthetic.Incuiate$8.op(Incuiate.java:156)]\n" + 
 				"   Object : null new Incuiate\n" + 
 				"      Write accesses:\n" + 
 				"        Write sabazios.synthetic.Incuiate$8.op(Incuiate.java:155) - .lacatStatic\n" + 
@@ -76,15 +75,15 @@ public class IncuiateTest extends DataRaceAnalysisTest {
 		assertCAs("Loop: sabazios.synthetic.Incuiate.syncedOnSomeChangedField(Incuiate.java:112)\n" + 
 				"   Object : sabazios.synthetic.Incuiate.syncedOnSomeChangedField(Incuiate.java:110) new Particle\n" + 
 				"      Write accesses:\n" + 
+				"        Write sabazios.synthetic.Incuiate$6.op(Incuiate.java:117) - .x [7: sabazios.synthetic.Incuiate$6.op(Incuiate.java:116)]\n" + 
+				"      Other accesses:\n" + 
+				"        Write sabazios.synthetic.Incuiate$6.op(Incuiate.java:117) - .x [7: sabazios.synthetic.Incuiate$6.op(Incuiate.java:116)]\n" + 
+				"   Object : sabazios.synthetic.Incuiate.syncedOnSomeChangedField(Incuiate.java:110) new Particle\n" + 
+				"      Write accesses:\n" + 
 				"        Write sabazios.synthetic.Incuiate$6.op(Incuiate.java:115) - .origin\n" + 
 				"      Other accesses:\n" + 
 				"        Read sabazios.synthetic.Incuiate$6.op(Incuiate.java:116) - .origin\n" + 
-				"        Write sabazios.synthetic.Incuiate$6.op(Incuiate.java:115) - .origin\n" + 
-				"   Object : sabazios.synthetic.Incuiate.syncedOnSomeChangedField(Incuiate.java:110) new Particle\n" + 
-				"      Write accesses:\n" + 
-				"        Write sabazios.synthetic.Incuiate$6.op(Incuiate.java:117) - .x { 7: sabazios.synthetic.Incuiate$6.op(Incuiate.java:116) }\n" + 
-				"      Other accesses:\n" + 
-				"        Write sabazios.synthetic.Incuiate$6.op(Incuiate.java:117) - .x { 7: sabazios.synthetic.Incuiate$6.op(Incuiate.java:116) }\n");
+				"        Write sabazios.synthetic.Incuiate$6.op(Incuiate.java:115) - .origin\n");
 	}
 	
 	@Test
@@ -92,9 +91,9 @@ public class IncuiateTest extends DataRaceAnalysisTest {
 		assertCAs("Loop: sabazios.synthetic.Incuiate.stillARace(Incuiate.java:61)\n" + 
 				"   Object : sabazios.synthetic.Incuiate.stillARace(Incuiate.java:59) new Particle\n" + 
 				"      Write accesses:\n" + 
-				"        Write sabazios.synthetic.Incuiate$3.op(Incuiate.java:65) - .x { 3: sabazios.synthetic.Incuiate$3.op(Incuiate.java:64) }\n" + 
+				"        Write sabazios.synthetic.Incuiate$3.op(Incuiate.java:65) - .x [3: sabazios.synthetic.Incuiate$3.op(Incuiate.java:64)]\n" + 
 				"      Other accesses:\n" + 
-				"        Write sabazios.synthetic.Incuiate$3.op(Incuiate.java:65) - .x { 3: sabazios.synthetic.Incuiate$3.op(Incuiate.java:64) }\n");
+				"        Write sabazios.synthetic.Incuiate$3.op(Incuiate.java:65) - .x [3: sabazios.synthetic.Incuiate$3.op(Incuiate.java:64)]\n");
 	}
 	
 	@Test
@@ -102,8 +101,22 @@ public class IncuiateTest extends DataRaceAnalysisTest {
 		assertCAs("");
 	}
 	
+	// our algorithm cannot prove this at this point. See Relooper.Log entry on 26th of May
+	@Ignore
 	@Test
 	public void printStream() {
+		assertCAs("");
+	}
+	
+	@Ignore
+	@Test
+	public void regexPatternCompile() {
+		assertCAs("");
+	}
+	
+	@Ignore
+	@Test
+	public void systemExit() {
 		assertCAs("");
 	}
 	

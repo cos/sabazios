@@ -9,7 +9,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package sabazios;
+package sabazios.wala;
+
 
 
 import com.ibm.wala.analysis.reflection.ReflectionContextInterpreter;
@@ -43,7 +44,7 @@ public class SmartCFABuilder extends SSAPropagationCallGraphBuilder {
     setContextInterpreter(contextInterpreter);
     
     ZeroXInstanceKeys zik = makeInstanceKeys(cha, options, contextInterpreter, instancePolicy);
-    setContextSelector(new CS(zik, options));
+    setContextSelector(new CS(zik, options, cha));
     setInstanceKeys(zik);
   }
   /**

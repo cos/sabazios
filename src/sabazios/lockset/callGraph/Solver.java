@@ -11,9 +11,9 @@ import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ssa.SSAInstruction;
 
-public class Solver extends DataflowSolver<CGNode, Lock> {
+public class Solver extends DataflowSolver<CGNode, LockSetVariable> {
 
-	public static class Problem extends BasicFramework<CGNode, Lock> {
+	public static class Problem extends BasicFramework<CGNode, LockSetVariable> {
 		public Problem(CallGraph cg,
 				TFProvider transferFunctionProvider) {
 			super(cg, transferFunctionProvider);
@@ -25,12 +25,17 @@ public class Solver extends DataflowSolver<CGNode, Lock> {
 	}
 
 	@Override
-	protected Lock makeNodeVariable(CGNode n, boolean IN) {
-		return new Lock();
+	protected LockSetVariable makeNodeVariable(CGNode n, boolean IN) {
+		return new LockSetVariable();
 	}
 
 	@Override
-	protected Lock makeEdgeVariable(CGNode src, CGNode dst) {
-		return new Lock();
+	protected LockSetVariable makeEdgeVariable(CGNode src, CGNode dst) {
+		return new LockSetVariable();
+	}
+
+	@Override
+	protected LockSetVariable[] makeStmtRHS(int size) {
+		return new LockSetVariable[size];
 	}
 }

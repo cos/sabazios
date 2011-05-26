@@ -5,7 +5,7 @@ import sabazios.util.IntSetVariable;
 import com.ibm.wala.fixpoint.UnaryOperator;
 import com.ibm.wala.ipa.callgraph.CGNode;
 
-public class AddLockTransferFunction extends UnaryOperator<Lock> {
+public class AddLockTransferFunction extends UnaryOperator<LockSetVariable> {
 	private final CGNode src;
 	private final IntSetVariable var;
 
@@ -15,8 +15,8 @@ public class AddLockTransferFunction extends UnaryOperator<Lock> {
 	}
 
 	@Override
-	public byte evaluate(Lock lhs, Lock rhs) {
-		Lock new_lhs = (Lock) rhs.clone();
+	public byte evaluate(LockSetVariable lhs, LockSetVariable rhs) {
+		LockSetVariable new_lhs = (LockSetVariable) rhs.clone();
 		
 		new_lhs.addNewVars(src, var);
 		

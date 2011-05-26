@@ -1,21 +1,18 @@
-package sabazios;
+package sabazios.domains;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.TreeSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
-import sabazios.domains.ConcurrentAccess;
-import sabazios.domains.ConcurrentFieldAccess;
-import sabazios.domains.FieldAccess;
-import sabazios.domains.Loop;
-import sabazios.domains.WriteFieldAccess;
+import sabazios.A;
 import sabazios.util.U;
 
 import com.ibm.wala.classLoader.IField;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 
-public class ConcurrentFieldAccesses extends ConcurrentAccesses {
+public class ConcurrentFieldAccesses extends ConcurrentAccesses<ConcurrentFieldAccess> {
 	private static final long serialVersionUID = 8609685673623357446L;
 
 	public ConcurrentFieldAccesses() {
@@ -24,14 +21,14 @@ public class ConcurrentFieldAccesses extends ConcurrentAccesses {
 	public void compute() {
 
 		// add all write this
-		for (Loop t : A.w.keySet()) {
-			this.put(t, new TreeSet<ConcurrentAccess>());
-			HashMap<InstanceKey, HashSet<WriteFieldAccess>> localAccesses = A.w.get(t);
+		for (Loop t : A.write.keySet()) {
+			this.put(t, new LinkedHashSet<ConcurrentFieldAccess>());
+			HashMap<InstanceKey, HashSet<WriteFieldAccess>> localAccesses = A.write.get(t);
 			for (InstanceKey o : localAccesses.keySet()) {
 				HashSet<WriteFieldAccess> writes = localAccesses.get(o);
 				for (WriteFieldAccess w : writes) {
 					ConcurrentFieldAccess ca = get(t, o, w.f);
-					ca.writeAccesses.add(w);
+					ca.alphaAccesses.add(w);
 				}
 			}
 		}
@@ -43,16 +40,16 @@ public class ConcurrentFieldAccesses extends ConcurrentAccesses {
 				HashSet<FieldAccess> others = localAccesses.get(o);
 				for (FieldAccess oa : others) {
 					ConcurrentFieldAccess ca = get(t, o, oa.f);
-					ca.otherAccesses.add(oa);
+					ca.betaAccesses.add(oa);
 				}
 			}
 		}
-		
-		reduceNonConcurrentAndSimilarLooking();
+
+		reduceNonConcurrent();
 	}
 
 	@SuppressWarnings("unused")
-	private void debugPrint(TreeSet<ConcurrentAccess> newCAS) {
+	private void debugPrint(Set<ConcurrentFieldAccess> newCAS) {
 		InstanceKey o = newCAS.iterator().next().o;
 		System.out.println("-------");
 		System.out.println(U.tos(o));
@@ -69,7 +66,7 @@ public class ConcurrentFieldAccesses extends ConcurrentAccesses {
 				Iterator<Object> succNodes3 = A.heapGraph.getSuccNodes(A.heapGraph.getSuccNodes(i).next());
 				while (succNodes3.hasNext()) {
 					InstanceKey object2 = (InstanceKey) succNodes3.next();
-					System.out.println("     "+U.tos(object2));
+					System.out.println("     " + U.tos(object2));
 				}
 			}
 		}
@@ -79,8 +76,8 @@ public class ConcurrentFieldAccesses extends ConcurrentAccesses {
 		if (!this.containsKey(t))
 			return null;
 
-		TreeSet<ConcurrentAccess> localAccesses = this.get(t);
-		for (ConcurrentAccess ca : localAccesses) {
+		Set<ConcurrentFieldAccess> localAccesses = (Set<ConcurrentFieldAccess>) this.get(t);
+		for (ConcurrentFieldAccess ca : localAccesses) {
 			ConcurrentFieldAccess cfa = (ConcurrentFieldAccess) ca;
 			if (cfa.f.equals(f) && ((ca.o == null && o == null) || (ca.o != null && ca.o.equals(o))))
 				return cfa;
@@ -89,31 +86,30 @@ public class ConcurrentFieldAccesses extends ConcurrentAccesses {
 		this.get(t).add(ca);
 		return ca;
 	}
-	
-	public ConcurrentAccesses rippleUp() {
-		ConcurrentAccesses cas = new ConcurrentAccesses();
-		for (Loop t : this.keySet()) {
-			TreeSet<ConcurrentAccess> s = this.get(t);
-			int i = 0;
-			for (ConcurrentAccess ca : s) {
-				ConcurrentFieldAccess cfa = (ConcurrentFieldAccess) ca;
-				System.out.println(i++);
-				ConcurrentAccess rippledUp = cfa.rippleUp();
-				if (!cas.containsKey(t))
-					cas.put(t, new TreeSet<ConcurrentAccess>());
-				TreeSet<ConcurrentAccess> treeSet = cas.get(t);
-				if (treeSet.contains(rippledUp))
-					for (ConcurrentAccess concurrentAccess : treeSet) {
-						if (concurrentAccess.equals(rippledUp)) {
-							concurrentAccess.writeAccesses.addAll(rippledUp.writeAccesses);
-							concurrentAccess.otherAccesses.addAll(rippledUp.otherAccesses);
-							break;
-						}
-					}
-				else
-					treeSet.add(rippledUp);
-			}
-		}
-		return cas;
-	}
+
+	// // do not keep duplicate this where the write to an object
+	// // of the main thread looks identical to the write
+	// // to an object of the check thread. this does not add value
+	// public void
+	// removeDuplicateWritesToObjectsAllocatedInMainAndCheckIterations() {
+	// // remove read this that don't have write this
+	// Iterator<Loop> loops = this.keySet().iterator();
+	// while (loops.hasNext()) {
+	// Loop t = loops.next();
+	// Set<ConcurrentFieldAccess> cas = this.get(t);
+	// Iterator<ConcurrentFieldAccess> iterator = cas.iterator();
+	// while (iterator.hasNext()) {
+	// ConcurrentFieldAccess ca = (ConcurrentFieldAccess) iterator.next();
+	// for (ConcurrentFieldAccess ca1 : cas) {
+	// if (ca != ca1 && !U.isAlphaIteration(ca.o)) {
+	// iterator.remove();
+	// break;
+	// }
+	// }
+	// }
+	//
+	// if (cas.isEmpty())
+	// loops.remove();
+	// }
+	// }
 }

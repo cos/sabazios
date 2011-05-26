@@ -5,27 +5,31 @@ import java.util.Iterator;
 import java.util.Set;
 
 import sabazios.A;
-import sabazios.util.ComparableTuple;
+import sabazios.util.CGNodeUtil;
 import sabazios.util.Relation;
 import sabazios.util.Tuple;
 import sabazios.util.U;
+import sabazios.wala.CS;
 
 import com.google.common.collect.Sets;
 import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.classLoader.IField;
 import com.ibm.wala.ipa.callgraph.CGNode;
+import com.ibm.wala.ipa.callgraph.propagation.AllocationSiteInNode;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
 import com.ibm.wala.ssa.SSAInvokeInstruction;
 
 public class ConcurrentFieldAccess extends ConcurrentAccess {
+	public final InstanceKey o;	
 	public final IField f;
 
 	public ConcurrentFieldAccess(Loop t, InstanceKey o, IField f) {
-		super(t, o);
+		super(t);
 		if(f == null)
 			throw new NullPointerException("f cannot be null");
+		this.o = o;
 		this.f = f;
 	}
 
@@ -51,10 +55,10 @@ public class ConcurrentFieldAccess extends ConcurrentAccess {
 	public ConcurrentAccess rippleUp() {
 		HashSet<ObjectAccess> was = new HashSet<ObjectAccess>();
 		HashSet<ObjectAccess> oas = new HashSet<ObjectAccess>();
-		for (ObjectAccess w : this.writeAccesses) {
+		for (ObjectAccess w : this.alphaAccesses) {
 			was.addAll(rippleUp((FieldAccess) w));
 		}
-		for (ObjectAccess w : this.otherAccesses) {
+		for (ObjectAccess w : this.betaAccesses) {
 			oas.addAll(rippleUp((FieldAccess) w));
 		}
 		boolean ugly = false;
@@ -72,13 +76,12 @@ public class ConcurrentFieldAccess extends ConcurrentAccess {
 		if (!ugly)
 			return this;
 
-		ConcurrentAccess ca;
-		ca = new ConcurrentAccess(t, was.iterator().next().o);
+		ConcurrentShallowAccess ca = new ConcurrentShallowAccess(t);
 
-		ca.writeAccesses.addAll(was);
-		ca.otherAccesses.addAll(oas);
+		ca.alphaAccesses.addAll(was);
+		ca.betaAccesses.addAll(oas);
 
-		ca.gatherOtherObjects();
+		ca.gatherObjects();
 		return ca;
 	}
 
@@ -129,29 +132,47 @@ public class ConcurrentFieldAccess extends ConcurrentAccess {
 		}
 		return sa;
 	}
-
+	
 	@Override
-	public boolean equals(Object obj) {
-		if (!super.equals(obj))
+	public boolean sameTarget(ConcurrentAccess obj) {
+		if(obj == null)
 			return false;
-		if (!(obj instanceof ConcurrentFieldAccess))
+		if(obj.getClass() != this.getClass())
 			return false;
-
-		return this.compareTo((ConcurrentFieldAccess) obj) == 0;
+		
+		ConcurrentFieldAccess other = (ConcurrentFieldAccess) obj;
+		
+		if(!f.equals(other.f))
+			return false;
+		
+		if(o instanceof AllocationSiteInNode && other.o instanceof AllocationSiteInNode) {
+			AllocationSiteInNode o1 = (AllocationSiteInNode) o;
+			AllocationSiteInNode o2 = (AllocationSiteInNode) other.o;
+			CGNode n1 = o1.getNode();
+			CGNode n2 = o2.getNode();
+			return CGNodeUtil.equalsExcept(n1, n2, CS.MAIN_ITERATION);
+				
+		} else
+			return o.equals(other.o);
 	}
-
-	@Override
-	public int compareTo(ConcurrentAccess other) {
-		if (!(other instanceof ConcurrentFieldAccess)) {
-			return -1;
+	
+	public void checkConsistency() {
+		if(o!=null){
+		for (ObjectAccess oa : alphaAccesses) 
+			if(!o.equals(oa.o))
+				throw new RuntimeException("Inconsistency");
+		
+		for (ObjectAccess oa : betaAccesses) 
+			if(!o.equals(oa.o))
+				throw new RuntimeException("Inconsistency");
 		} else {
-			ConcurrentFieldAccess cfa = (ConcurrentFieldAccess) other;
-			String string = o != null ? o.toString() : "";
-			String string2 = cfa.o != null ? cfa.o.toString() : "";
-			String f_string = f!= null ? f.toString() : ""; 
-			String cfa_f_string = cfa.f != null ? cfa.f.toString() : "";
-			return ComparableTuple.from(t, string, f_string).compareTo(
-					ComparableTuple.from(cfa.t, string2, cfa_f_string));
+			for (ObjectAccess oa : alphaAccesses) 
+				if(oa.o != null)
+					throw new RuntimeException("Inconsistency");
+			
+			for (ObjectAccess oa : betaAccesses) 
+				if(oa.o != null)
+					throw new RuntimeException("Inconsistency");
 		}
 	}
 }

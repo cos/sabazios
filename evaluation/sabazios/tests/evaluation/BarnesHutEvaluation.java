@@ -17,5 +17,6 @@ public class BarnesHutEvaluation extends DataRaceAnalysisTest{
 	@Test
 	public void test() throws CancelException {
 		findCA("LbarnesHut/ParallelBarneshut", "main([Ljava/lang/String;)V");
+		assertCAs("");
 	}
 }

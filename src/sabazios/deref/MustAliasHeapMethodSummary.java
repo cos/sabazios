@@ -1,4 +1,4 @@
-package sabazios.lockIdentity;
+package sabazios.deref;
 
 import java.util.LinkedHashMap;
 
@@ -11,7 +11,7 @@ import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.util.graph.labeled.SlowSparseNumberedLabeledGraph;
 import com.ibm.wala.util.strings.Atom;
 
-public class MustAliasHeapMethodSummary extends SlowSparseNumberedLabeledGraph<Integer, FieldReference> {
+class MustAliasHeapMethodSummary extends SlowSparseNumberedLabeledGraph<Integer, FieldReference> {
 
 	public final static LinkedHashMap<IR, MustAliasHeapMethodSummary> cached = new LinkedHashMap<IR, MustAliasHeapMethodSummary>();
 

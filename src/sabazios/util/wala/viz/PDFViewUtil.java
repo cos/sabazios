@@ -37,8 +37,6 @@ import com.ibm.wala.util.warnings.WalaException;
  */
 public class PDFViewUtil {
 
-  public static A raceAnalysis;
-
 /**
    * spawn a process to view a WALA IR
    * 
@@ -149,7 +147,7 @@ public class PDFViewUtil {
         StringBuffer x = new StringBuffer(j + "   " + instructions[j].toString(ir.getSymbolTable()));
         StringStuff.padWithSpaces(x, 35);
         result.append(x);
-        result.append(" "+raceAnalysis.locks.get(n, instructions[j]));
+        result.append(" "+A.locks.get(n, instructions[j]));
         result.append("\\l");
       }
     }

@@ -3,18 +3,18 @@ package sabazios.lockset.callGraph;
 import com.ibm.wala.dataflow.graph.AbstractMeetOperator;
 import com.ibm.wala.fixpoint.IVariable;
 
-public class LockIntersection extends AbstractMeetOperator<Lock> {
+public class LockIntersection extends AbstractMeetOperator<LockSetVariable> {
 
-	public static final AbstractMeetOperator<Lock> instance = new LockIntersection();
+	public static final AbstractMeetOperator<LockSetVariable> instance = new LockIntersection();
 	
 	private LockIntersection() {
 	}
 
 	@Override
-	public byte evaluate(Lock lhs, @SuppressWarnings("rawtypes") IVariable[] rhs) {
-		Lock newLhs = (Lock) ((Lock) rhs[0]).clone();
+	public byte evaluate(LockSetVariable lhs, LockSetVariable[] rhs) {
+		LockSetVariable newLhs = (LockSetVariable) rhs[0].clone();
 		for(IVariable<?> v :rhs) {
-			Lock other = (Lock) v;
+			LockSetVariable other = (LockSetVariable) v;
 			newLhs.intersect(other);
 		}
 		if(newLhs.equals(lhs))

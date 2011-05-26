@@ -27,7 +27,7 @@ public class IntSetVariableUnion extends AbstractMeetOperator<IntSetVariable> {
 
 	@SuppressWarnings({"rawtypes" })
 	@Override
-	public byte evaluate(IntSetVariable lhs, IVariable[] rhs) {
+	public byte evaluate(IntSetVariable lhs, IntSetVariable[] rhs) {
 		if (lhs == null) {
 			throw new IllegalArgumentException("null lhs");
 		}

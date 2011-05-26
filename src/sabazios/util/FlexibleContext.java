@@ -1,17 +1,16 @@
 package sabazios.util;
 
-import java.util.HashMap;
 import java.util.Set;
 
-import sabazios.CS;
+import sabazios.wala.CS;
 
+import com.ibm.wala.ipa.callgraph.AbstractCallContext;
 import com.ibm.wala.ipa.callgraph.Context;
 import com.ibm.wala.ipa.callgraph.ContextItem;
 import com.ibm.wala.ipa.callgraph.ContextKey;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 
-public class FlexibleContext implements Context {
-	HashMap<ContextKey, Object> items = new HashMap<ContextKey, Object>();
+public class FlexibleContext extends AbstractCallContext {
 	private Context inner;
 
 	public FlexibleContext() {
@@ -23,9 +22,9 @@ public class FlexibleContext implements Context {
 	
 	@Override
 	public ContextItem get(ContextKey k) {
-		Object o = items.get(k);
+		ContextItem o = super.get(k);
 		if(o != null)
-			return new FlexibleContextItem(o);
+			return o;
 		else
 			if(inner != null)
 				return inner.get(k);
@@ -33,19 +32,18 @@ public class FlexibleContext implements Context {
 	}
 
 	public void putItem(ContextKey k, Object o) {
-		items.put(k, o);
+		this.put(k, new FlexibleContextItem(o));
 	}
 	
 	public Object getItem(ContextKey k) {
-		Object item = items.get(k);
+		FlexibleContextItem item = (FlexibleContextItem) this.get(k);
 		if(item != null)
-			return item;
+			return item.o;
 		else
 			if(inner instanceof FlexibleContext)
 				return ((FlexibleContext) inner).getItem(k);
 		return null;
 	}
-	
 	
 	@Override
 	public boolean equals(Object obj) {
@@ -56,20 +54,20 @@ public class FlexibleContext implements Context {
 		
 		FlexibleContext other = (FlexibleContext) obj;
 		
-		return this.items.equals(other.items) && (inner != null ? inner.equals(other.inner) : other.inner == null);
+		return super.equals(other) && (inner != null ? inner.equals(other.inner) : other.inner == null);
 	}
 	
 	@Override
 	public int hashCode() {
-		return items.hashCode() + (inner != null ? inner.hashCode() : 0);
+		return super.hashCode() + (inner != null ? inner.hashCode() : 0);
 	}
 	
 	@Override
 	public String toString() {
 		String s = "";
-		Set<ContextKey> keySet = items.keySet();
+		Set<ContextKey> keySet = this.keySet();
 		for (ContextKey contextKey : keySet) {
-			Object object = items.get(contextKey);
+			Object object = this.getItem(contextKey);
 			if(object instanceof InstanceKey) {
 				InstanceKey i = (InstanceKey) object;
 				s+= "["+contextKey + " => " + U.tos(i) + "]";
@@ -85,9 +83,9 @@ public class FlexibleContext implements Context {
 	
 	public String toDotString() {
 		String s = "";
-		Set<ContextKey> keySet = items.keySet();
+		Set<ContextKey> keySet = this.keySet();
 		for (ContextKey contextKey : keySet) {
-			Object object = items.get(contextKey);
+			Object object = this.getItem(contextKey);
 			if(object instanceof InstanceKey) {
 				InstanceKey i = (InstanceKey) object;
 				s+= "["+contextKey + " => " + U.tos(i) + "]\\n";
@@ -111,7 +109,20 @@ public class FlexibleContext implements Context {
 		}
 		@Override
 		public boolean equals(Object obj) {
-			return o.equals(obj);
+			if(obj == null)
+				return false;
+			if(obj.getClass() != this.getClass())
+				return false;
+			
+			FlexibleContextItem other = (FlexibleContextItem) obj;
+			return o.equals(other.o);
+		}
+		@Override
+		public int hashCode() {
+			if(o == null)
+				return 0;
+			else
+				return o.hashCode();
 		}
 	}
 	

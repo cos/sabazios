@@ -2,12 +2,12 @@ package sabazios.lockset.callGraph;
 
 import com.ibm.wala.fixpoint.UnaryOperator;
 
-public class LockIdentity extends UnaryOperator<Lock> {
+public class LockIdentity extends UnaryOperator<LockSetVariable> {
 
-	public static final UnaryOperator<Lock> instance = new LockIdentity();
+	public static final UnaryOperator<LockSetVariable> instance = new LockIdentity();
 
 	@Override
-	public byte evaluate(Lock lhs, Lock rhs) {
+	public byte evaluate(LockSetVariable lhs, LockSetVariable rhs) {
 		if(lhs.equals(rhs))
 			return NOT_CHANGED;
 		else {

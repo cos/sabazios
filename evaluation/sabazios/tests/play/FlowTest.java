@@ -3,7 +3,7 @@ package sabazios.tests.play;
 import java.io.IOException;
 import java.util.Iterator;
 
-import sabazios.WalaAnalysis;
+import sabazios.wala.WalaAnalysis;
 
 import com.ibm.wala.analysis.pointers.HeapGraph;
 import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;

@@ -1,6 +1,6 @@
 package sabazios;
 
-import sabazios.lockset.callGraph.Lock;
+import sabazios.lockset.LockSet;
 import sabazios.util.wala.viz.NodeDecorator;
 
 import com.ibm.wala.ipa.callgraph.CGNode;
@@ -21,7 +21,7 @@ public class CGNodeDecorator implements NodeDecorator {
 		s = s.replace("[", "\\n");
 		s = s.replace("]", "\\n");
 		
-		Lock lock = A.locks.get(n);
+		LockSet lock = A.locks.get(n);
 		s += "\\n"+lock;
 		
 		return s.substring(1);

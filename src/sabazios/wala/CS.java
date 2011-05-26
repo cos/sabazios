@@ -1,4 +1,4 @@
-package sabazios;
+package sabazios.wala;
 
 import sabazios.util.FlexibleContext;
 import sabazios.util.U;
@@ -15,6 +15,7 @@ import com.ibm.wala.ipa.callgraph.propagation.ContainerUtil;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.cfa.ZeroXInstanceKeys;
 import com.ibm.wala.ipa.callgraph.propagation.cfa.nCFAContextSelector;
+import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
 
 public final class CS extends nCFAContextSelector {
@@ -33,20 +34,20 @@ public final class CS extends nCFAContextSelector {
 
 	ZeroXInstanceKeys keyFactory;
 
-	public CS(ZeroXInstanceKeys keyFactory, AnalysisOptions options) {
-		super(NCFA, new DefaultContextSelector(options));
+	public CS(ZeroXInstanceKeys keyFactory, AnalysisOptions options, IClassHierarchy cha) {
+		super(NCFA, new DefaultContextSelector(options, cha));
 		this.keyFactory = keyFactory;
 	}
 
 	@Override
-	public Context getCalleeTarget(CGNode caller, CallSiteReference site, IMethod callee, InstanceKey receiver) {
+	public Context getCalleeTarget(CGNode caller, CallSiteReference site, IMethod callee, InstanceKey[] receiver) {
 
 		String calleeString = callee.toString();
 		Context context = caller.getContext();
 		if (calleeString.contains("replaceWith") || calleeString.contains("apply(Lextra166y")) {
 			System.out.println(calleeString);
 			FlexibleContext c = new FlexibleContext(context);
-			c.putItem(ARRAY, receiver);
+			c.putItem(ARRAY, receiver[0]);
 			c.putItem(OPERATOR_CALL_SITE_REFERENCE, site);
 			c.putItem(OPERATOR_CALLER, caller);
 			// System.out.println(c);
@@ -137,7 +138,7 @@ public final class CS extends nCFAContextSelector {
 
 			if (context instanceof FlexibleContext && ((FlexibleContext) context).getItem(RECEIVER_INSTANCE) != null) {
 				FlexibleContext c = new FlexibleContext(context);
-				c.putItem(RECEIVER_INSTANCE, receiver);
+				c.putItem(RECEIVER_INSTANCE, receiver[0]);
 				return c;
 			} else
 				return context;

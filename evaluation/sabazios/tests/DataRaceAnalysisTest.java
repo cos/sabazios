@@ -3,10 +3,10 @@ package sabazios.tests;
 import java.io.IOException;
 
 import junit.framework.Assert;
-import sabazios.ConcurrentAccesses;
 import sabazios.A;
-import sabazios.WalaAnalysis;
+import sabazios.domains.ConcurrentAccesses;
 import sabazios.util.Log;
+import sabazios.wala.WalaAnalysis;
 
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.util.CancelException;
@@ -46,12 +46,12 @@ public abstract class DataRaceAnalysisTest extends WalaAnalysis {
 
 		Log.log("Pointer analysis done");
 
-		A analysis = new A(callGraph, pointerAnalysis, builder);
+		A.init(callGraph, pointerAnalysis, builder);
 
-		analysis.compute();
+		foundCA = A.compute();
 		Log.log("New Race analysis done");
 
-		return analysis.getRaces();
+		return foundCA;
 	}
 
 	public void assertCAs(String string) {

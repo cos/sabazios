@@ -31,4 +31,9 @@ public class Solver extends DataflowSolver<IExplodedBasicBlock, IntSetVariable> 
 		return null;
 	}
 
+	@Override
+	protected IntSetVariable[] makeStmtRHS(int size) {
+		return new IntSetVariable[size];
+	}
+
 }

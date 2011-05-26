@@ -1,10 +1,13 @@
 package sabazios.lockset.callGraph;
 
+import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
-import sabazios.lockIdentity.Dereferences;
+import sabazios.deref.DerefRep;
+import sabazios.deref.Dereferences;
+import sabazios.lockset.Lock;
+import sabazios.lockset.LockSet;
 import sabazios.util.CodeLocation;
 import sabazios.util.IntSetVariable;
 import sabazios.util.U;
@@ -14,24 +17,15 @@ import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSAMonitorInstruction;
 import com.ibm.wala.util.collections.ArraySet;
-import com.ibm.wala.util.graph.impl.NodeWithNumber;
 
-public class Lock extends NodeWithNumber implements IVariable<Lock> {
+public class LockSetVariable implements IVariable<LockSetVariable>, Iterable<Lock> {
 	private static int nextHashCode = 0;
 	private LinkedHashMap<CGNode, IntSetVariable> locks = null;
 	private int orderNumber;
 	private final int hashCode;
-	
-	public static class Individual {
-		public final CGNode n;
-		public final int v;
-		public Individual(CGNode n, int v) {
-			this.n = n;
-			this.v = v;
-		}
-	}
+	private Set<DerefRep> deref;
 
-	public Lock(boolean top) {
+	public LockSetVariable(boolean top) {
 		hashCode = nextHash();
 		if (!top)
 			locks = new LinkedHashMap<CGNode, IntSetVariable>();
@@ -45,7 +39,7 @@ public class Lock extends NodeWithNumber implements IVariable<Lock> {
 		return locks.get(n);
 	}
 
-	public Lock() {
+	public LockSetVariable() {
 		this(false);
 	}
 
@@ -54,7 +48,7 @@ public class Lock extends NodeWithNumber implements IVariable<Lock> {
 	}
 
 	@Override
-	public void copyState(Lock v) {
+	public void copyState(LockSetVariable v) {
 		if (v.isTop())
 			this.locks = null;
 		else {
@@ -68,10 +62,10 @@ public class Lock extends NodeWithNumber implements IVariable<Lock> {
 	public boolean equals(Object obj) {
 		if (obj == null)
 			return false;
-		if (obj.getClass() != Lock.class)
+		if (obj.getClass() != LockSetVariable.class)
 			return false;
 
-		Lock other = (Lock) obj;
+		LockSetVariable other = (LockSetVariable) obj;
 		if (this.isTop())
 			if (other.isTop())
 				return true;
@@ -81,7 +75,7 @@ public class Lock extends NodeWithNumber implements IVariable<Lock> {
 			return locks.equals(other.locks);
 	}
 
-	public void intersect(Lock other) {
+	public void intersect(LockSetVariable other) {
 		if (this.isTop()) {
 			this.copyState(other);
 			return;
@@ -101,7 +95,7 @@ public class Lock extends NodeWithNumber implements IVariable<Lock> {
 
 	@Override
 	public Object clone() {
-		Lock newLock = new Lock();
+		LockSetVariable newLock = new LockSetVariable();
 		newLock.copyState(this);
 		return newLock;
 	}
@@ -181,8 +175,8 @@ public class Lock extends NodeWithNumber implements IVariable<Lock> {
 							s.delete(s.length() - 1, s.length());
 							s.append("}");
 						}
-						if(U.detailedResults) {
-							s.append(" "+Dereferences.get(n, v));
+						if (U.detailedResults) {
+							s.append(" " + Dereferences.get(n, v));
 						}
 						s.append(" , ");
 					}
@@ -209,15 +203,33 @@ public class Lock extends NodeWithNumber implements IVariable<Lock> {
 		return ms;
 	}
 
-	public Set<Individual> getIndividualLocks() {
-		LinkedHashSet<Individual> l = new LinkedHashSet<Lock.Individual>();
-		for (CGNode n :this.locks.keySet()) {
+	public LockSet getIndividualLocks() {
+		LockSet l = new LockSet();
+		for (CGNode n : this.locks.keySet()) {
 			IntSetVariable intSetVariable = this.locks.get(n);
 			for (Integer v : intSetVariable) {
-				l.add(new Individual(n,v));
+				l.add(new Lock(n, v));
 			}
 		}
-		
+
 		return l;
+	}
+
+	private int number = -1;
+
+	/**
+	 * @return the number which identifies this node in the numbered graph
+	 */
+	public int getGraphNodeId() {
+		return number;
+	}
+
+	public void setGraphNodeId(int i) {
+		number = i;
+	}
+
+	@Override
+	public Iterator<Lock> iterator() {
+		return this.getIndividualLocks().iterator();
 	}
 }

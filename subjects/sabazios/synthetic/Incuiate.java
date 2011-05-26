@@ -1,6 +1,7 @@
 package sabazios.synthetic;
 
 import java.util.Vector;
+import java.util.regex.Pattern;
 
 import extra166y.Ops;
 import extra166y.ParallelArray;
@@ -9,7 +10,6 @@ import extra166y.ParallelArray;
  * Space that can be spared to maintain line numbers  
  * 
  *
- * 
  * 
  * 
  */
@@ -181,14 +181,35 @@ public class Incuiate {
 		final ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
 				ParallelArray.defaultExecutor());
 
-		final Particle shared = new Particle();
-		final Vector<Particle> v = new Vector<Particle>();
-
 		particles.replaceWithGeneratedValue(new Ops.Generator<Particle>() {
 			@Override
 			public Particle op() {
 				System.out.println("bla");
 				return new Particle();
+			}
+		});
+	}
+	
+	public void regexPatternCompile() {
+		final ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
+				ParallelArray.defaultExecutor());
+		particles.replaceWithGeneratedValue(new Ops.Generator<Particle>() {
+			@Override
+			public Particle op() {
+				Pattern.compile("somePattern.*");
+				return null;
+			}
+		});
+	}
+	
+	public void systemExit() {
+		final ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
+				ParallelArray.defaultExecutor());
+		particles.replaceWithGeneratedValue(new Ops.Generator<Particle>() {
+			@Override
+			public Particle op() {
+				System.exit(0);
+				return null;
 			}
 		});
 	}

@@ -1,8 +1,11 @@
 package sabazios.domains;
 
+import java.util.Set;
+
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import sabazios.lockset.callGraph.Lock;
+import sabazios.lockset.Lock;
+import sabazios.lockset.LockSet;
 
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
@@ -12,7 +15,7 @@ public abstract class ObjectAccess implements Comparable<ObjectAccess> {
 	public final CGNode n;
 	public final InstanceKey o;
 	public final SSAInstruction i;
-	public Lock l;
+	public LockSet l;
 
 	public ObjectAccess(CGNode n, SSAInstruction i, InstanceKey o) {
 		this.n = n;

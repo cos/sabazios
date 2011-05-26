@@ -1,4 +1,4 @@
-package sabazios;
+package sabazios.wala;
 
 import java.io.File;
 import java.io.IOException;
@@ -61,7 +61,7 @@ public class WalaAnalysis {
 		Util.addDefaultSelectors(options, cha);
 		Util.addDefaultBypassLogic(options, scope, Util.class.getClassLoader(), cha);
 
-		DefaultContextSelector appContextSelector = new DefaultContextSelector(options);
+		DefaultContextSelector appContextSelector = new DefaultContextSelector(options, cha);
 
 		return new SmartCFABuilder(cha, options, cache, appContextSelector, new DefaultSSAInterpreter(options, cache),
 				ZeroXInstanceKeys.SMUSH_STRINGS | 

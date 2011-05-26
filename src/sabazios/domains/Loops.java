@@ -1,15 +1,13 @@
-package sabazios;
+package sabazios.domains;
 
 import java.util.HashSet;
 import java.util.Iterator;
-
-import sabazios.domains.Loop;
 
 import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 
-public class AbstractThreads implements Iterable<Loop> {
+public class Loops implements Iterable<Loop> {
 	HashSet<Loop> all = new HashSet<Loop>();
 	
 	public Loop get(InstanceKey array, CGNode operatorCaller, CallSiteReference operatorCallSite) {
