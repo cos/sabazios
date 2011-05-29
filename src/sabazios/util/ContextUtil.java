@@ -14,7 +14,7 @@ public class ContextUtil {
 	public static boolean equalsExecept(CallContext c1, CallContext c2, Set<ContextKey> keys) {
 		Map<ContextKey, ValueDifference<ContextItem>> entriesDiffering = Maps.difference(c1, c2).entriesDiffering();
 		Set<ContextKey> differentEntries = entriesDiffering.keySet();	
-		return differentEntries.equals(keys);
+		return keys.containsAll(differentEntries);
 	}
 	
 }

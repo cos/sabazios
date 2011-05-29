@@ -52,6 +52,9 @@ public class ConcurrentFieldAccess extends ConcurrentAccess<FieldAccess> {
 		for (FieldAccess w : this.betaAccesses) 
 			oas.addAll(w.rippleUp());
 		
+		if(was.size() == 0 || oas.size() == 0)
+			throw new RuntimeException("see what happens here");
+		
 		boolean ugly = false;
 		for (ObjectAccess oa : was)
 			if (!(oa instanceof FieldAccess)) {
@@ -88,15 +91,7 @@ public class ConcurrentFieldAccess extends ConcurrentAccess<FieldAccess> {
 		if (!f.equals(other.f))
 			return false;
 
-		if (o instanceof AllocationSiteInNode && other.o instanceof AllocationSiteInNode) {
-			AllocationSiteInNode o1 = (AllocationSiteInNode) o;
-			AllocationSiteInNode o2 = (AllocationSiteInNode) other.o;
-			CGNode n1 = o1.getNode();
-			CGNode n2 = o2.getNode();
-			return CGNodeUtil.equalsExcept(n1, n2, CS.MAIN_ITERATION);
-
-		} else
-			return o.equals(other.o);
+		return U.sameExceptIteration(o, other.o);
 	}
 
 	public void checkConsistency() {

@@ -21,7 +21,7 @@ public class IncuiateTest extends DataRaceAnalysisTest {
 		DEBUG = true;
 		this.addBinaryDependency("sabazios/synthetic");
 		this.addBinaryDependency("../lib/parallelArray.mock");
-		U.detailedResults = true;
+		U.detailedResults = false;
 	}
 
 	@Before

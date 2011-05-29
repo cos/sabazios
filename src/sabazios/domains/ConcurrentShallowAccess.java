@@ -29,7 +29,14 @@ public class ConcurrentShallowAccess extends ConcurrentAccess<ObjectAccess> {
 			return false;
 
 		ConcurrentShallowAccess other = (ConcurrentShallowAccess) obj;
-		return this.objects.equals(other.objects);
+		for (InstanceKey o1 : this.objects) {
+			boolean foundMatch = false;
+			for(InstanceKey o2 : other.objects)
+				if(U.sameExceptIteration(o1, o2)) {
+					return true;
+				}
+		}
+		return false;
 	}
 
 	@Override

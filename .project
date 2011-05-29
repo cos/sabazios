@@ -25,4 +25,11 @@
 		<nature>org.eclipse.pde.PluginNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>paper</name>
+			<type>2</type>
+			<location>/Users/cosminradoi/Projects/ReLooper/paper</location>
+		</link>
+	</linkedResources>
 </projectDescription>

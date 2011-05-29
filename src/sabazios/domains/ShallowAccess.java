@@ -15,6 +15,6 @@ public class ShallowAccess extends ObjectAccess {
 
 	@Override
 	public String toString(boolean withObj) {
-		return CodeLocation.make(n, i) + (withObj? " / "+ U.tos(o):"");
-	}
+		return "" + CodeLocation.make(n, i) + contextString() + (withObj? " Object: "+ U.tos(o):"");
+	}	
 }

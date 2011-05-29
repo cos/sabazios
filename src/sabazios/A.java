@@ -82,11 +82,11 @@ public class A {
 
 		System.out.println("---- Compute locks ------------------------------------- ");
 		locks.compute();
-		for (CGNode n : locks.locksForCGNodes.keySet()) {
-			Set<Lock> lock = locks.locksForCGNodes.get(n);
-			if (!lock.isEmpty())
-				System.out.println(n + " -- " + lock);
-		}
+//		for (CGNode n : locks.locksForCGNodes.keySet()) {
+//			Set<Lock> lock = locks.locksForCGNodes.get(n);
+//			if (!lock.isEmpty())
+//				System.out.println(n + " -- " + lock);
+//		}
 		// dotCallGraph(); decoreator to use: new CGNodeDecorator(this)
 		// dotIRFor(".*op().*");
 		Log.log("Computed locks");

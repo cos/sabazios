@@ -14,7 +14,7 @@ public class OldCorefEvaluation extends DataRaceAnalysisTest {
 		this.addBinaryDependency("../evaluation/coref/bin");
 		this.addBinaryDependency("../lib/parallelArray.mock");
 		this.addJarDependency("../evaluation/coref/java_cup_runtime.jar");
-		U.detailedResults = false;
+		U.detailedResults = true;
 	}
 
 	@Test

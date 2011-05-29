@@ -120,4 +120,17 @@ public class U {
 	private static String tosFieldReference(FieldReference o) {
 		return "."+o.getName();
 	}
+	
+	public static boolean sameExceptIteration(InstanceKey o1, InstanceKey o2) {
+		if(o1 == null)
+			return o2 == null;
+		if (o1 instanceof AllocationSiteInNode && o2 instanceof AllocationSiteInNode) {
+			AllocationSiteInNode ao1 = (AllocationSiteInNode) o1;
+			AllocationSiteInNode ao2 = (AllocationSiteInNode) o2;
+			CGNode n1 = ao1.getNode();
+			CGNode n2 = ao2.getNode();
+			return CGNodeUtil.equalsExcept(n1, n2, CS.MAIN_ITERATION);
+		} else
+			return o1.equals(o2);
+	}
 }

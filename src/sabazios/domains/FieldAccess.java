@@ -9,6 +9,7 @@ import sabazios.util.CodeLocation;
 import sabazios.util.Relation;
 import sabazios.util.Tuple;
 import sabazios.util.U;
+import sabazios.wala.CS;
 
 import com.google.common.collect.Sets;
 import com.ibm.wala.classLoader.CallSiteReference;
@@ -35,11 +36,19 @@ public class FieldAccess extends ObjectAccess {
 	public String toString() {
 		return toString(true);
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(!super.equals(obj))
+			return false;
+		FieldAccess other = (FieldAccess) obj;
+		return f.equals(other.f);
+	}
 
 	@Override
 	public String toString(boolean withObj) {
 		withObj = false;
-		return CodeLocation.make(n, i) + " - ."+ f.getName() + (withObj? " / "+ (o != null?U.tos(o):f.getClass().getName()):"")+(this.l != null && !this.l.isEmpty() ? " "+this.l : "");
+		return CodeLocation.make(n, i) + " - ."+ f.getName() + contextString() + (withObj? " / "+ (o != null?U.tos(o):f.getClass().getName()):"")+(this.l != null && !this.l.isEmpty() ? " "+this.l : "");
 	}
 	
 	Set<ObjectAccess> rippleUp() {
@@ -62,6 +71,9 @@ public class FieldAccess extends ObjectAccess {
 			Iterator<CGNode> predNodes = A.callGraph.getPredNodes(n);
 			while (predNodes.hasNext()) {
 				CGNode n1 = predNodes.next();
+				if(CS.threadSafe(n1))
+					continue;
+				
 				Iterator<CallSiteReference> possibleSites = A.callGraph.getPossibleSites(n1, n);
 				while (possibleSites.hasNext()) {
 					CallSiteReference csr = possibleSites.next();

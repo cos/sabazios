@@ -24,10 +24,7 @@ public abstract class ObjectAccesses<T extends FieldAccess> extends LinkedHashMa
 
 		@Override
 		protected boolean shouldVisit(CGNode n) {
-			for (String pattern : threadSafeMethods)
-				if (n.getMethod().toString().contains(pattern))
-					return false;
-			return true;
+			return !CS.threadSafe(n);
 		}
 
 		@Override
@@ -69,15 +66,6 @@ public abstract class ObjectAccesses<T extends FieldAccess> extends LinkedHashMa
 		}
 		return s.toString();
 	}
-
-	String[] threadSafeMethods = new String[] { 
-			"java/util/regex/Pattern", "java/lang/System, exit",
-			"java/io/PrintStream, ",
-			"java/util/Vector, ",
-			"java/lang/Throwable, printStackTrace",
-			"java/security/AccessControlContext, getDebug", // not relevant
-			"java/util/Random, <init>" , "Integer, <init>",
-			};
 
 	protected void add(T w) {
 		FlexibleContext c = (FlexibleContext) w.n.getContext();

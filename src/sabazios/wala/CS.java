@@ -131,7 +131,7 @@ public final class CS extends nCFAContextSelector {
 			// System.out.println("here 1");
 			// return c;
 
-			if (context instanceof FlexibleContext && ((FlexibleContext) context).getItem(RECEIVER_INSTANCE) != null) {
+			if (context instanceof FlexibleContext && ((FlexibleContext) context).getItem(RECEIVER_INSTANCE) == null) {
 				FlexibleContext c = new FlexibleContext(context);
 				c.putItem(RECEIVER_INSTANCE, receiver[0]);
 				return c;
@@ -171,5 +171,23 @@ public final class CS extends nCFAContextSelector {
 
 	private boolean isInterestingForUs(IMethod callee) {
 		return ContainerUtil.isContainer(callee.getDeclaringClass()) || callee.toString().contains("DateFormat");
+	}
+	
+	public static String[] threadSafeMethods = new String[] { 
+		"java/util/regex/Pattern", "java/lang/System, exit",
+		"java/io/PrintStream, ",
+		"java/util/Vector, ",
+		"java/lang/Throwable, printStackTrace",
+		"java/security/AccessControlContext, getDebug", // not relevant
+		"java/util/Random, <init>" , "Integer, <init>",
+		"java/lang/SecurityManager, ",
+		"java/lang/ClassLoader, initSystemClassLoader"
+		};
+	
+	public static boolean threadSafe(CGNode n) {
+		for (String pattern : CS.threadSafeMethods)
+			if (n.getMethod().toString().contains(pattern))
+				return true;
+		return false;
 	}
 }
