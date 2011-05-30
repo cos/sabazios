@@ -4,13 +4,14 @@ import extra166y.Ops.Generator;
 import extra166y.Ops.Procedure;
 import extra166y.ParallelArray;
 
-class Particle {
+class Computation {
 
-	protected static final double dT = 1;
-	private static int noSteps = 1000;
-	protected double x, y, vX, vY, fX, fY, m;
+	class Particle {
+		double x, y, vX, vY, fX, fY, m;
+	}
 
 	Particle centerOfMass = new Particle();
+	protected Object lock;
 
 	void compute() {
 
@@ -40,7 +41,9 @@ class Particle {
 				public void op(Particle p) {
 					Particle oldC = centerOfMass;
 					centerOfMass = new Particle();
-					centerOfMass.m = oldC.m + p.m;
+					synchronized (lock) {
+						centerOfMass.m = oldC.m + p.m;
+					}
 					centerOfMass.x = (oldC.x * oldC.m + p.x * p.m) / centerOfMass.m;
 					centerOfMass.y = (oldC.y * oldC.m + p.y * p.m) / centerOfMass.m;
 				}
@@ -48,16 +51,18 @@ class Particle {
 		}
 	}
 
-	private ParallelArray<Particle> createArray() {
-		return ParallelArray.createUsingHandoff(new Particle[1000], ParallelArray.defaultExecutor());
-	}
-
 	private void updateForce() {
 
 	}
 
-	protected static void readParticle(Particle p) {
+	private ParallelArray<Particle> createArray() {
+		return null;
+	}
+
+	protected void readParticle(Particle p) {
 
 	}
 
+	private static final int noSteps = 0;
+	protected static final double dT = 0;
 }

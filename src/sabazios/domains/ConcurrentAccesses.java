@@ -9,6 +9,7 @@ import sabazios.A;
 
 public abstract class ConcurrentAccesses<T extends ConcurrentAccess<?>> extends LinkedHashMap<Loop, Set<T>>{
 	private static final long serialVersionUID = -962627971686357883L;
+	private int noUniquePrintedPairs = 0;
 
 	public ConcurrentAccesses() {
 	}
@@ -16,12 +17,20 @@ public abstract class ConcurrentAccesses<T extends ConcurrentAccess<?>> extends 
 	@Override
 	public String toString() {
 		StringBuffer s = new StringBuffer();
+		noUniquePrintedPairs = 0;
 		for (Loop t : this.keySet()) {
 			s.append("Loop: " + t);
+			LinkedHashSet<String> stringReps = new LinkedHashSet<String>();
+			
 			for (ConcurrentAccess<?> concurrentAccess : this.get(t)) {
-				s.append("\n");
-				s.append(concurrentAccess.toString("   "));
+				stringReps.add(concurrentAccess.toString("   "));
+				noUniquePrintedPairs += concurrentAccess.getNoUniquePrintedPairs();
 			}
+			for (String srep : stringReps) {
+				s.append("\n");
+				s.append(srep);
+			}
+			
 			s.append("\n");
 		}
 		return s.toString();
@@ -35,6 +44,10 @@ public abstract class ConcurrentAccesses<T extends ConcurrentAccess<?>> extends 
 			}
 		}
 		return n;
+	}
+	
+	public int getNoUniquePrintedPairs() {
+		return noUniquePrintedPairs;
 	}
 
 	/**

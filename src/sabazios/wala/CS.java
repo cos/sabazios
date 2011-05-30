@@ -176,6 +176,8 @@ public final class CS extends nCFAContextSelector {
 	public static String[] threadSafeMethods = new String[] { 
 		"java/util/regex/Pattern", "java/lang/System, exit",
 		"java/io/PrintStream, ",
+		"java/io/PrintWriter, ",
+		"java/io/StringReader, ",
 		"java/util/Vector, ",
 		"java/lang/Throwable, printStackTrace",
 		"java/security/AccessControlContext, getDebug", // not relevant

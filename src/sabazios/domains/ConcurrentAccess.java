@@ -11,6 +11,7 @@ public abstract class ConcurrentAccess<T extends ObjectAccess> {
 	public final Loop t;
 	public final LinkedHashSet<T> alphaAccesses = new LinkedHashSet<T>();
 	public final LinkedHashSet<T> betaAccesses = new LinkedHashSet<T>();
+	private int noUniquePrintedPairs = 0;
 
 	public ConcurrentAccess(Loop t) {
 		this.t = t;
@@ -19,24 +20,31 @@ public abstract class ConcurrentAccess<T extends ObjectAccess> {
 	public abstract String toString(String s);
 
 	protected String postfixToString(String linePrefix, StringBuffer s) {
+		noUniquePrintedPairs = 0;
 		s.append("\n");
 		s.append(linePrefix);
 		s.append("   Write accesses:");
-		accessesToString(alphaAccesses, linePrefix, s);
+		noUniquePrintedPairs += accessesToString(alphaAccesses, linePrefix, s);;
 		s.append("\n");
 		s.append(linePrefix);
 		s.append("   Other accesses:");
-		accessesToString(betaAccesses, linePrefix, s);
+		noUniquePrintedPairs += accessesToString(betaAccesses, linePrefix, s);
 		return s.toString();
 	}
 
-	private static <T extends ObjectAccess> void accessesToString(Set<T> accesses, String linePrefix, StringBuffer s) {
+	private static <T extends ObjectAccess> int accessesToString(Set<T> accesses, String linePrefix, StringBuffer s) {
+		LinkedHashSet<String> sreps = new LinkedHashSet<String>();
 		for (ObjectAccess w : accesses) {
+			sreps.add(w.toString(U.detailedResults));
+		}
+		
+		for (String srep : sreps) {
 			s.append("\n");
 			s.append(linePrefix);
 			s.append("     ");
-			s.append(w.toString(U.detailedResults));
+			s.append(srep);
 		}
+		return sreps.size();
 	}
 
 	@Override
@@ -48,14 +56,22 @@ public abstract class ConcurrentAccess<T extends ObjectAccess> {
 
 		@SuppressWarnings("unchecked")
 		ConcurrentAccess<T> other = (ConcurrentAccess<T>) obj;
-		if (!(this.t.equals(other.t) && this.alphaAccesses.equals(other.alphaAccesses) && this.betaAccesses
-				.equals(other.betaAccesses)))
+		if(!this.t.equals(other.t))
 			return false;
+		if(!sameAccesses(other))
+			return false;
+		
+		sameAccesses(other);
 
 		if (obj.getClass() != this.getClass())
 			return false;
 		return this.sameTarget(other);
 	}
+
+	public boolean sameAccesses(ConcurrentAccess<T> other) {
+	  return this.alphaAccesses.equals(other.alphaAccesses) && this.betaAccesses
+				.equals(other.betaAccesses);
+  }
 
 	@Override
 	public int hashCode() {
@@ -84,4 +100,8 @@ public abstract class ConcurrentAccess<T extends ObjectAccess> {
 	}
 
 	public abstract boolean sameTarget(ConcurrentAccess<?> rippledUp);
+
+	public int getNoUniquePrintedPairs() {
+	  return noUniquePrintedPairs ;
+  }
 }

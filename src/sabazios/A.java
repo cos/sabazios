@@ -121,6 +121,7 @@ public class A {
 		System.out.println("---- Shallow races ---- ");
 		System.out.println(shallowRaces.toString());
 		Log.log("Shallow races done. # = " + shallowRaces.getNoPairs());
+		Log.log("Shallow races printed. # = " + shallowRaces.getNoUniquePrintedPairs());
 		System.out.println("-------------------------------------------------------- \n");
 
 		// Other stuff

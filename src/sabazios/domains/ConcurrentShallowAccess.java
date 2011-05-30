@@ -30,14 +30,30 @@ public class ConcurrentShallowAccess extends ConcurrentAccess<ObjectAccess> {
 
 		ConcurrentShallowAccess other = (ConcurrentShallowAccess) obj;
 		for (InstanceKey o1 : this.objects) {
-			boolean foundMatch = false;
-			for(InstanceKey o2 : other.objects)
-				if(U.sameExceptIteration(o1, o2)) {
+			for (InstanceKey o2 : other.objects)
+				if (U.sameExceptIteration(o1, o2)) {
 					return true;
 				}
 		}
 		return false;
 	}
+
+	// @Override
+	// public boolean sameTarget(ConcurrentAccess<?> obj) {
+	// if (obj == null)
+	// return false;
+	// if (obj.getClass() != this.getClass())
+	// return false;
+	//
+	// ConcurrentShallowAccess other = (ConcurrentShallowAccess) obj;
+	// for (InstanceKey o1 : this.objects) {
+	// for (InstanceKey o2 : other.objects)
+	// if (o1.toString().equals(o2.toString())) {
+	// return true;
+	// }
+	// }
+	// return false;
+	// }
 
 	@Override
 	public String toString(String linePrefix) {
