@@ -10,13 +10,11 @@ public class ConcurrentShallowAccesses extends ConcurrentAccesses<ConcurrentAcce
 		ConcurrentShallowAccesses cas = new ConcurrentShallowAccesses();
 		for (Loop t : cfas.keySet()) {
 			Set<ConcurrentFieldAccess> s = cfas.get(t);
-			int i = 0;
 			if (!cas.containsKey(t))
 				cas.put(t, new LinkedHashSet<ConcurrentAccess<?>>());
 			Set<ConcurrentAccess<?>> casForThread = cas.get(t);
 			for (ConcurrentFieldAccess ca : s) {
 				ConcurrentFieldAccess cfa = (ConcurrentFieldAccess) ca;
-				System.out.println(i++);
 				ConcurrentAccess<?> rippledUp = cfa.rippleUp();
 				
 				boolean mergedWithExisting = false;

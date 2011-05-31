@@ -127,6 +127,43 @@ public class IncuiateTest extends DataRaceAnalysisTest {
 		assertCAs("");
 	}
 	
+	@Test
+	public void lockPropagatedCircularly() {
+		assertCAs("Loop: sabazios.synthetic.Incuiate.lockPropagatedCircularly(Incuiate.java:242)\n" + 
+				"   Object : sabazios.synthetic.Incuiate.lockPropagatedCircularly(Incuiate.java:240) new Particle\n" + 
+				"      Write accesses:\n" + 
+				"        Write sabazios.synthetic.Incuiate.someMethod(Incuiate.java:258) - .x [3: sabazios.synthetic.Incuiate$14.op(Incuiate.java:245)]\n" + 
+				"      Other accesses:\n" + 
+				"        Write sabazios.synthetic.Incuiate.someMethod(Incuiate.java:258) - .x [3: sabazios.synthetic.Incuiate$14.op(Incuiate.java:245)]\n");
+	}
+	
+	@Test
+	public void lockPropagatedCircularlyButBroken() {
+		assertCAs("Loop: sabazios.synthetic.Incuiate.lockPropagatedCircularlyButBroken(Incuiate.java:267)\n" + 
+				"   Object : sabazios.synthetic.Incuiate.lockPropagatedCircularlyButBroken(Incuiate.java:265) new Particle\n" + 
+				"      Write accesses:\n" + 
+				"        Write sabazios.synthetic.Incuiate.someMethod(Incuiate.java:258) - .x\n" + 
+				"      Other accesses:\n" + 
+				"        Write sabazios.synthetic.Incuiate.someMethod(Incuiate.java:258) - .x\n");
+	}
+	
+	@Test
+	public void safeLockAquiredInRecursion() {
+		assertCAs("");
+	}
+	
+	@Ignore
+	@Test
+	public void templateMethod4() {
+		assertCAs("");
+	}
+	
+	@Ignore
+	@Test
+	public void templateMethod2() {
+		assertCAs("");
+	}
+	
 	// just a template method to copy around
 	@Ignore
 	@Test

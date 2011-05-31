@@ -3,6 +3,7 @@ package sabazios.domains;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import sabazios.A;
 import sabazios.lockset.LockSet;
 import sabazios.util.U;
 
@@ -53,4 +54,8 @@ public abstract class ObjectAccess {
 	protected String contextString() {
 		return ""; //(U.detailedResults ? "Context: " + U.tos(n.getContext()) : "") ;
 	}
+
+	public void updateLock() {
+		l = A.locks.get(n, i);
+  }
 }

@@ -22,9 +22,9 @@ public class ConcurrentFieldAccesses extends ConcurrentAccesses<ConcurrentFieldA
 	public void compute() {
 
 		// add all write this
-		for (Loop t : A.write.keySet()) {
+		for (Loop t : A.alphaAccesses.keySet()) {
 			this.put(t, new LinkedHashSet<ConcurrentFieldAccess>());
-			Map<InstanceKey, Set<WriteFieldAccess>> localAccesses = A.write.get(t);
+			Map<InstanceKey, Set<WriteFieldAccess>> localAccesses = A.alphaAccesses.get(t);
 			for (InstanceKey o : localAccesses.keySet()) {
 				Set<WriteFieldAccess> writes = localAccesses.get(o);
 				for (WriteFieldAccess w : writes) {
@@ -36,7 +36,7 @@ public class ConcurrentFieldAccesses extends ConcurrentAccesses<ConcurrentFieldA
 
 		// add all other this
 		for (Loop t : this.keySet()) {
-			Map<InstanceKey, Set<FieldAccess>> localAccesses = A.o.get(t);
+			Map<InstanceKey, Set<FieldAccess>> localAccesses = A.betaAccesses.get(t);
 			for (InstanceKey o : localAccesses.keySet()) {
 				Set<FieldAccess> others = localAccesses.get(o);
 				for (FieldAccess oa : others) {

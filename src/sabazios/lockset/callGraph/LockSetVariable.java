@@ -92,6 +92,22 @@ public class LockSetVariable implements IVariable<LockSetVariable>, Iterable<Loc
 		this.locks = newLocks;
 	}
 
+	public void unite(LockSetVariable other) {
+		if (this.isTop()) 
+			return;
+		
+		if (other.isTop()) {
+			this.locks = null;
+			return;
+		}
+
+		for (CGNode n : other.locks.keySet())
+			if (this.locks.containsKey(n)) 
+				this.locks.get(n).union(other.locks.get(n));
+			else 
+				this.locks.put(n, other.locks.get(n).clone());
+	}
+
 	@Override
 	public Object clone() {
 		LockSetVariable newLock = new LockSetVariable();

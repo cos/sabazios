@@ -14,10 +14,11 @@ import com.ibm.wala.util.collections.SparseVector;
 public class PointerForValue {
 	private boolean computed = false;
 
-	private Map<CGNode, SparseVector<LocalPointerKey>> pointedObjects = new LinkedHashMap<CGNode, SparseVector<LocalPointerKey>>();
+	private Map<CGNode, SparseVector<LocalPointerKey>> pointedObjects;
 //	private HashMap<IClass, ConcreteTypeKey> classToInstanceKey = new HashMap<IClass, ConcreteTypeKey>(); 
 
 	public void compute() {
+		pointedObjects = new LinkedHashMap<CGNode, SparseVector<LocalPointerKey>>();
 		Iterator<Object> iterator = A.heapGraph.iterator();
 		while (iterator.hasNext()) {
 			Object ik = iterator.next();

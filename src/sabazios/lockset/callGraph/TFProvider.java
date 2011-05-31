@@ -72,7 +72,7 @@ public class TFProvider implements ITransferFunctionProvider<CGNode, LockSetVari
 
 	@Override
 	public AbstractMeetOperator<LockSetVariable> getMeetOperator() {
-		return LockIntersection.instance;
+		return LockMeet.instance;
 	}
 
 }

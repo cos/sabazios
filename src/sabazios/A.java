@@ -10,9 +10,9 @@ import sabazios.domains.ConcurrentFieldAccesses;
 import sabazios.domains.ConcurrentShallowAccesses;
 import sabazios.domains.FilterSafe;
 import sabazios.domains.Loops;
-import sabazios.domains.OtherAccesses;
+import sabazios.domains.BetaAccesses;
 import sabazios.domains.PointerForValue;
-import sabazios.domains.WriteAccesses;
+import sabazios.domains.AlphaAccesses;
 import sabazios.lockset.Lock;
 import sabazios.lockset.Locks;
 import sabazios.util.Log;
@@ -38,6 +38,9 @@ public class A {
 	public static IClassHierarchy cha;
 	public static Locks locks;
 	public static PointerForValue pointerForValue;
+	public static AlphaAccesses alphaAccesses;
+	public static BetaAccesses betaAccesses;
+	public static Loops loops;
 
 	public static void init(CallGraph callGraph, PointerAnalysis pointerAnalysis, PropagationCallGraphBuilder builder) {
 		A.callGraph = callGraph;
@@ -47,19 +50,13 @@ public class A {
 		A.cha = A.pointerAnalysis.getClassHierarchy();
 
 		A.pointerForValue = new PointerForValue();
-		A.write = new WriteAccesses();
-		A.o = new OtherAccesses();
+		A.alphaAccesses = new AlphaAccesses();
+		A.betaAccesses = new BetaAccesses();
 		A.loops = new Loops();
 		A.locks = new Locks(callGraph);
 	}
 
-	public static WriteAccesses write;
-	public static OtherAccesses o;
-	public static Loops loops;
-	
-
-
-	public static ConcurrentAccesses compute() {
+	public static ConcurrentAccesses<?> compute() {
 		// Graph<Integer> prunedM = GraphSlicer.prune(m, new
 		// Filter<Integer>() {
 		// @Override
@@ -74,10 +71,10 @@ public class A {
 		System.out.println("-------------------------------------------------------- \n");
 
 		System.out.println("---- Reads and writes ---------------------------------- ");
-		write.compute();
-		Log.log("Found all relevant writes: " + write.size());
-		o.compute();
-		Log.log("Found all relevant other accesses: " + o.size());
+		alphaAccesses.compute();
+		Log.log("Found all relevant writes: " + alphaAccesses.size());
+		betaAccesses.compute();
+		Log.log("Found all relevant other accesses: " + betaAccesses.size());
 		System.out.println("-------------------------------------------------------- \n");
 
 		System.out.println("---- Compute locks ------------------------------------- ");
@@ -89,16 +86,17 @@ public class A {
 //		}
 		// dotCallGraph(); decoreator to use: new CGNodeDecorator(this)
 		// dotIRFor(".*op().*");
+		
 		Log.log("Computed locks");
 		System.out.println("-------------------------------------------------------- \n");
 
 		System.out.println("---- Initial races ------------------------------------- ");
 		ConcurrentFieldAccesses initialRaces = new ConcurrentFieldAccesses();
 		initialRaces.compute();  
-		System.out.println(initialRaces.toString());
-		System.out.println();
 		// Distribute locks
 		initialRaces.distributeLocks();
+		System.out.println(initialRaces.toString());
+		System.out.println();
 		Log.log("Initial races. # = " + initialRaces.getNoPairs());
 		System.out.println("-------------------------------------------------------- \n");
 

@@ -50,9 +50,9 @@ public class FilterSafe {
 			Iterator<Object> iks = A.heapGraph.getSuccNodes(pk);
 			while (iks.hasNext()) {
 				InstanceKey ik = (InstanceKey) iks.next();
-				for (Loop loop : A.write.keySet()) {
+				for (Loop loop : A.alphaAccesses.keySet()) {
 					if (loop.operatorCaller.equals(cgn)) {
-						Map<InstanceKey, Set<WriteFieldAccess>> hashMap = A.write.get(loop);
+						Map<InstanceKey, Set<WriteFieldAccess>> hashMap = A.alphaAccesses.get(loop);
 						if(hashMap.containsKey(ik))
 						{
 							Set<WriteFieldAccess> hashSet = hashMap.get(ik);

@@ -115,7 +115,7 @@ public class FlexibleContext extends AbstractCallContext {
 				return false;
 			
 			FlexibleContextItem other = (FlexibleContextItem) obj;
-			return o.equals(other.o);
+			return o == null ? other.o == null : o.equals(other.o);
 		}
 		@Override
 		public int hashCode() {

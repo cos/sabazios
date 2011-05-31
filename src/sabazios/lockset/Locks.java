@@ -1,8 +1,11 @@
 package sabazios.lockset;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import sabazios.lockset.CFG.Solver;
+import sabazios.lockset.callGraph.LockMeet;
+import sabazios.lockset.callGraph.LockSetVariable;
 import sabazios.util.IntSetVariable;
 
 import com.ibm.wala.classLoader.IMethod;
@@ -24,26 +27,28 @@ public class Locks {
 	Map<IMethod, Map<SSAInstruction, IntSetVariable>> intraProceduralLocks = new LinkedHashMap<IMethod, Map<SSAInstruction, IntSetVariable>>();
 
 	public void compute() {
-		inferIntraProcedural();
-		inferInterProcedural();
-	}
-
-	private void inferInterProcedural() {
-		sabazios.lockset.callGraph.Solver solver = new sabazios.lockset.callGraph.Solver(this.callGraph,
-				this.intraProceduralLocks);
 		try {
-			solver.solve(null);
+			inferIntraProcedural();
+			inferInterProcedural();
 		} catch (CancelException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	private void inferInterProcedural() throws CancelException {
+		sabazios.lockset.callGraph.Solver solver = new sabazios.lockset.callGraph.Solver(this.callGraph,
+		    this.intraProceduralLocks);
+		solver.solve(null);
+		LockMeet.firstPass = false;
+		solver.solve(null);
 		for (CGNode n : callGraph) {
 			LockSet out = solver.getOut(n).getIndividualLocks();
 			this.locksForCGNodes.put(n, out);
 		}
 	}
 
-	private void inferIntraProcedural() {
+	private void inferIntraProcedural() throws CancelException {
 		for (CGNode n : this.callGraph) {
 			Map<SSAInstruction, IntSetVariable> insideLocks = intraProceduralLocks.get(n.getMethod());
 			if (insideLocks != null)
@@ -53,30 +58,18 @@ public class Locks {
 				continue;
 			ExplodedControlFlowGraph explodedCFG = ExplodedControlFlowGraph.make(n.getIR());
 			Solver solverEnter = new Solver(explodedCFG, true);
-			try {
-				solverEnter.solve(null);
-			} catch (CancelException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			solverEnter.solve(null);
 			Solver solverExit = new Solver(explodedCFG, false);
-			try {
-				solverExit.solve(null);
-			} catch (CancelException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			solverExit.solve(null);
+
 			insideLocks = new LinkedHashMap<SSAInstruction, IntSetVariable>();
 
-			for (IExplodedBasicBlock iExplodedBasicBlock : explodedCFG) {	
+			for (IExplodedBasicBlock iExplodedBasicBlock : explodedCFG) {
 				SSAInstruction i = iExplodedBasicBlock.getInstruction();
 				IntSetVariable lockEnter = solverEnter.getOut(iExplodedBasicBlock).clone();
 				IntSetVariable lockExit = solverExit.getOut(iExplodedBasicBlock);
 				lockEnter.diff(lockExit);
-//				if(n.getMethod().toString().contains("BufferedWriter, write(Ljava/lang/String;II)"))  {
-//					System.out.println(" FINAL "+iExplodedBasicBlock.getGraphNodeId()+" : "+i+"   :   "+lockEnter);
-//				}
-				if(i!=null) {
+				if (i != null) {
 					insideLocks.put(i, lockEnter);
 				}
 			}
