@@ -9,8 +9,6 @@ import org.junit.rules.TestName;
 import sabazios.tests.DataRaceAnalysisTest;
 import sabazios.util.U;
 
-import com.ibm.wala.util.CancelException;
-
 public class IncuiateTest extends DataRaceAnalysisTest {
 
 	@Rule

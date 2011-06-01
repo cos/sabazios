@@ -4,28 +4,25 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import sabazios.domains.AlphaAccesses;
+import sabazios.domains.BetaAccesses;
 import sabazios.domains.ConcurrentAccess;
 import sabazios.domains.ConcurrentAccesses;
 import sabazios.domains.ConcurrentFieldAccesses;
 import sabazios.domains.ConcurrentShallowAccesses;
 import sabazios.domains.FilterSafe;
 import sabazios.domains.Loops;
-import sabazios.domains.BetaAccesses;
 import sabazios.domains.PointerForValue;
-import sabazios.domains.AlphaAccesses;
-import sabazios.lockset.Lock;
 import sabazios.lockset.Locks;
 import sabazios.util.Log;
 import sabazios.util.wala.viz.DotUtil;
 import sabazios.util.wala.viz.NodeDecorator;
 import sabazios.util.wala.viz.PDFViewUtil;
 
-import com.google.common.collect.Sets;
 import com.ibm.wala.analysis.pointers.HeapGraph;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
@@ -33,13 +30,9 @@ import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
 import com.ibm.wala.ipa.callgraph.propagation.PropagationCallGraphBuilder;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.util.collections.Filter;
-import com.ibm.wala.util.collections.IndiscriminateFilter;
 import com.ibm.wala.util.graph.Graph;
-import com.ibm.wala.util.graph.GraphReachability;
 import com.ibm.wala.util.graph.GraphSlicer;
-import com.ibm.wala.util.graph.traverse.DFS;
 import com.ibm.wala.util.warnings.WalaException;
-import com.sun.corba.se.spi.orb.StringPair;
 
 public class A {
 

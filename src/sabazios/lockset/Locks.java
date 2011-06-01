@@ -5,7 +5,6 @@ import java.util.Map;
 
 import sabazios.lockset.CFG.Solver;
 import sabazios.lockset.callGraph.LockMeet;
-import sabazios.lockset.callGraph.LockSetVariable;
 import sabazios.util.IntSetVariable;
 
 import com.ibm.wala.classLoader.IMethod;

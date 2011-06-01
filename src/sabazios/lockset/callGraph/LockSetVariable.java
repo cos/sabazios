@@ -4,7 +4,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
-import sabazios.deref.DerefRep;
 import sabazios.deref.Dereferences;
 import sabazios.lockset.Lock;
 import sabazios.lockset.LockSet;

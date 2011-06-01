@@ -1,15 +1,10 @@
 package sabazios.domains;
 
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 
-import sabazios.util.CGNodeUtil;
 import sabazios.util.U;
-import sabazios.wala.CS;
 
 import com.ibm.wala.classLoader.IField;
-import com.ibm.wala.ipa.callgraph.CGNode;
-import com.ibm.wala.ipa.callgraph.propagation.AllocationSiteInNode;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 
 public class ConcurrentFieldAccess extends ConcurrentAccess<FieldAccess> {

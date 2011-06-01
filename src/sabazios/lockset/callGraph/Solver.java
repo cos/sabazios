@@ -1,6 +1,5 @@
 package sabazios.lockset.callGraph;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import sabazios.util.IntSetVariable;
