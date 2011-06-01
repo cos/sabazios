@@ -74,7 +74,7 @@ public class DotUtil {
 	/**
 	 * Some versions of dot appear to croak on long labels. Reduce this if so.
 	 */
-	private final static int MAX_LABEL_LENGTH = 30;
+	private final static int MAX_LABEL_LENGTH = 200;
 
 	/**
    */
@@ -302,7 +302,7 @@ public class DotUtil {
 	}
 
 	private static String getPort(Object o, NodeDecorator d) throws WalaException {
-		return "\"" + getLabel(U.tos(o), d) + "\"";
+		return "\"" + getLabel(o, d) + "\"";
 
 	}
 
