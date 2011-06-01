@@ -1,7 +1,12 @@
 package sabazios;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import sabazios.domains.ConcurrentAccess;
@@ -20,14 +25,21 @@ import sabazios.util.wala.viz.DotUtil;
 import sabazios.util.wala.viz.NodeDecorator;
 import sabazios.util.wala.viz.PDFViewUtil;
 
+import com.google.common.collect.Sets;
 import com.ibm.wala.analysis.pointers.HeapGraph;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.callgraph.propagation.PointerAnalysis;
 import com.ibm.wala.ipa.callgraph.propagation.PropagationCallGraphBuilder;
 import com.ibm.wala.ipa.cha.IClassHierarchy;
+import com.ibm.wala.util.collections.Filter;
+import com.ibm.wala.util.collections.IndiscriminateFilter;
 import com.ibm.wala.util.graph.Graph;
+import com.ibm.wala.util.graph.GraphReachability;
+import com.ibm.wala.util.graph.GraphSlicer;
+import com.ibm.wala.util.graph.traverse.DFS;
 import com.ibm.wala.util.warnings.WalaException;
+import com.sun.corba.se.spi.orb.StringPair;
 
 public class A {
 
@@ -127,8 +139,67 @@ public class A {
 		System.out.println(A.callGraph.getNumberOfNodes());
 		System.out.println("-------------------------------------------------------- \n");
 		
+		
+		interactiveDebug();
+		
 		return shallowRaces;
 	}
+
+	private static void interactiveDebug() {
+	  String s = "";
+		do {
+			InputStreamReader isr = new InputStreamReader(System.in);
+			BufferedReader br = new BufferedReader(isr);
+			System.out.println("What do you want to detail (regex)? \n");
+			try {
+	      s = br.readLine();
+	      s = ".*"+s+".*";
+	      List<CGNode> nodes = findNodes(s);
+	      
+	      if(nodes.size() == 0) {
+	      	System.out.println("No nodes found. Try again.");
+	      	continue;
+	      } 
+	      
+	      System.out.println("Found "+nodes.size()+" nodes:");
+	      for(int i=0;i<nodes.size();i++)
+	      	System.out.println(i+" : "+nodes.get(i).toString());	        
+       
+	      int x = -1;
+	      do {
+	      	System.out.println("Which one interests you? ");
+		      String s1 = br.readLine();
+		      try {
+		      x = Integer.parseInt(s1);
+		      } catch(NumberFormatException e) {
+		      	System.out.println("Number not recognized. Try again.");
+		      	continue;
+		      }
+		      if(x < 0 || x >= nodes.size())
+		      	System.out.println("Node index not in range. Try aganin.");
+	      } while(x == -1);
+	      
+	      final CGNode theNode = nodes.get(x); 
+	      
+	      final Set<CGNode> predecedorNodes = GraphSlicer.slice(callGraph, new Filter<CGNode>() {
+					@Override
+          public boolean accepts(CGNode o) {
+	          return o == theNode;
+          }
+	      });
+	      Graph<CGNode> prunedCallGraph = GraphSlicer.prune(callGraph, new Filter<CGNode>() {
+					@Override
+          public boolean accepts(CGNode o) {
+	          return predecedorNodes.contains(o);
+          }
+	      });
+	      dotGraph(prunedCallGraph, s, new CGNodeDecorator());
+	      
+      } catch (IOException e) {
+	      e.printStackTrace();
+      }
+		} while(s.length() > 4);
+  }
 
 	@SuppressWarnings("unused")
 	private void dotIRFor(String s) {
@@ -159,9 +230,9 @@ public class A {
 	}
 
 	@SuppressWarnings("unused")
-	private Set<CGNode> findNodes(String regex) {
+	private static List<CGNode> findNodes(String regex) {
 		Iterator<CGNode> iterator = callGraph.iterator();
-		HashSet<CGNode> nodes = new HashSet<CGNode>();
+		ArrayList<CGNode> nodes = new ArrayList<CGNode>();
 		while (iterator.hasNext()) {
 			CGNode n = iterator.next();
 			if (n.getMethod().toString().matches(regex)) {
