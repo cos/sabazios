@@ -24,9 +24,11 @@ import com.ibm.wala.ssa.SSAInvokeInstruction;
 
 public class FieldAccess extends ObjectAccess {
 	public final IField f;
+	private final A a;
 	
-	public FieldAccess(CGNode n, SSAInstruction i, InstanceKey o, IField f) {
+	public FieldAccess(A a, CGNode n, SSAInstruction i, InstanceKey o, IField f) {
 		super(n,i,o);
+		this.a = a;
 		if(f == null)
 			throw new NullPointerException("f cannot be null");
 		this.f = f;	
@@ -68,21 +70,21 @@ public class FieldAccess extends ObjectAccess {
 			n = todo.p1();
 			workList.remove(todo);
 			visitedAccesses.add(todo);
-			Iterator<CGNode> predNodes = A.callGraph.getPredNodes(n);
+			Iterator<CGNode> predNodes = a.callGraph.getPredNodes(n);
 			while (predNodes.hasNext()) {
 				CGNode n1 = predNodes.next();
 				if(CS.threadSafe(n1))
 					continue;
 				
-				Iterator<CallSiteReference> possibleSites = A.callGraph.getPossibleSites(n1, n);
+				Iterator<CallSiteReference> possibleSites = a.callGraph.getPossibleSites(n1, n);
 				while (possibleSites.hasNext()) {
 					CallSiteReference csr = possibleSites.next();
 					SSAAbstractInvokeInstruction[] calls = n1.getIR().getCalls(csr);
 					for (SSAAbstractInvokeInstruction i : calls) {
 						if (U.inApplicationScope(n1)) {
 							if (!i.isStatic()) {
-								LocalPointerKey p = A.pointerForValue.get(n1, i.getReceiver());
-								Iterator<Object> succNodes = A.heapGraph.getSuccNodes(p);
+								LocalPointerKey p = a.pointerForValue.get(n1, i.getReceiver());
+								Iterator<Object> succNodes = a.heapGraph.getSuccNodes(p);
 								while (succNodes.hasNext()) {
 									Object o1 = succNodes.next();
 									sa.add(new ShallowAccess(n1, i, (InstanceKey) o1));

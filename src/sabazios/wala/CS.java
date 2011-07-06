@@ -179,11 +179,12 @@ public final class CS extends nCFAContextSelector {
 		"java/io/PrintWriter, ",
 		"java/io/StringReader, ",
 		"java/util/Vector, ",
-		"java/lang/Throwable, printStackTrace",
+		"java/lang/Throwable, ",
 		"java/security/AccessControlContext, getDebug", // not relevant
 		"java/util/Random, <init>" , "Integer, <init>",
 		"java/lang/SecurityManager, ",
-		"java/lang/ClassLoader, initSystemClassLoader"
+		"java/lang/ClassLoader, initSystemClassLoader",
+		"java/util/Properties, "
 		};
 	
 	public static boolean threadSafe(CGNode n) {

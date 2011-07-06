@@ -13,9 +13,6 @@ import com.ibm.wala.util.CancelException;
 
 public class ParticleTest extends DataRaceAnalysisTest {
 
-	@Rule
-	public TestName name = new TestName();
-
 	public ParticleTest() {
 		super();
 		DEBUG = true;

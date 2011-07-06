@@ -16,9 +16,9 @@ public class PointerForValue {
 	private Map<CGNode, SparseVector<LocalPointerKey>> pointedObjects;
 //	private HashMap<IClass, ConcreteTypeKey> classToInstanceKey = new HashMap<IClass, ConcreteTypeKey>(); 
 
-	public void compute() {
+	public void compute(A a) {
 		pointedObjects = new LinkedHashMap<CGNode, SparseVector<LocalPointerKey>>();
-		Iterator<Object> iterator = A.heapGraph.iterator();
+		Iterator<Object> iterator = a.heapGraph.iterator();
 		while (iterator.hasNext()) {
 			Object ik = iterator.next();
 			if (ik instanceof LocalPointerKey) {

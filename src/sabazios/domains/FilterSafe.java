@@ -16,7 +16,7 @@ import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 
 public class FilterSafe {
-	public static void filter(ConcurrentFieldAccesses races) {
+	public static void filter(A a, ConcurrentFieldAccesses races) {
 		for (Loop l : races.keySet()) {
 			Iterator<ConcurrentFieldAccess> iterca = races.get(l).iterator();
 			while (iterca.hasNext()) {
@@ -28,7 +28,7 @@ public class FilterSafe {
 						ObjectAccess oa2 = (ObjectAccess) iter.next();
 						LockSet lockSet2 = oa2.l;
 						DerefRep commonUniqueDeref = lockSet1.commonUniqueDeref(lockSet2);
-						if (commonUniqueDeref != null && noWritesToOurBelovedObjects(commonUniqueDeref)) 
+						if (commonUniqueDeref != null && noWritesToOurBelovedObjects(a, commonUniqueDeref)) 
 							iter.remove();
 					}
 				}
@@ -38,19 +38,19 @@ public class FilterSafe {
 		}
 	}	
 
-	private static boolean noWritesToOurBelovedObjects(DerefRep derefRep) {
+	private static boolean noWritesToOurBelovedObjects(A a, DerefRep derefRep) {
 		FlexibleContext context = (FlexibleContext)derefRep.peek().n.getContext();
 		CGNode cgn = (CGNode) context.getItem(CS.OPERATOR_CALLER);
 		for (Deref d : derefRep) {
-			LocalPointerKey pk = A.pointerForValue.get(d.n, d.v);
+			LocalPointerKey pk = a.pointerForValue.get(d.n, d.v);
 			if(pk == null)
 				continue;
-			Iterator<Object> iks = A.heapGraph.getSuccNodes(pk);
+			Iterator<Object> iks = a.heapGraph.getSuccNodes(pk);
 			while (iks.hasNext()) {
 				InstanceKey ik = (InstanceKey) iks.next();
-				for (Loop loop : A.alphaAccesses.keySet()) {
+				for (Loop loop : a.alphaAccesses.keySet()) {
 					if (loop.operatorCaller.equals(cgn)) {
-						Map<InstanceKey, Set<WriteFieldAccess>> hashMap = A.alphaAccesses.get(loop);
+						Map<InstanceKey, Set<WriteFieldAccess>> hashMap = a.alphaAccesses.get(loop);
 						if(hashMap.containsKey(ik))
 						{
 							Set<WriteFieldAccess> hashSet = hashMap.get(ik);

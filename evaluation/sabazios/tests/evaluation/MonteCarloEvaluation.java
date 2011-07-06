@@ -3,6 +3,7 @@ package sabazios.tests.evaluation;
 import org.junit.Test;
 
 import sabazios.tests.DataRaceAnalysisTest;
+import sabazios.util.Log;
 
 import com.ibm.wala.util.CancelException;
 
@@ -12,16 +13,23 @@ public class MonteCarloEvaluation extends DataRaceAnalysisTest{
 		super();
 		this.addBinaryDependency("../evaluation/montecarlo/bin");
 		this.addBinaryDependency("../lib/parallelArray.mock");
+		this.projectName = "MonteCarlo";
 	}
 	
 	@Test
 	public void test() throws CancelException {
-		findCA("Lmontecarlo/parallel/JGFMonteCarloBench", "JGFrun(I)V");
-		assertCAs("Loop: montecarlo.parallel.AppDemo.runParallel(AppDemo.java:178) Array: extra166y.ParallelArray.createUsingHandoff(ParallelArray.java:18)[EXTRA_CONTEXT => < Application, Lmontecarlo/parallel/AppDemo, initTasks(I)V >invokestatic < Application, Lextra166y/ParallelArray, createUsingHandoff([Ljava/lang/Object;Ljsr166y/ForkJoinPool;)Lextra166y/ParallelArray; >@7]Everywhere\n" + 
+		String entryClass = "Lmontecarlo/parallel/JGFMonteCarloBench";
+		String entryMethod = "JGFrun(I)V";
+		findCA(entryClass, entryMethod);
+		Log.report(":size_LOC", "1441+220k");
+		Log.report(":real_races", 1);
+		Log.report(":beningn_races", 1);
+		Log.report(":bugs", 0);
+		assertCAs("Loop: montecarlo.parallel.AppDemo.runParallel(AppDemo.java:178)\n" + 
 				"   Class: Lmontecarlo/parallel/Universal\n" + 
-				"      Write accesses:\n" + 
+				"      Alpha accesses:\n" + 
 				"        Write montecarlo.parallel.Universal.<init>(Universal.java:63) - .UNIVERSAL_DEBUG\n" + 
-				"      Other accesses:\n" + 
+				"      Beta accesses:\n" + 
 				"        Write montecarlo.parallel.Universal.<init>(Universal.java:63) - .UNIVERSAL_DEBUG\n");
 	}
 }

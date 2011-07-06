@@ -20,15 +20,15 @@ public abstract class ConcurrentAccess<T extends ObjectAccess> {
 	public abstract String toString(String s);
 
 	protected String postfixToString(String linePrefix, StringBuffer s) {
-		noUniquePrintedPairs = 0;
 		s.append("\n");
 		s.append(linePrefix);
-		s.append("   Write accesses:");
-		noUniquePrintedPairs += accessesToString(alphaAccesses, linePrefix, s);;
+		s.append("   Alpha accesses:");
+		int noPrintedAlpha = accessesToString(alphaAccesses, linePrefix, s);;
 		s.append("\n");
 		s.append(linePrefix);
-		s.append("   Other accesses:");
-		noUniquePrintedPairs += accessesToString(betaAccesses, linePrefix, s);
+		s.append("   Beta accesses:");
+		int noPrintedBeta = accessesToString(betaAccesses, linePrefix, s);
+		noUniquePrintedPairs = noPrintedAlpha * noPrintedBeta;
 		return s.toString();
 	}
 

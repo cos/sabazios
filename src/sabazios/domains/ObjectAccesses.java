@@ -12,6 +12,7 @@ import sabazios.util.U;
 import sabazios.wala.CS;
 
 import com.ibm.wala.classLoader.CallSiteReference;
+import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 
@@ -30,7 +31,7 @@ public abstract class ObjectAccesses<T extends FieldAccess> extends LinkedHashMa
 		protected boolean shouldAnalyze(CGNode n) {
 			if (!(n.getContext() instanceof FlexibleContext))
 				return false;
-
+			
 			FlexibleContext c = (FlexibleContext) n.getContext();
 			return c.getItem(CS.PARALLEL) != null && ((Boolean) c.getItem(CS.PARALLEL)) && rightIteration(c)
 					&& n.getIR() != null;
@@ -38,8 +39,10 @@ public abstract class ObjectAccesses<T extends FieldAccess> extends LinkedHashMa
 
 	}
 	protected ObjectAccessesGatherer oag;
+	private final A a;
 
-	public ObjectAccesses() {
+	public ObjectAccesses(A a) {
+		this.a = a;
 	}
 
 	@Override
@@ -68,7 +71,7 @@ public abstract class ObjectAccesses<T extends FieldAccess> extends LinkedHashMa
 
 	protected void add(T w) {
 		FlexibleContext c = (FlexibleContext) w.n.getContext();
-		Loop t = A.loops.get((InstanceKey) c.getItem(CS.ARRAY),
+		Loop t = a.loops.get((InstanceKey) c.getItem(CS.ARRAY),
 				(CGNode) c.getItem(CS.OPERATOR_CALLER), (CallSiteReference) c.getItem(CS.OPERATOR_CALL_SITE_REFERENCE));
 		
 		Map<InstanceKey, Set<T>> localAcccess;
@@ -98,7 +101,7 @@ public abstract class ObjectAccesses<T extends FieldAccess> extends LinkedHashMa
 
 	protected abstract boolean rightIteration(FlexibleContext c);
 
-	public void compute() {
-		this.oag.compute();		
+	public void compute(A a) {
+		this.oag.compute(a);		
 	}
 }

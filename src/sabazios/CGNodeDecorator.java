@@ -9,7 +9,12 @@ import com.ibm.wala.types.MethodReference;
 import com.ibm.wala.util.warnings.WalaException;
 
 public class CGNodeDecorator implements NodeDecorator {
-	@Override
+	private final A a;
+	
+	public CGNodeDecorator(A a) {
+		this.a = a;
+  }
+	
 	public String getLabel(Object o) throws WalaException {
 		CGNode n = (CGNode) o;
 		MethodReference reference = n.getMethod().getReference();
@@ -21,7 +26,7 @@ public class CGNodeDecorator implements NodeDecorator {
 		s = s.replace("[", "\\n");
 		s = s.replace("]", "\\n");
 		
-		LockSet lock = A.locks.get(n);
+		LockSet lock = a.locks.get(n);
 		s += "\\n"+lock;
 		
 		return s.substring(1);

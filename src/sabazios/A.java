@@ -36,32 +36,32 @@ import com.ibm.wala.util.warnings.WalaException;
 
 public class A {
 
-	public static CallGraph callGraph;
-	public static PointerAnalysis pointerAnalysis;
-	public static HeapGraph heapGraph;
-	public static PropagationCallGraphBuilder builder;
-	public static IClassHierarchy cha;
-	public static Locks locks;
-	public static PointerForValue pointerForValue;
-	public static AlphaAccesses alphaAccesses;
-	public static BetaAccesses betaAccesses;
-	public static Loops loops;
+	public CallGraph callGraph;
+	public PointerAnalysis pointerAnalysis;
+	public HeapGraph heapGraph;
+	public PropagationCallGraphBuilder builder;
+	public IClassHierarchy cha;
+	public Locks locks;
+	public PointerForValue pointerForValue;
+	public AlphaAccesses alphaAccesses;
+	public BetaAccesses betaAccesses;
+	public final Loops loops;
 
-	public static void init(CallGraph callGraph, PointerAnalysis pointerAnalysis, PropagationCallGraphBuilder builder) {
-		A.callGraph = callGraph;
-		A.pointerAnalysis = pointerAnalysis;
-		A.builder = builder;
-		A.heapGraph = A.pointerAnalysis.getHeapGraph();
-		A.cha = A.pointerAnalysis.getClassHierarchy();
+	public A(CallGraph callGraph, PointerAnalysis pointerAnalysis, PropagationCallGraphBuilder builder) {
+		this.callGraph = callGraph;
+		this.pointerAnalysis = pointerAnalysis;
+		this.builder = builder;
+		this.heapGraph = this.pointerAnalysis.getHeapGraph();
+		this.cha = this.pointerAnalysis.getClassHierarchy();
 
-		A.pointerForValue = new PointerForValue();
-		A.alphaAccesses = new AlphaAccesses();
-		A.betaAccesses = new BetaAccesses();
-		A.loops = new Loops();
-		A.locks = new Locks(callGraph);
+		this.pointerForValue = new PointerForValue();
+		this.alphaAccesses = new AlphaAccesses(this);
+		this.betaAccesses = new BetaAccesses(this);
+		this.loops = new Loops();
+		this.locks = new Locks(this);
 	}
 
-	public static ConcurrentAccesses<?> compute() {
+	public ConcurrentAccesses<?> compute() {
 		// Graph<Integer> prunedM = GraphSlicer.prune(m, new
 		// Filter<Integer>() {
 		// @Override
@@ -71,15 +71,19 @@ public class A {
 		// });
 
 		System.out.println("---- Compute map value -> PointerKey ------------------- ");
-		pointerForValue.compute();
+		pointerForValue.compute(this);
 		Log.log("Function CGNode x SSAvalue -> Object precomputed");
+		Log.reportTime(":map_vars_to_pointers_time");
 		System.out.println("-------------------------------------------------------- \n");
 
 		System.out.println("---- Reads and writes ---------------------------------- ");
-		alphaAccesses.compute();
+		alphaAccesses.compute(this);
 		Log.log("Found all relevant writes: " + alphaAccesses.size());
-		betaAccesses.compute();
+		betaAccesses.compute(this);
 		Log.log("Found all relevant other accesses: " + betaAccesses.size());
+		Log.reportTime(":alpha_beta_accesses_time");
+		Log.report(":alpha_accesses",alphaAccesses.size());
+		Log.report(":beta_accesses",betaAccesses.size());
 		System.out.println("-------------------------------------------------------- \n");
 
 		System.out.println("---- Compute locks ------------------------------------- ");
@@ -92,28 +96,34 @@ public class A {
 		// dotCallGraph(); decoreator to use: new CGNodeDecorator(this)
 		// dotIRFor(".*op().*");
 		
-		Log.log("Computed locks");
+		Log.reportTime(":locks_time");
 		System.out.println("-------------------------------------------------------- \n");
 
-		System.out.println("---- Initial races ------------------------------------- ");
-		ConcurrentFieldAccesses initialRaces = new ConcurrentFieldAccesses();
-		initialRaces.compute();  
+		System.out.println("---- Potential races ------------------------------------- ");
+		ConcurrentFieldAccesses potentialRaces = new ConcurrentFieldAccesses(this);
+		potentialRaces.compute(this.alphaAccesses, this.betaAccesses);  
 		// Distribute locks
-		initialRaces.distributeLocks();
-		System.out.println(initialRaces.toString());
+		potentialRaces.distributeLocks(this);
+		System.out.println(potentialRaces.toString());
 		System.out.println();
-		Log.log("Initial races. # = " + initialRaces.getNoPairs());
+		int noPotentialRaces = potentialRaces.getNoPairs();
+		Log.log("Potential races. # = " + noPotentialRaces);
+		Log.reportTime(":potential_races_time");
+		Log.report(":potential_races",noPotentialRaces);		
 		System.out.println("-------------------------------------------------------- \n");
 
 		System.out.println("---- Deep races ---------------------------------------- ");
 		// Lock identity
 		// LockIdentity li = new LockIdentity(this);
 		// li.compute();
-		FilterSafe.filter(initialRaces);
-		ConcurrentFieldAccesses deepRaces = initialRaces;
+		FilterSafe.filter(this, potentialRaces);
+		ConcurrentFieldAccesses deepRaces = potentialRaces;
 		System.out.println(deepRaces.toString());
 		System.out.println();
-		Log.log("Deep races done. # = " + deepRaces.getNoPairs());
+		int noRaces = deepRaces.getNoPairs();
+		Log.log("Deep races done. # = " + noRaces);
+		Log.reportTime(":races_time");
+		Log.report(":races",noRaces);
 		System.out.println("-------------------------------------------------------- \n");
 
 		System.out.println("---- Shallow races ------------------------------------- ");
@@ -123,13 +133,20 @@ public class A {
 		shallowRaces.reduceNonConcurrent();
 		System.out.println("---- Shallow races ---- ");
 		System.out.println(shallowRaces.toString());
-		Log.log("Shallow races done. # = " + shallowRaces.getNoPairs());
-		Log.log("Shallow races printed. # = " + shallowRaces.getNoUniquePrintedPairs());
+		int noAtomicityViolations = shallowRaces.getNoPairs();
+		Log.log("Shallow races done. # = " + noAtomicityViolations);
+		int noPrintedAtomicityViolations = shallowRaces.getNoUniquePrintedPairs();
+		Log.log("Shallow races printed. # = " + noPrintedAtomicityViolations);
+		Log.reportTime(":atomicity_violations_time");
+		Log.report(":atomicity_violations",""+noAtomicityViolations);
+		Log.report(":printed_atomicity_violations",""+noPrintedAtomicityViolations);
 		System.out.println("-------------------------------------------------------- \n");
 
 		// Other stuff
 		System.out.println("------- Other stuff ------------------------------------ ");
-		System.out.println(A.callGraph.getNumberOfNodes());
+		int numberOfCGNodes = this.callGraph.getNumberOfNodes();
+		System.out.println(numberOfCGNodes);
+		Log.report(":call_graph_nodes", numberOfCGNodes);
 		System.out.println("-------------------------------------------------------- \n");
 		
 		
@@ -138,7 +155,7 @@ public class A {
 		return shallowRaces;
 	}
 
-	private static void interactiveDebug() {
+	private void interactiveDebug() {
 	  String s = "";
 		do {
 			InputStreamReader isr = new InputStreamReader(System.in);
@@ -186,7 +203,7 @@ public class A {
 	          return predecedorNodes.contains(o);
           }
 	      });
-	      dotGraph(prunedCallGraph, s, new CGNodeDecorator());
+	      dotGraph(prunedCallGraph, s, new CGNodeDecorator(this));
 	      
       } catch (IOException e) {
 	      e.printStackTrace();
@@ -195,7 +212,7 @@ public class A {
   }
 
 	@SuppressWarnings("unused")
-	private void dotIRFor(String s) {
+	public void dotIRFor(String s) {
 		for (CGNode cgNode : callGraph) {
 			if (cgNode.getMethod().toString().matches(s))
 				try {
@@ -210,7 +227,7 @@ public class A {
 		}
 	}
 
-	public static void dotGraph(Graph<?> m, String name, NodeDecorator decorator) {
+	public void dotGraph(Graph<?> m, String name, NodeDecorator decorator) {
 		String dotFile = "debug/" + name + ".dot";
 		String outputFile = "./debug/" + name + ".pdf";
 		try {
@@ -223,7 +240,7 @@ public class A {
 	}
 
 	@SuppressWarnings("unused")
-	private static List<CGNode> findNodes(String regex) {
+	public List<CGNode> findNodes(String regex) {
 		Iterator<CGNode> iterator = callGraph.iterator();
 		ArrayList<CGNode> nodes = new ArrayList<CGNode>();
 		while (iterator.hasNext()) {

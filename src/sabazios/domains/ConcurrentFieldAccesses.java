@@ -13,16 +13,18 @@ import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 
 public class ConcurrentFieldAccesses extends ConcurrentAccesses<ConcurrentFieldAccess> {
 	private static final long serialVersionUID = 8609685673623357446L;
+	private final A a;
 
-	public ConcurrentFieldAccesses() {
+	public ConcurrentFieldAccesses(A a) {
+		this.a = a;
 	}
 
-	public void compute() {
+	public void compute(AlphaAccesses alphaAccesses, BetaAccesses betaAccesses) {
 
 		// add all write this
-		for (Loop t : A.alphaAccesses.keySet()) {
+		for (Loop t : alphaAccesses.keySet()) {
 			this.put(t, new LinkedHashSet<ConcurrentFieldAccess>());
-			Map<InstanceKey, Set<WriteFieldAccess>> localAccesses = A.alphaAccesses.get(t);
+			Map<InstanceKey, Set<WriteFieldAccess>> localAccesses = alphaAccesses.get(t);
 			for (InstanceKey o : localAccesses.keySet()) {
 				Set<WriteFieldAccess> writes = localAccesses.get(o);
 				for (WriteFieldAccess w : writes) {
@@ -34,7 +36,7 @@ public class ConcurrentFieldAccesses extends ConcurrentAccesses<ConcurrentFieldA
 
 		// add all other this
 		for (Loop t : this.keySet()) {
-			Map<InstanceKey, Set<FieldAccess>> localAccesses = A.betaAccesses.get(t);
+			Map<InstanceKey, Set<FieldAccess>> localAccesses = betaAccesses.get(t);
 			for (InstanceKey o : localAccesses.keySet()) {
 				Set<FieldAccess> others = localAccesses.get(o);
 				for (FieldAccess oa : others) {
@@ -53,16 +55,16 @@ public class ConcurrentFieldAccesses extends ConcurrentAccesses<ConcurrentFieldA
 		System.out.println("-------");
 		System.out.println(U.tos(o));
 		System.out.println("--");
-		Iterator<Object> succNodes = A.heapGraph.getSuccNodes(o);
+		Iterator<Object> succNodes = a.heapGraph.getSuccNodes(o);
 		while (succNodes.hasNext()) {
 			Object object = (Object) succNodes.next();
-			Iterator<Object> succNodes2 = A.heapGraph.getSuccNodes(object);
+			Iterator<Object> succNodes2 = a.heapGraph.getSuccNodes(object);
 			System.out.println(object);
 			while (succNodes2.hasNext()) {
 				InstanceKey i = (InstanceKey) succNodes2.next();
 				System.out.println(U.tos(i));
 				System.out.println("----->");
-				Iterator<Object> succNodes3 = A.heapGraph.getSuccNodes(A.heapGraph.getSuccNodes(i).next());
+				Iterator<Object> succNodes3 = a.heapGraph.getSuccNodes(a.heapGraph.getSuccNodes(i).next());
 				while (succNodes3.hasNext()) {
 					InstanceKey object2 = (InstanceKey) succNodes3.next();
 					System.out.println("     " + U.tos(object2));

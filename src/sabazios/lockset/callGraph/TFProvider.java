@@ -3,6 +3,7 @@ package sabazios.lockset.callGraph;
 import java.util.Iterator;
 import java.util.Map;
 
+import sabazios.A;
 import sabazios.util.IntSetVariable;
 
 import com.ibm.wala.classLoader.CallSiteReference;
@@ -20,11 +21,11 @@ public class TFProvider implements ITransferFunctionProvider<CGNode, LockSetVari
 	// private static final UnaryOperator<Lock> lockIdentity = new
 	// IntSetIdentity<Lock>();
 	private final Map<IMethod, Map<SSAInstruction, IntSetVariable>> intraProceduralLocks;
-	private final CallGraph callGraph;
+	private final A a;
 
-	public TFProvider(CallGraph callGraph,
+	public TFProvider(A a,
 			Map<IMethod, Map<SSAInstruction, IntSetVariable>> intraProceduralLocks) {
-		this.callGraph = callGraph;
+		this.a = a;
 		this.intraProceduralLocks = intraProceduralLocks;
 	}
 
@@ -56,7 +57,7 @@ public class TFProvider implements ITransferFunctionProvider<CGNode, LockSetVari
 
 	@Override
 	public UnaryOperator<LockSetVariable> getEdgeTransferFunction(CGNode src, CGNode dst) {
-		Iterator<CallSiteReference> possibleSites = callGraph.getPossibleSites(src, dst);
+		Iterator<CallSiteReference> possibleSites = a.callGraph.getPossibleSites(src, dst);
 		IntSetVariable var = IntSetVariable.newTop();
 		while (possibleSites.hasNext()) {
 			CallSiteReference callSiteReference = possibleSites.next();

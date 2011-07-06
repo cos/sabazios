@@ -3,7 +3,9 @@ package sabazios.wala;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.jar.JarFile;
@@ -11,6 +13,8 @@ import java.util.jar.JarFile;
 import sabazios.tests.DataRaceAnalysisTest;
 
 import com.ibm.wala.classLoader.BinaryDirectoryTreeModule;
+import com.ibm.wala.classLoader.IClass;
+import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.classLoader.Module;
 import com.ibm.wala.ipa.callgraph.AnalysisCache;
 import com.ibm.wala.ipa.callgraph.AnalysisOptions;
@@ -36,11 +40,8 @@ import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.config.FileOfClasses;
 import com.ibm.wala.util.io.FileProvider;
 
-
-
 public class WalaAnalysis {
 
-	
 	public final static String MAIN_METHOD = "main([Ljava/lang/String;)V";
 	protected Entrypoint entrypoint;
 	protected PointerAnalysis pointerAnalysis;
@@ -51,9 +52,10 @@ public class WalaAnalysis {
 	protected final List<String> jarDependencies = new ArrayList<String>();
 	protected final List<String> extensionBinaryDependencies = new ArrayList<String>();
 	protected PropagationCallGraphBuilder builder;
+	private AnalysisCache cache;
 
 	public static SSAPropagationCallGraphBuilder makeCFABuilder(AnalysisOptions options, AnalysisCache cache,
-			IClassHierarchy cha, AnalysisScope scope) {
+	    IClassHierarchy cha, AnalysisScope scope) {
 
 		if (options == null) {
 			throw new IllegalArgumentException("options is null");
@@ -64,8 +66,7 @@ public class WalaAnalysis {
 		DefaultContextSelector appContextSelector = new DefaultContextSelector(options, cha);
 
 		return new SmartCFABuilder(cha, options, cache, appContextSelector, new DefaultSSAInterpreter(options, cache),
-				ZeroXInstanceKeys.SMUSH_STRINGS | 
-				ZeroXInstanceKeys.ALLOCATIONS);
+		    ZeroXInstanceKeys.SMUSH_STRINGS | ZeroXInstanceKeys.ALLOCATIONS);
 		// ZeroXInstanceKeys.SMUSH_MANY |
 		// ZeroXInstanceKeys.SMUSH_THROWABLES |
 	}
@@ -83,30 +84,45 @@ public class WalaAnalysis {
 	}
 
 	public void setup(String entryClass, String entryMethod) throws ClassHierarchyException, IllegalArgumentException,
-			CancelException, IOException {
+	    CancelException, IOException {
 		this.entryClass = entryClass;
 		this.entryMethod = entryMethod;
 		AnalysisScope scope = getAnalysisScope();
 		scope.setExclusions(FileOfClasses.createFileOfClasses(new File("walaExclusions.txt")));
-		
+
 		IClassHierarchy cha = ClassHierarchy.make(scope);
 
 		Set<Entrypoint> entrypoints = new HashSet<Entrypoint>();
 		TypeReference typeReference = TypeReference.findOrCreate(scope.getLoader(AnalysisScope.APPLICATION),
-				TypeName.string2TypeName(entryClass));
+		    TypeName.string2TypeName(entryClass));
 		MethodReference methodReference = MethodReference.findOrCreate(typeReference,
-				entryMethod.substring(0, entryMethod.indexOf('(')), entryMethod.substring(entryMethod.indexOf('(')));
-		
+		    entryMethod.substring(0, entryMethod.indexOf('(')), entryMethod.substring(entryMethod.indexOf('(')));
+//		displayClassHierachy(cha);
 		entrypoint = new DefaultEntrypoint(methodReference, cha);
 		entrypoints.add(entrypoint);
-		
+
 		AnalysisOptions options = new AnalysisOptions(scope, entrypoints);
-		AnalysisCache cache = new AnalysisCache();
+		cache = new AnalysisCache();
 		builder = makeCFABuilder(options, cache, cha, scope);
-		
+
 		callGraph = builder.makeCallGraph(options);
 		pointerAnalysis = builder.getPointerAnalysis();
 	}
+
+	@SuppressWarnings("unused")
+  private static void displayClassHierachy(IClassHierarchy cha) {
+	  Iterator<IClass> iterator = cha.iterator();
+		while (iterator.hasNext()) {
+			IClass iClass = (IClass) iterator.next();
+			if (iClass.getName().toString().equals("Lweka/clusterers/EM")) {
+				System.out.println("FOUNT IT!!!!   " + iClass.getName());
+				Collection<IMethod> allMethods = iClass.getAllMethods();
+				for (IMethod iMethod : allMethods) {
+					System.out.println(iMethod);
+				}
+			}
+		}
+  }
 
 	private AnalysisScope getAnalysisScope() throws IOException {
 		AnalysisScope scope = AnalysisScope.createJavaAnalysisScope();

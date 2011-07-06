@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
+import sabazios.A;
 import sabazios.deref.Dereferences;
 import sabazios.lockset.Lock;
 import sabazios.lockset.LockSet;
@@ -22,8 +23,10 @@ public class LockSetVariable implements IVariable<LockSetVariable>, Iterable<Loc
 	private LinkedHashMap<CGNode, IntSetVariable> locks = null;
 	private int orderNumber;
 	private final int hashCode;
+	private final A a;
 
-	public LockSetVariable(boolean top) {
+	public LockSetVariable(A a, boolean top) {
+		this.a = a;
 		hashCode = nextHash();
 		if (!top)
 			locks = new LinkedHashMap<CGNode, IntSetVariable>();
@@ -37,8 +40,8 @@ public class LockSetVariable implements IVariable<LockSetVariable>, Iterable<Loc
 		return locks.get(n);
 	}
 
-	public LockSetVariable() {
-		this(false);
+	public LockSetVariable(A a) {
+		this(a, false);
 	}
 
 	public boolean isTop() {
@@ -109,7 +112,7 @@ public class LockSetVariable implements IVariable<LockSetVariable>, Iterable<Loc
 
 	@Override
 	public Object clone() {
-		LockSetVariable newLock = new LockSetVariable();
+		LockSetVariable newLock = new LockSetVariable(a);
 		newLock.copyState(this);
 		return newLock;
 	}
@@ -190,7 +193,7 @@ public class LockSetVariable implements IVariable<LockSetVariable>, Iterable<Loc
 							s.append("}");
 						}
 						if (U.detailedResults) {
-							s.append(" " + Dereferences.get(n, v));
+							s.append(" " + Dereferences.get(a, n, v));
 						}
 						s.append(" , ");
 					}
@@ -222,7 +225,7 @@ public class LockSetVariable implements IVariable<LockSetVariable>, Iterable<Loc
 		for (CGNode n : this.locks.keySet()) {
 			IntSetVariable intSetVariable = this.locks.get(n);
 			for (Integer v : intSetVariable) {
-				l.add(new Lock(n, v));
+				l.add(new Lock(a, n, v));
 			}
 		}
 

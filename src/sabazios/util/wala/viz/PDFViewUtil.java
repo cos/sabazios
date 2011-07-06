@@ -95,17 +95,17 @@ public class PDFViewUtil {
    */
   private final static class ConcatenatingNodeDecorator implements NodeDecorator {
 
-    private final NodeDecorator A;
+    private final NodeDecorator a;
 
-    private final NodeDecorator B;
+    private final NodeDecorator b;
 
     ConcatenatingNodeDecorator(NodeDecorator A, NodeDecorator B) {
-      this.A = A;
-      this.B = B;
+      this.a = A;
+      this.b = B;
     }
 
     public String getLabel(Object o) throws WalaException {
-      return A.getLabel(o) + B.getLabel(o);
+      return a.getLabel(o) + b.getLabel(o);
     }
 
   }
@@ -147,7 +147,7 @@ public class PDFViewUtil {
         StringBuffer x = new StringBuffer(j + "   " + instructions[j].toString(ir.getSymbolTable()));
         StringStuff.padWithSpaces(x, 35);
         result.append(x);
-        result.append(" "+A.locks.get(n, instructions[j]));
+//        result.append(" "+a.locks.get(n, instructions[j]));
         result.append("\\l");
       }
     }

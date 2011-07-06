@@ -19,7 +19,8 @@ import com.ibm.wala.ssa.SSAPutInstruction;
 public class AlphaAccesses extends ObjectAccesses<WriteFieldAccess> {
 	private static final long serialVersionUID = 3482224366938834900L;
 
-	public AlphaAccesses() {
+	public AlphaAccesses(final A a) {
+		super(a);
 		oag = new ObjectAccessesGatherer() {
 
 			@Override
@@ -27,31 +28,31 @@ public class AlphaAccesses extends ObjectAccesses<WriteFieldAccess> {
 				if (i instanceof SSAPutInstruction) {
 
 					SSAPutInstruction pi = (SSAPutInstruction) i;
-					IField f = A.cha.resolveField(pi.getDeclaredField());
+					IField f = a.cha.resolveField(pi.getDeclaredField());
 					if (!pi.isStatic()) {
-						LocalPointerKey pk = A.pointerForValue.get(n, pi.getRef());
-						Iterator<Object> succNodes = A.heapGraph.getSuccNodes(pk);
+						LocalPointerKey pk = a.pointerForValue.get(n, pi.getRef());
+						Iterator<Object> succNodes = a.heapGraph.getSuccNodes(pk);
 						while (succNodes.hasNext()) {
 							InstanceKey o = (InstanceKey) succNodes.next();
 							// if (!U.isMainContext(o)) {
-							WriteFieldAccess w = new WriteFieldAccess(n, pi, o, f);
+							WriteFieldAccess w = new WriteFieldAccess(a, n, pi, o, f);
 							add(w);
 							// }
 						}
 					} else {
-						WriteFieldAccess w = new WriteFieldAccess(n, pi, null, f);
+						WriteFieldAccess w = new WriteFieldAccess(a, n, pi, null, f);
 						add(w);
 					}
 				}
 				if (i instanceof SSAArrayStoreInstruction) {
 					SSAArrayStoreInstruction asi = (SSAArrayStoreInstruction) i;
-					LocalPointerKey pk = A.pointerForValue.get(n, asi.getArrayRef());
-					Iterator<Object> succNodes = A.heapGraph.getSuccNodes(pk);
+					LocalPointerKey pk = a.pointerForValue.get(n, asi.getArrayRef());
+					Iterator<Object> succNodes = a.heapGraph.getSuccNodes(pk);
 					IField f = ArrayContents.v();
 					while (succNodes.hasNext()) {
 						InstanceKey o = (InstanceKey) succNodes.next();
 						if (!U.isAlphaIteration(o)) {
-							WriteFieldAccess w = new WriteFieldAccess(n, asi, o, f);
+							WriteFieldAccess w = new WriteFieldAccess(a, n, asi, o, f);
 							add(w);
 						}
 					}

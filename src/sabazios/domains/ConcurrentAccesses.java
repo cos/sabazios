@@ -56,10 +56,10 @@ public abstract class ConcurrentAccesses<T extends ConcurrentAccess<?>> extends 
 	 * which lock protects a certain access. 
 	 * @param raceAnalysis
 	 */
-	public void distributeLocks() {
+	public void distributeLocks(A a) {
 		for (Set<T> cas : this.values()) {
 			for (ConcurrentAccess<?> concurrentAccess : cas) {
-				concurrentAccess.distributeLocks(A.locks);
+				concurrentAccess.distributeLocks(a.locks);
 			}
 		}
 	}

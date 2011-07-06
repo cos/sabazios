@@ -9,17 +9,12 @@ import com.ibm.wala.util.CancelException;
 public class LBJPOSEvaluation extends DataRaceAnalysisTest{
 
 	public LBJPOSEvaluation() {
-		this.addJarDependency("../evaluation/LBJPOS/lib/LBJ2.jar");
-		this.addJarDependency("../evaluation/LBJPOS/lib/LBJ2Library.jar");
-		this.addJarDependency("../evaluation/LBJPOS/lib/LBJPOS.jar");		
-		this.addBinaryDependency("../evaluation/LBJPOS/bin");
-		this.addBinaryDependency("../ParallelArrayMock/bin");		
+		this.addBinaryDependency("../old/WALATests_workinprogress/LBJPOS/lib/LBJ2.jar");
+		this.addBinaryDependency("../lib/parallelArray.mock");		
 	}
 	
 	@Test
-	public void bla() throws CancelException {
-//		Set<Race> races = findRaces("Ledu/illinois/cs/cogcomp/lbj/pos/POSTag", "main([Ljava/lang/String;)V");
-		
+	public void test() throws CancelException {
+		findCA("Ledu/illinois/cs/cogcomp/lbj/pos/POSTag", "main([Ljava/lang/String;)V");
 	}
-
 }

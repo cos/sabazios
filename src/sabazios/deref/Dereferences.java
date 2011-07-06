@@ -19,21 +19,22 @@ public class Dereferences {
 
 	static LinkedHashMap<Pair<CGNode, Integer>, Set<DerefRep>> cached = new LinkedHashMap<Pair<CGNode, Integer>, Set<DerefRep>>();
 	static LinkedHashMap<Pair<Pair<CGNode, Integer>, Pair<CGNode, Integer>>, Set<DerefRep>> cachedWithExtraStop = new LinkedHashMap<Tuple.Pair<Pair<CGNode, Integer>, Pair<CGNode, Integer>>, Set<DerefRep>>();
+	
 
-	public static Set<DerefRep> get(CGNode n, int v) {
+	public static Set<DerefRep> get(A a, CGNode n, int v) {
 		if (!cached.containsKey(Tuple.from(n, v))) {
-			Set<DerefRep> result = Dereferences.infer(n, v);
+			Set<DerefRep> result = Dereferences.infer(a, n, v);
 			cached.put(Tuple.from(n, v), result);
 		}
 		return cached.get(Tuple.from(n, v));
 	}
 
-	public static Set<DerefRep> get(CGNode n, int v, CGNode extraStopN, int extraStopV) {
+	public static Set<DerefRep> get(A a, CGNode n, int v, CGNode extraStopN, int extraStopV) {
 		Pair<Pair<CGNode, Integer>, Pair<CGNode, Integer>> key = Tuple.from(Tuple.from(n, v),
 				Tuple.from(extraStopN, extraStopV));
 		Set<DerefRep> result = cachedWithExtraStop.get(key);
 		if (result == null) {
-			result = Dereferences.infer(n, v, extraStopN, extraStopV);
+			result = Dereferences.infer(a, n, v, extraStopN, extraStopV);
 			cachedWithExtraStop.put(key, result);
 		}
 		return result;
@@ -45,8 +46,8 @@ public class Dereferences {
 	 * @param v the value
 	 * @return the set of DerefRep or null if it cannot infer (ex. infinite loop, recursion, etc)
 	 */
-	private static Set<DerefRep> infer(CGNode n, int v) {
-		return infer(n, v, null, null);
+	private static Set<DerefRep> infer(A a, CGNode n, int v) {
+		return infer(a, n, v, null, null);
 	}
 
 	
@@ -58,7 +59,7 @@ public class Dereferences {
 	 * @param extraStopV
 	 * @return the set of DerefRep or null if it cannot infer (ex. infinite loop, recursion, etc)
 	 */
-	public static Set<DerefRep> infer(CGNode n, int v, CGNode extraStopN, Integer extraStopV) {
+	public static Set<DerefRep> infer(A a, CGNode n, int v, CGNode extraStopN, Integer extraStopV) {
 
 		LinkedHashSet<DerefRep> w = new LinkedHashSet<DerefRep>();
 		DerefRep start = new DerefRep();
@@ -114,10 +115,10 @@ public class Dereferences {
 					for (int pv : parameterValueNumbers) {
 						if (v == pv) {
 							processed = true;
-							Iterator<CGNode> predNodes = A.callGraph.getPredNodes(n);
+							Iterator<CGNode> predNodes = a.callGraph.getPredNodes(n);
 							while (predNodes.hasNext()) {
 								CGNode pn = (CGNode) predNodes.next();
-								Iterator<CallSiteReference> possibleSites = A.callGraph.getPossibleSites(pn, n);
+								Iterator<CallSiteReference> possibleSites = a.callGraph.getPossibleSites(pn, n);
 								while (possibleSites.hasNext()) {
 									CallSiteReference callSite = (CallSiteReference) possibleSites.next();
 									SSAAbstractInvokeInstruction[] calls = pn.getIR().getCalls(callSite);

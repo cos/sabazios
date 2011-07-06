@@ -18,7 +18,7 @@ import com.ibm.wala.types.FieldReference;
 
 
 public class U {
-	public static boolean detailedResults = true;
+	public static boolean detailedResults = false;
 	public static String tos(InstanceKey o) {
 		if (o == null)
 			return null;

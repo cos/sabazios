@@ -54,7 +54,7 @@ public abstract class ObjectAccess {
 		return ""; //(U.detailedResults ? "Context: " + U.tos(n.getContext()) : "") ;
 	}
 
-	public void updateLock() {
-		l = A.locks.get(n, i);
+	public void updateLock(A a) {
+		l = a.locks.get(n, i);
   }
 }

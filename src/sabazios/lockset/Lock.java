@@ -2,6 +2,7 @@ package sabazios.lockset;
 
 import java.util.Set;
 
+import sabazios.A;
 import sabazios.deref.DerefRep;
 import sabazios.deref.Dereferences;
 import sabazios.util.CodeLocation;
@@ -16,15 +17,17 @@ public class Lock {
 	public final CGNode n;
 	public final int v;
 	private Set<DerefRep> deref;
+	private final A a;
 
-	public Lock(CGNode n, int v) {
+	public Lock(A a, CGNode n, int v) {
+		this.a = a;
 		this.n = n;
 		this.v = v;
 	}
 
 	public Set<DerefRep> deref() {
 		if (deref == null)
-			deref = Dereferences.get(n, v);
+			deref = Dereferences.get(a, n, v);
 		return deref;
 	}
 
