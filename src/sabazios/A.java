@@ -71,7 +71,7 @@ public class A {
 		// });
 
 		System.out.println("---- Compute map value -> PointerKey ------------------- ");
-		pointerForValue.compute(this);
+		pointerForValue.compute(this.heapGraph);
 		Log.log("Function CGNode x SSAvalue -> Object precomputed");
 		Log.reportTime(":map_vars_to_pointers_time");
 		System.out.println("-------------------------------------------------------- \n");

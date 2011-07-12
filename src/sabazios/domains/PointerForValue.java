@@ -6,6 +6,7 @@ import java.util.Map;
 
 import sabazios.A;
 
+import com.ibm.wala.analysis.pointers.HeapGraph;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 import com.ibm.wala.util.collections.SparseVector;
@@ -16,9 +17,9 @@ public class PointerForValue {
 	private Map<CGNode, SparseVector<LocalPointerKey>> pointedObjects;
 //	private HashMap<IClass, ConcreteTypeKey> classToInstanceKey = new HashMap<IClass, ConcreteTypeKey>(); 
 
-	public void compute(A a) {
+	public void compute(HeapGraph heapGraph) {
 		pointedObjects = new LinkedHashMap<CGNode, SparseVector<LocalPointerKey>>();
-		Iterator<Object> iterator = a.heapGraph.iterator();
+		Iterator<Object> iterator = heapGraph.iterator();
 		while (iterator.hasNext()) {
 			Object ik = iterator.next();
 			if (ik instanceof LocalPointerKey) {
