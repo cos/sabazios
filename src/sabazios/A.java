@@ -68,11 +68,7 @@ public class A {
 		// }
 		// });
 
-		System.out.println("---- Compute map value -> PointerKey ------------------- ");
-		pointerForValue.compute(this.heapGraph);
-		Log.log("Function CGNode x SSAvalue -> Object precomputed");
-		Log.reportTime(":map_vars_to_pointers_time");
-		System.out.println("-------------------------------------------------------- \n");
+		precompute();
 
 		System.out.println("---- Reads and writes ---------------------------------- ");
 		alphaAccesses.compute(this);
@@ -151,6 +147,14 @@ public class A {
 		interactiveDebug();
 		
 		return shallowRaces;
+	}
+
+	public void precompute() {
+		System.out.println("---- Compute map value -> PointerKey ------------------- ");
+		pointerForValue.compute(this.heapGraph);
+		Log.log("Function CGNode x SSAvalue -> Object precomputed");
+		Log.reportTime(":map_vars_to_pointers_time");
+		System.out.println("-------------------------------------------------------- \n");
 	}
 
 	private void interactiveDebug() {
