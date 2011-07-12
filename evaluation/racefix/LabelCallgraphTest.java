@@ -14,7 +14,5 @@ public class LabelCallgraphTest extends DataRaceAnalysisTest {
 	@Test
 	public void test() throws Exception {
 		setup("Lracefix/Foo", "simple()V");
-		LabelHeapGraph lhg = new LabelHeapGraph(this.pointerAnalysis.getHeapGraph());
-		lhg.compute();
 	}
 }
