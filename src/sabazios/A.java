@@ -39,7 +39,6 @@ public class A {
 	public CallGraph callGraph;
 	public PointerAnalysis pointerAnalysis;
 	public HeapGraph heapGraph;
-	public PropagationCallGraphBuilder builder;
 	public IClassHierarchy cha;
 	public Locks locks;
 	public PointerForValue pointerForValue;
@@ -47,10 +46,9 @@ public class A {
 	public BetaAccesses betaAccesses;
 	public final Loops loops;
 
-	public A(CallGraph callGraph, PointerAnalysis pointerAnalysis, PropagationCallGraphBuilder builder) {
+	public A(CallGraph callGraph, PointerAnalysis pointerAnalysis) {
 		this.callGraph = callGraph;
 		this.pointerAnalysis = pointerAnalysis;
-		this.builder = builder;
 		this.heapGraph = this.pointerAnalysis.getHeapGraph();
 		this.cha = this.pointerAnalysis.getClassHierarchy();
 

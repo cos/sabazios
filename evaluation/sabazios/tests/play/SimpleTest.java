@@ -34,7 +34,7 @@ public class SimpleTest extends DataRaceAnalysisTest {
 	public void verySimple() throws CancelException {
 		try {
 	    setup("Lsandbox/Bar", "foo()V");
-	    A a = new A(callGraph, pointerAnalysis, builder);
+	    A a = new A(callGraph, pointerAnalysis);
 	    List<CGNode> nodes = a.findNodes(".*foo.*");	    
 	    CGNode cgNode = nodes.get(0);
 //			PDFViewUtil.ghostviewIR(A.cha, cgNode, "debug/irPdf" + cgNode.getGraphNodeId(), "./debug/irDot"

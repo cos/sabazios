@@ -63,7 +63,7 @@ public abstract class DataRaceAnalysisTest extends WalaAnalysis {
 		Log.log("Pointer analysis done");
 		Log.reportTime(":pointer_analysis_time");
 
-		A a = new A(callGraph, pointerAnalysis, builder);
+		A a = new A(callGraph, pointerAnalysis);
 
 		foundCA = a.compute();
 		Log.log("New Race analysis done");
