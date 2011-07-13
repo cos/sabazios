@@ -9,140 +9,179 @@ import extra166y.ParallelArray;
 
 public class Foo {
 	
-	public static class Bubu {
-		public Mumu m1;
-		public Mumu m2;
+	public static class Dog {
+		public Cat chases;
+		public Cat m2;
 	}
 	
-	public static class Mumu {
-		public int x;
-		public Mumu next = null;
+	public static class Cat {
+		public int lives;
+		public Cat follows = null;
 		
 	}
 
 	public void simple1() {
-		Bubu b = new Bubu();
+		Dog b = new Dog();
+		b.chases = null;
 	}
 	
 	public void simple1Label() {
-		Bubu b = new Bubu();
-		b.m1 = new Mumu();
-		Mumu v1 = b.m1;
+		Dog b = new Dog();
+		b.chases = new Cat();
+		Cat v1 = b.chases;
 	}
 	
 	public void simpleWithUninteresting() {
-		Mumu mumu = new Mumu();
+		Cat mumu = new Cat();
 		
-		Bubu b = new Bubu();
-		b.m1 = mumu;
+		Dog b = new Dog();
+		b.chases = mumu;
 		b.m2 = mumu;
-		Mumu v1 = b.m1;
-		v1.x = 10;
+		Cat v1 = b.chases;
+		v1.lives = 10;
 	}
 	
 	public void simplePhi() {
-		Mumu mumu = new Mumu();
+		Cat mumu = new Cat();
 		
-		Bubu b = new Bubu();
-		b.m1 = mumu;
+		Dog b = new Dog();
+		b.chases = mumu;
 		b.m2 = mumu;
-		Mumu v1;
-		if (mumu.x == 21)
-			v1 = b.m1;
+		Cat v1;
+		if (mumu.lives == 21)
+			v1 = b.chases;
 		else
 			v1 = b.m2;
-		v1.x = 10;
+		v1.lives = 10;
 	}
 	
 	public void simpleCalls() {
-		Mumu mumu = new Mumu();
+		Cat mumu = new Cat();
 		
-		Bubu b = new Bubu();
-		b.m1 = mumu;
+		Dog b = new Dog();
+		b.chases = mumu;
 		b.m2 = mumu;
 		writeField(b);
 	}
 
-	private void writeField(Bubu b) {
-		Mumu v1 = b.m1;
-		v1.x = 10;
+	private void writeField(Dog b) {
+		Cat v1 = b.chases;
+		v1.lives = 10;
 	}
 	
 	public void simpleCalls2() {
-		Mumu mumu = new Mumu();
+		Cat mumu = new Cat();
 		
-		Bubu b = new Bubu();
+		Dog b = new Dog();
 		writeField2(mumu, b);
 	}
 
-	private void writeField2(Mumu mumu, Bubu b) {
-		b.m1 = mumu;
+	private void writeField2(Cat mumu, Dog b) {
+		b.chases = mumu;
 		b.m2 = mumu;
-		Mumu v1 = b.m1;
-		v1.x = 10;
+		Cat v1 = b.chases;
+		v1.lives = 10;
 	}
 	
 	public void simpleWithReturn() {
-		Mumu mumu = new Mumu();
+		Cat mumu = new Cat();
 		
-		Bubu b = makeBubu(mumu);
-		Mumu v1 = b.m1;
-		v1.x = 10;
+		Dog b = makeBubu(mumu);
+		Cat v1 = b.chases;
+		v1.lives = 10;
 	}
 
-	private Bubu makeBubu(Mumu mumu) {
-		Bubu b = new Bubu();
-		b.m1 = mumu;
+	private Dog makeBubu(Cat mumu) {
+		Dog b = new Dog();
+		b.chases = mumu;
 		b.m2 = mumu;
 		return b;
 	}
 	
 	//doesn't work on context insensitive
 	public void simpleCalls3() {
-		Mumu mumu = new Mumu();
+		Cat mumu = new Cat();
 		
-		Bubu b = new Bubu();
-		b.m1 = mumu;
+		Dog b = new Dog();
+		b.chases = mumu;
 		b.m2 = mumu;
 		writeField(b);
 		
-		Bubu b1 = new Bubu();
-		b1.m1 = mumu;
+		Dog b1 = new Dog();
+		b1.chases = mumu;
 		writeField(b1);
 	}
 	
 	public void simpleWithReturn2() {
-		Mumu mumu = new Mumu();
+		Cat mumu = new Cat();
 		
-		Bubu b1 = makeBubu(mumu);
-		Bubu b = makeBubu(mumu);
-		Mumu v1 = b.m1;
-		v1.x = 10;
+		Dog b1 = makeBubu(mumu);
+		Dog b = makeBubu(mumu);
+		Cat v1 = b.chases;
+		v1.lives = 10;
 	}
 	
 	public void simpleRecursive() {
-		Mumu mumu = new Mumu();
+		Cat mumu = new Cat();
 		
-		Bubu b = null;
-		while(mumu.x > 0) {			
-			b = new Bubu();
-			b.m1 = mumu;
+		Dog b = null;
+		while(mumu.lives > 0) {			
+			b = new Dog();
+			b.chases = mumu;
 			b.m2 = mumu;
 		}
 		
-		Mumu v1 = b.m1;
-		v1.x = 10;
+		Cat v1 = b.chases;
+		v1.lives = 10;
 	}
 	
 	public void simpleRecursive2() {
-		Mumu p = new Mumu();
+		Cat p = new Cat();
 		
-		while(p.x > 0) {			
-			Mumu p1 = new Mumu();
-			p.next = p1;
+		while(p.lives > 0) {			
+			Cat p1 = new Cat();
+			p.follows = p1;
 			p = p1;
 		}
 		
-		p.x = 10;
+		p.lives = 10;
+	}
+	
+	public void simpleWithFieldWrites() {
+		Cat mumu = new Cat();
+		
+		Dog b = new Dog();
+		b.chases = mumu;
+		b.chases = new Cat();
+		Cat v1 = b.chases;
+		v1.lives = 10;
+	}
+	
+	// 
+	public void simpleWithFieldWrites2() {
+		Cat pufi = new Cat();
+		
+		Dog rex = new Dog();
+		Cat cici = new Cat();
+		cici.follows = pufi;
+		Cat bibi = new Cat();
+		Cat x = cici.follows;
+		rex.chases = x;
+		Cat y = rex.chases;
+		y.lives -= 1;
+	}
+	
+	public void simpleWithFieldWrites3() {
+		Cat pufi = new Cat();
+		
+		Dog rex = new Dog();
+		Cat cici = new Cat();
+		cici.follows = pufi;
+		Cat bibi = new Cat();
+		rex.chases = cici;
+		rex.chases = bibi;
+		Cat y = rex.chases;
+		Cat z = y.follows;
+		z.lives -= 1;
 	}
 }

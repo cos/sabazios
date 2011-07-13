@@ -9,7 +9,7 @@
 	<classpathentry kind="lib" path="lib/commons-lang3-3.0-beta.jar"/>
 	<classpathentry kind="lib" path="lib/lambdaj-2.3.3-with-dependencies.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.util"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/parallelArray.mock"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ibm.wala.core"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/lib.parallelArray.mock"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
