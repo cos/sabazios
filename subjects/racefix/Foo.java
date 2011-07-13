@@ -11,7 +11,7 @@ public class Foo {
 	
 	public static class Dog {
 		public Cat chases;
-		public Cat m2;
+		public Cat loves;
 	}
 	
 	public static class Cat {
@@ -38,20 +38,19 @@ public class Foo {
 	
 	public void simpleTwoLabelsDeep() {
 	  Dog rex = new Dog();
-	  Cat dudu = new Cat();
-    rex.chases = dudu;
-	  Cat pufi = rex.chases;
-	  dudu.follows = pufi;	 
+    rex.chases = new Cat();
+    rex.chases.follows = new Cat();
+    Cat fifi = rex.chases.follows;
 	}
 	
 	public void simpleWithUninteresting() {
 		Cat mumu = new Cat();
 		
-		Dog b = new Dog();
-		b.chases = mumu;
-		b.m2 = mumu;
-		Cat v1 = b.chases;
-		v1.lives = 10;
+		Dog rex = new Dog();
+		rex.chases = mumu;
+		rex.loves = mumu;
+		Cat fifi = rex.chases;
+		fifi.lives -= 1;
 	}
 	
 	public void simplePhi() {
@@ -59,12 +58,12 @@ public class Foo {
 		
 		Dog b = new Dog();
 		b.chases = mumu;
-		b.m2 = mumu;
+		b.loves = mumu;
 		Cat v1;
 		if (mumu.lives == 21)
 			v1 = b.chases;
 		else
-			v1 = b.m2;
+			v1 = b.loves;
 		v1.lives = 10;
 	}
 	
@@ -73,7 +72,7 @@ public class Foo {
 		
 		Dog b = new Dog();
 		b.chases = mumu;
-		b.m2 = mumu;
+		b.loves = mumu;
 		writeField(b);
 	}
 
@@ -91,7 +90,7 @@ public class Foo {
 
 	private void writeField2(Cat mumu, Dog b) {
 		b.chases = mumu;
-		b.m2 = mumu;
+		b.loves = mumu;
 		Cat v1 = b.chases;
 		v1.lives = 10;
 	}
@@ -107,7 +106,7 @@ public class Foo {
 	private Dog makeBubu(Cat mumu) {
 		Dog b = new Dog();
 		b.chases = mumu;
-		b.m2 = mumu;
+		b.loves = mumu;
 		return b;
 	}
 	
@@ -117,7 +116,7 @@ public class Foo {
 		
 		Dog b = new Dog();
 		b.chases = mumu;
-		b.m2 = mumu;
+		b.loves = mumu;
 		writeField(b);
 		
 		Dog b1 = new Dog();
@@ -141,7 +140,7 @@ public class Foo {
 		while(mumu.lives > 0) {			
 			b = new Dog();
 			b.chases = mumu;
-			b.m2 = mumu;
+			b.loves = mumu;
 		}
 		
 		Cat v1 = b.chases;

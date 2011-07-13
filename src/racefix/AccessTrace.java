@@ -13,11 +13,16 @@ import com.ibm.wala.ipa.callgraph.propagation.InstanceFieldKey;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
+import com.ibm.wala.ssa.DefUse;
+import com.ibm.wala.ssa.SSAGetInstruction;
+import com.ibm.wala.ssa.SSAInstruction;
+import com.ibm.wala.ssa.SSANewInstruction;
+import com.ibm.wala.types.FieldReference;
 
 /**
  * 
  * @author caius
- *
+ * 
  */
 public class AccessTrace {
   private final CGNode n;
@@ -35,29 +40,41 @@ public class AccessTrace {
   }
 
   public void compute() {
-    LocalPointerKey lpk = pv.get(n, v);
+    CGNode n2 = n;
+    int v2 = v;
+    solveNV(n2, v2);
+  }
+
+  private void solveNV(CGNode n2, int v2) {
+    LocalPointerKey lpk = pv.get(n2, v2);
     Iterator<Object> succNodes = a.heapGraph.getSuccNodes(lpk);
     while (succNodes.hasNext()) {
       InstanceKey o = (InstanceKey) succNodes.next();
       instances.add(o);
-      Iterator<Object> pred = a.heapGraph.getPredNodes(o);
-      while (pred.hasNext()) {
-        Object prev = (Object) pred.next();
-        if (prev instanceof InstanceFieldKey) {
-          InstanceFieldKey field = (InstanceFieldKey) prev;
-          pointers.add(field);
-          Iterator<Object> predNodes = a.heapGraph.getPredNodes(field);
-          while (predNodes.hasNext()) {
-            Object prev1 = (Object) predNodes.next();
-            if (prev1 instanceof InstanceKey) {
-              InstanceKey as = (InstanceKey) prev1;
-              instances.add(as);
-            }
+
+      DefUse du = n2.getDU();
+      SSAInstruction def = du.getDef(v2);
+      // if (def instanceof SSANewInstruction) {
+      // SSANewInstruction newInstr = (SSANewInstruction) def;
+      //
+      // }
+      if (def instanceof SSAGetInstruction) {
+        SSAGetInstruction get = (SSAGetInstruction) def;
+        FieldReference declaredField = get.getDeclaredField();
+        Iterator<Object> pred = a.heapGraph.getPredNodes(o);
+        while (pred.hasNext()) {
+          Object prev = (Object) pred.next();
+          if (prev instanceof InstanceFieldKey) {
+            InstanceFieldKey field = (InstanceFieldKey) prev;
+
+            if (field.getField().getReference().equals(declaredField))
+              pointers.add(field);
+              
+            solveNV(n, get.getRef());
           }
         }
       }
     }
-
   }
 
   public String getTestString() {
@@ -80,7 +97,7 @@ public class AccessTrace {
           s += "-" + variableName;
         s += "\n";
       }
-      
+
       if (o instanceof InstanceFieldKey) {
         InstanceFieldKey p = (InstanceFieldKey) o;
         s += "IFK:";

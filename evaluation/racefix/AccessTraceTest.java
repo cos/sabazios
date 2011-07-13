@@ -1,25 +1,25 @@
 package racefix;
 
 import java.io.IOException;
-import java.util.List;
 
 import junit.framework.Assert;
 
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runners.JUnit4;
-
-import com.ibm.wala.ipa.callgraph.CGNode;
-import com.ibm.wala.ipa.cha.ClassHierarchyException;
-import com.ibm.wala.util.CancelException;
-import com.ibm.wala.util.collections.Filter;
-import com.ibm.wala.util.graph.Graph;
-import com.ibm.wala.util.graph.GraphSlicer;
+import org.junit.rules.TestName;
 
 import sabazios.A;
 import sabazios.tests.DataRaceAnalysisTest;
 import sabazios.util.U;
 
+import com.ibm.wala.ipa.callgraph.CGNode;
+import com.ibm.wala.ipa.cha.ClassHierarchyException;
+import com.ibm.wala.util.CancelException;
+
 public class AccessTraceTest extends DataRaceAnalysisTest {
+
+  @Rule
+  public TestName name = new TestName();
 
   public AccessTraceTest() {
     super();
@@ -27,41 +27,58 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
     this.addBinaryDependency("../lib/parallelArray.mock");
   }
 
-  @Test
-  public void testSimple() throws Exception {
-    setup("Lracefix/Foo", "simple1()V");
+  private void runTest(String startVariableName, String expected) throws ClassHierarchyException, CancelException,
+      IOException {
+    String testString;
+    String methodName = name.getMethodName();
+
+    setup("Lracefix/Foo", methodName + "()V");
     A a = new A(callGraph, pointerAnalysis);
     a.precompute();
-    CGNode cgNode = a.findNodes(".*simple1.*").get(0);
-    AccessTrace trace = new AccessTrace(a, cgNode, 3);
+    CGNode cgNode = a.findNodes(".*" + methodName + ".*").get(0);
+    int value = U.getValueForVariableName(cgNode, startVariableName);
+    System.out.println(cgNode + "" + value);
+    AccessTrace trace = new AccessTrace(a, cgNode, value);
     trace.compute();
-    String testString = trace.getTestString();
-    Assert.assertEquals("O:Foo.simple1-new Foo$Dog\n", testString);
-
-    Graph<Object> prunedHP = GraphSlicer.prune(a.heapGraph, new Filter<Object>() {
-
-      @Override
-      public boolean accepts(Object o) {
-        return o.toString().contains("simple1");
-      }
-
-    });
-
-    a.dotGraph(prunedHP, "test_dot", null);
-
+    testString = trace.getTestString();
+    Assert.assertEquals(expected, testString);
   }
 
   @Test
-  public void testSimpleLabel() throws Exception {
-    setup("Lracefix/Foo", "simpleLabel()V");
-    A a = new A(callGraph, pointerAnalysis);
-    a.precompute();
-    CGNode cgNode = a.findNodes(".*simpleLabel.*").get(0);
-    int value = U.getValueForVariableName(cgNode, "pufi");
-    System.out.println(value);
-    AccessTrace trace = new AccessTrace(a, cgNode, value);
-    trace.compute();
-    Assert.assertEquals("IFK:Foo$Dog.chases\n" + "O:Foo.simpleLabel-new Foo$Cat\n" + "O:Foo.simpleLabel-new Foo$Dog\n",
-        trace.getTestString());
+  public void simple1() throws Exception {
+    String startVariableName = "b";
+    String expected = "O:Foo.simple1-new Foo$Dog\n";
+    runTest(startVariableName, expected);
+  }
+
+  @Test
+  public void simpleLabel() throws Exception {
+    String startVariableName = "pufi";
+    String expected = "IFK:Foo$Dog.chases\n" + "O:Foo.simpleLabel-new Foo$Cat\n" + "O:Foo.simpleLabel-new Foo$Dog\n";
+    runTest(startVariableName, expected);
+  }
+
+  @Test
+  public void simpleLabel1() throws Exception {
+    String startVariableName = "pufi";
+    String expected = "O:Foo.simpleLabel1-new Foo$Cat\n";
+    runTest(startVariableName, expected);
+  }
+
+  @Test
+  public void simpleTwoLabelsDeep() throws Exception {
+    String startVariableName = "fifi";
+    String expected = "IFK:Foo$Cat.follows\n" + "IFK:Foo$Dog.chases\n" + "O:Foo.simpleTwoLabelsDeep-new Foo$Cat\n"
+        + "O:Foo.simpleTwoLabelsDeep-new Foo$Cat\n" + "O:Foo.simpleTwoLabelsDeep-new Foo$Dog\n";
+
+    runTest(startVariableName, expected);
+  }
+
+  @Test
+  public void simpleWithUninteresting() throws Exception {
+    String startVariableName = "fifi";
+    String expected = "IFK:Foo$Dog.chases\n" + "O:Foo.simpleWithUninteresting-new Foo$Cat\n"
+        + "O:Foo.simpleWithUninteresting-new Foo$Dog\n";
+    runTest(startVariableName, expected);
   }
 }
