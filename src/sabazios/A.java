@@ -233,7 +233,7 @@ public class A {
 		String dotFile = "debug/" + name + ".dot";
 		String outputFile = "./debug/" + name + ".pdf";
 		try {
-			DotUtil.dotify(m, decorator, dotFile, outputFile, "/opt/local/bin/dot");
+			DotUtil.dotify(m, decorator, dotFile, outputFile, "dot");
 			PDFViewUtil.launchPDFView(outputFile, "open");
 		} catch (WalaException e) {
 			// TODO Auto-generated catch block
