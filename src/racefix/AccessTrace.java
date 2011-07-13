@@ -7,15 +7,18 @@ import sabazios.A;
 import sabazios.domains.PointerForValue;
 import sabazios.util.CodeLocation;
 
-import com.ibm.wala.analysis.pointers.HeapGraph;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.propagation.AllocationSiteInNode;
+import com.ibm.wala.ipa.callgraph.propagation.InstanceFieldKey;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
-import com.ibm.wala.ssa.SSAInstruction;
-import com.ibm.wala.util.graph.traverse.BFSIterator;
 
+/**
+ * 
+ * @author caius
+ *
+ */
 public class AccessTrace {
   private final CGNode n;
   private final int v;
@@ -33,12 +36,26 @@ public class AccessTrace {
 
   public void compute() {
     LocalPointerKey lpk = pv.get(n, v);
-    System.out.println(lpk);
-    pointers.add(lpk);
     Iterator<Object> succNodes = a.heapGraph.getSuccNodes(lpk);
     while (succNodes.hasNext()) {
       InstanceKey o = (InstanceKey) succNodes.next();
       instances.add(o);
+      Iterator<Object> pred = a.heapGraph.getPredNodes(o);
+      while (pred.hasNext()) {
+        Object prev = (Object) pred.next();
+        if (prev instanceof InstanceFieldKey) {
+          InstanceFieldKey field = (InstanceFieldKey) prev;
+          pointers.add(field);
+          Iterator<Object> predNodes = a.heapGraph.getPredNodes(field);
+          while (predNodes.hasNext()) {
+            Object prev1 = (Object) predNodes.next();
+            if (prev1 instanceof InstanceKey) {
+              InstanceKey as = (InstanceKey) prev1;
+              instances.add(as);
+            }
+          }
+        }
+      }
     }
 
   }
@@ -61,6 +78,15 @@ public class AccessTrace {
         String variableName = CodeLocation.variableName(n, p.getValueNumber());
         if (variableName != null)
           s += "-" + variableName;
+        s += "\n";
+      }
+      
+      if (o instanceof InstanceFieldKey) {
+        InstanceFieldKey p = (InstanceFieldKey) o;
+        s += "IFK:";
+        s += p.getField().getDeclaringClass().getName().getClassName().toString();
+        s += ".";
+        s += p.getField().getName().toString();
         s += "\n";
       }
     }

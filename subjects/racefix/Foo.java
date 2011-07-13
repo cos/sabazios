@@ -22,13 +22,26 @@ public class Foo {
 
 	public void simple1() {
 		Dog b = new Dog();
-		b.chases = null;
 	}
 	
-	public void simple1Label() {
-		Dog b = new Dog();
-		b.chases = new Cat();
-		Cat v1 = b.chases;
+	public void simpleLabel() {
+		Dog rex = new Dog();
+		rex.chases = new Cat();
+		Cat pufi = rex.chases;
+	}
+	
+	public void simpleLabel1() {
+    Dog rex = new Dog();
+    Cat pufi = new Cat();
+    rex.chases = pufi;
+  }
+	
+	public void simpleTwoLabelsDeep() {
+	  Dog rex = new Dog();
+	  Cat dudu = new Cat();
+    rex.chases = dudu;
+	  Cat pufi = rex.chases;
+	  dudu.follows = pufi;	 
 	}
 	
 	public void simpleWithUninteresting() {
