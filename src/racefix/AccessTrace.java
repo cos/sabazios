@@ -17,6 +17,7 @@ import com.ibm.wala.ssa.DefUse;
 import com.ibm.wala.ssa.SSAGetInstruction;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSANewInstruction;
+import com.ibm.wala.ssa.SSAPhiInstruction;
 import com.ibm.wala.types.FieldReference;
 
 /**
@@ -45,19 +46,16 @@ public class AccessTrace {
     solveNV(n2, v2);
   }
 
-  private void solveNV(CGNode n2, int v2) {
-    LocalPointerKey lpk = pv.get(n2, v2);
+  private void solveNV(CGNode node, int value) {
+    LocalPointerKey lpk = pv.get(node, value);
     Iterator<Object> succNodes = a.heapGraph.getSuccNodes(lpk);
     while (succNodes.hasNext()) {
       InstanceKey o = (InstanceKey) succNodes.next();
       instances.add(o);
 
-      DefUse du = n2.getDU();
-      SSAInstruction def = du.getDef(v2);
-      // if (def instanceof SSANewInstruction) {
-      // SSANewInstruction newInstr = (SSANewInstruction) def;
-      //
-      // }
+      DefUse du = node.getDU();
+      SSAInstruction def = du.getDef(value);
+      
       if (def instanceof SSAGetInstruction) {
         SSAGetInstruction get = (SSAGetInstruction) def;
         FieldReference declaredField = get.getDeclaredField();
@@ -72,6 +70,15 @@ public class AccessTrace {
               
             solveNV(n, get.getRef());
           }
+        }
+      }
+      
+      if (def instanceof SSAPhiInstruction) {
+        SSAPhiInstruction phi = (SSAPhiInstruction) def;
+        int numberOfUses = phi.getNumberOfUses();
+        for (int i=0; i < numberOfUses; i++) {
+          int use = phi.getUse(i);
+          solveNV(n, use);
         }
       }
     }

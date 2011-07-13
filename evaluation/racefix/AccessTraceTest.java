@@ -81,4 +81,15 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
         + "O:Foo.simpleWithUninteresting-new Foo$Dog\n";
     runTest(startVariableName, expected);
   }
+  
+  @Test
+  public void simplePhi() throws Exception {
+    String startVariableName = "pufi";
+    String expected = "IFK:Foo$Dog.chases\n" + 
+    		"IFK:Foo$Dog.loves\n" + 
+    		"O:Foo.simplePhi-new Foo$Cat\n" + 
+    		"O:Foo.simplePhi-new Foo$Dog\n";
+    runTest(startVariableName, expected);
+  }
+  
 }

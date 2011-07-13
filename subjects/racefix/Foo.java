@@ -56,15 +56,15 @@ public class Foo {
 	public void simplePhi() {
 		Cat mumu = new Cat();
 		
-		Dog b = new Dog();
-		b.chases = mumu;
-		b.loves = mumu;
-		Cat v1;
+		Dog rex = new Dog();
+		rex.chases = mumu;
+		rex.loves = mumu;
+		Cat pufi;
 		if (mumu.lives == 21)
-			v1 = b.chases;
+			pufi = rex.chases;
 		else
-			v1 = b.loves;
-		v1.lives = 10;
+			pufi = rex.loves;
+		pufi.lives = 10;
 	}
 	
 	public void simpleCalls() {
