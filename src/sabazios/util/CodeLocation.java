@@ -155,6 +155,10 @@ public class CodeLocation {
 				instruction);
 		return variableName(v, cgNode, ssaInstructionNo);
 	}
+	
+	public static String variableName(CGNode n, Integer v) {
+		return CodeLocation.variableName(v, n, n.getIR().getInstructions().length - 1);
+	}
 
 	public static String variableName(Integer v, CGNode cgNode,
 			int ssaInstructionNo) {
