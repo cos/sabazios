@@ -12,14 +12,21 @@ import sabazios.A;
 import sabazios.tests.DataRaceAnalysisTest;
 import sabazios.util.U;
 
+import com.ibm.wala.analysis.pointers.HeapGraph;
 import com.ibm.wala.ipa.callgraph.CGNode;
+import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.util.CancelException;
+import com.ibm.wala.util.collections.Filter;
+import com.ibm.wala.util.graph.Graph;
+import com.ibm.wala.util.graph.GraphSlicer;
 
 public class AccessTraceTest extends DataRaceAnalysisTest {
 
   @Rule
   public TestName name = new TestName();
+  
+  private final boolean printGraphs = true;
 
   public AccessTraceTest() {
     super();
@@ -30,7 +37,7 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
   private void runTest(String startVariableName, String expected) throws ClassHierarchyException, CancelException,
       IOException {
     String testString;
-    String methodName = name.getMethodName();
+    final String methodName = name.getMethodName();
 
     setup("Lracefix/Foo", methodName + "()V");
     A a = new A(callGraph, pointerAnalysis);
@@ -41,6 +48,29 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
     AccessTrace trace = new AccessTrace(a, cgNode, value);
     trace.compute();
     testString = trace.getTestString();
+
+    if (printGraphs ) {
+
+      Graph<Object> prunedHP = GraphSlicer.prune(a.heapGraph, new Filter<Object>() {
+        @Override
+        public boolean accepts(Object o) {
+          return o.toString().contains("Foo");
+        }
+
+      });
+      
+      Graph<CGNode> prunedCG = GraphSlicer.prune(a.callGraph, new Filter<CGNode>() {
+
+        @Override
+        public boolean accepts(CGNode o) {
+          return o.toString().contains("Foo");
+        }
+      });
+
+      a.dotGraph(prunedHP, methodName + "_HP", null);
+      a.dotGraph(prunedCG, methodName + "_CG", null);
+    }
+
     Assert.assertEquals(expected, testString);
   }
 
@@ -81,33 +111,29 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
         + "O:Foo.simpleWithUninteresting-new Foo$Dog\n";
     runTest(startVariableName, expected);
   }
-  
+
   @Test
   public void simplePhi() throws Exception {
     String startVariableName = "pufi";
-    String expected = "IFK:Foo$Dog.chases\n" + 
-    		"IFK:Foo$Dog.loves\n" + 
-    		"O:Foo.simplePhi-new Foo$Cat\n" + 
-    		"O:Foo.simplePhi-new Foo$Dog\n";
+    String expected = "IFK:Foo$Dog.chases\n" + "IFK:Foo$Dog.loves\n" + "O:Foo.simplePhi-new Foo$Cat\n"
+        + "O:Foo.simplePhi-new Foo$Dog\n";
     runTest(startVariableName, expected);
   }
-  
+
   @Test
   public void notSoSimplePhi() throws Exception {
     String startVariableName = "pufi";
-    String expected = "IFK:Foo$Dog.chases\n" + 
-        "IFK:Foo$Dog.loves\n" + 
-        "O:Foo.notSoSimplePhi-new Foo$Cat\n" +
-        "O:Foo.notSoSimplePhi-new Foo$Dog\n" +
-        "O:Foo.notSoSimplePhi-new Foo$Cat\n";
+    String expected = "IFK:Foo$Dog.chases\n" + "IFK:Foo$Dog.loves\n" + "O:Foo.notSoSimplePhi-new Foo$Cat\n"
+        + "O:Foo.notSoSimplePhi-new Foo$Dog\n" + "O:Foo.notSoSimplePhi-new Foo$Cat\n";
     runTest(startVariableName, expected);
   }
-  
+
   @Test
   public void simpleCalls() throws Exception {
-    String startVariableName = "pufi";
+    String startVariableName = "mumu";
     String expected = "";
+
     runTest(startVariableName, expected);
   }
-  
+
 }
