@@ -1,24 +1,34 @@
 package racefix;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Set;
 
 import sabazios.A;
 import sabazios.domains.PointerForValue;
 import sabazios.util.CodeLocation;
+import sabazios.util.U;
 
+import com.ibm.wala.classLoader.CallSiteReference;
+import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.propagation.AllocationSiteInNode;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceFieldKey;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
+import com.ibm.wala.shrikeBT.MethodData;
 import com.ibm.wala.ssa.DefUse;
+import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
 import com.ibm.wala.ssa.SSAGetInstruction;
 import com.ibm.wala.ssa.SSAInstruction;
+import com.ibm.wala.ssa.SSAInvokeInstruction;
 import com.ibm.wala.ssa.SSANewInstruction;
 import com.ibm.wala.ssa.SSAPhiInstruction;
+import com.ibm.wala.ssa.SSAReturnInstruction;
 import com.ibm.wala.types.FieldReference;
+import com.sun.org.apache.bcel.internal.generic.SALOAD;
 
 /**
  * 
@@ -53,11 +63,65 @@ public class AccessTrace {
       InstanceKey o = (InstanceKey) succNodes.next();
       instances.add(o);
 
+      IMethod method = node.getMethod();
+
       DefUse du = node.getDU();
       SSAInstruction def = du.getDef(value);
-      
+
+      if (node.getMethod().getNumberOfParameters() >= value) {
+        Iterator<CGNode> predNodes = a.callGraph.getPredNodes(node);
+        while (predNodes.hasNext()) {
+          CGNode cgNode = (CGNode) predNodes.next();
+
+          Iterator<CallSiteReference> possibleSites = a.callGraph.getPossibleSites(cgNode, node);
+          while (possibleSites.hasNext()) {
+            CallSiteReference callSiteReference = (CallSiteReference) possibleSites.next();
+            SSAAbstractInvokeInstruction[] calls = cgNode.getIR().getCalls(callSiteReference);
+
+            // now we must find the calls that have as a possible parameter
+            // our node
+            for (SSAAbstractInvokeInstruction ssaAbstractInvokeInstruction : calls) {
+              int use = ssaAbstractInvokeInstruction.getUse(value - 1);
+              solveNV(cgNode, use);
+            }
+
+          }
+        }
+      }
+
+      // a.callGraph.getPredNodes(node);
+      // ... list of CGNodes
+
+      // a.callGraph.getPossibleSites(src, target);
+      // ... for each, set of callsitereferece
+
+      // ... for each, set of SSAInvokeInstructin
+      // node.getIR().getCalls(site)
+
+      // ... invokeInstruction.getUse(number - 1)
+
+      // method invokation
+
+      // find the def
+
+      // SSAInvokeInstruction ssaII;
+      // ssaII.getCallSite();
+      // a.callGraph.getNumberOfTargets(node, site);
+
+      // SSAReturnInstruction ssaRI;
+      // ssaRI.getUse(j);
+
       if (def instanceof SSAGetInstruction) {
         SSAGetInstruction get = (SSAGetInstruction) def;
+        int v1 = get.getRef();
+        LocalPointerKey lpc = pv.get(node, v1);
+        Iterator<Object> predNodes = a.heapGraph.getSuccNodes(lpc);
+        Set<InstanceKey> objs = new HashSet<InstanceKey>();
+        while (predNodes.hasNext()) {
+          Object object = (Object) predNodes.next();
+          objs.add((InstanceKey) object);
+        }
+
         FieldReference declaredField = get.getDeclaredField();
         Iterator<Object> pred = a.heapGraph.getPredNodes(o);
         while (pred.hasNext()) {
@@ -65,31 +129,36 @@ public class AccessTrace {
           if (prev instanceof InstanceFieldKey) {
             InstanceFieldKey field = (InstanceFieldKey) prev;
 
-            if (field.getField().getReference().equals(declaredField))
-              pointers.add(field);
-              
-            solveNV(n, get.getRef());
+            if (field.getField().getReference().equals(declaredField)) {
+              Iterator<Object> predNodes2 = a.heapGraph.getPredNodes(field);
+              while (predNodes2.hasNext()) {
+                Object object = (Object) predNodes2.next();
+                if (objs.contains(object)) {
+                  pointers.add(field);
+                  break;
+                }
+              }
+            }
           }
         }
+        solveNV(node, get.getRef());
       }
-      
+
       if (def instanceof SSAPhiInstruction) {
         SSAPhiInstruction phi = (SSAPhiInstruction) def;
         int numberOfUses = phi.getNumberOfUses();
-        for (int i=0; i < numberOfUses; i++) {
+        for (int i = 0; i < numberOfUses; i++) {
           int use = phi.getUse(i);
-          solveNV(n, use);
+          solveNV(node, use);
         }
       }
+
     }
   }
 
   public String getTestString() {
     String s = "";
-    // "[SITE_IN_NODE{< Application, Lracefix/Foo, simple1()V >:NEW <Application,Lracefix/Foo$Dog>@0 in Everywhere}]\n"
-    // +
-    // "\n" +
-    // "[[Node: < Application, Lracefix/Foo, simple1()V > Context: Everywhere, v3]]"
+
     for (PointerKey o : pointers) {
       if (o instanceof LocalPointerKey) {
         LocalPointerKey p = (LocalPointerKey) o;
@@ -127,7 +196,6 @@ public class AccessTrace {
         s += "\n";
       }
     }
-    // return instances.toString() + "\n\n" + pointers.toString();
     return s;
   }
 }

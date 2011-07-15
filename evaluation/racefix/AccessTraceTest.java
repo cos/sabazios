@@ -26,15 +26,19 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
   @Rule
   public TestName name = new TestName();
   
-  private final boolean printGraphs = true;
+  private final boolean printGraphs = false;
 
   public AccessTraceTest() {
     super();
     this.addBinaryDependency("racefix");
     this.addBinaryDependency("../lib/parallelArray.mock");
   }
+  
+  private void runTest(String startVariableName, String expected) throws ClassHierarchyException, CancelException, IOException {
+    runTest(startVariableName, name.getMethodName(), expected);    
+  }  
 
-  private void runTest(String startVariableName, String expected) throws ClassHierarchyException, CancelException,
+  private void runTest(String startVariableName, String raceMethod, String expected) throws ClassHierarchyException, CancelException,
       IOException {
     String testString;
     final String methodName = name.getMethodName();
@@ -42,14 +46,14 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
     setup("Lracefix/Foo", methodName + "()V");
     A a = new A(callGraph, pointerAnalysis);
     a.precompute();
-    CGNode cgNode = a.findNodes(".*" + methodName + ".*").get(0);
+    CGNode cgNode = a.findNodes(".*" + raceMethod + ".*").get(0);
     int value = U.getValueForVariableName(cgNode, startVariableName);
     System.out.println(cgNode + "" + value);
     AccessTrace trace = new AccessTrace(a, cgNode, value);
     trace.compute();
     testString = trace.getTestString();
 
-    if (printGraphs ) {
+    if (printGraphs) {
 
       Graph<Object> prunedHP = GraphSlicer.prune(a.heapGraph, new Filter<Object>() {
         @Override
@@ -130,10 +134,42 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
 
   @Test
   public void simpleCalls() throws Exception {
-    String startVariableName = "mumu";
-    String expected = "";
+    String startVariableName = "pufi";
+    String expected = "IFK:Foo$Dog.chases\n" + 
+    		"O:Foo.simpleCalls-new Foo$Cat\n" + 
+    		"O:Foo.simpleCalls-new Foo$Dog\n";
 
-    runTest(startVariableName, expected);
+    runTest(startVariableName, "writeField", expected);
+  }
+  
+  @Test
+  public void simpleCalls2() throws Exception {
+    String startVariableName = "pufi";
+    String expected = "IFK:Foo$Dog.chases\n" + 
+        "O:Foo.simpleCalls2-new Foo$Cat\n" + 
+        "O:Foo.simpleCalls2-new Foo$Dog\n";
+    
+    runTest(startVariableName, "writeField2", expected);
+  }
+  
+  @Test
+  public void simpleCalls3() throws Exception {
+    String startVariableName = "pufi";
+    String expected = "IFK:Foo$Dog.chases\n" + 
+        "O:Foo.simpleCalls3-new Foo$Cat\n" + 
+        "O:Foo.simpleCalls3-new Foo$Dog\n";
+    
+    runTest(startVariableName, "writeField", expected);
+  }
+  
+  @Test
+  public void simpleCalls4() throws Exception {
+    String startVariableName = "pufi";
+    String expected = "IFK:Foo$Dog.chases\n" + 
+    		"O:Foo.simpleCalls4-new Foo$Cat\n" + 
+    		"O:Foo.simpleCalls4-new Foo$Dog\n";
+    
+    runTest(startVariableName, "writeField4", expected);
   }
 
 }

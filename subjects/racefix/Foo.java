@@ -94,21 +94,35 @@ public class Foo {
 
   private void writeField(Dog rex) {
     Cat pufi = rex.chases;
-    pufi.lives = 10;
+    pufi.lives = 10; // race
   }
 
   public void simpleCalls2() {
-    Cat mumu = new Cat();
+    Cat pufi = new Cat();
 
-    Dog b = new Dog();
-    writeField2(mumu, b);
+    Dog rex = new Dog();
+    writeField2(pufi, rex);
   }
 
-  private void writeField2(Cat mumu, Dog b) {
-    b.chases = mumu;
-    b.loves = mumu;
-    Cat v1 = b.chases;
-    v1.lives = 10;
+  private void writeField2(Cat mumu, Dog rex) {
+    rex.chases = mumu;
+    rex.loves = mumu;
+    Cat pufi = rex.chases;
+    pufi.lives = 10;
+  }
+  
+  public void simpleCalls4() {
+    Cat mumu = new Cat();
+
+    Dog rex = new Dog();
+    rex.chases = mumu;
+    rex.loves = mumu;
+    Cat pufi = rex.chases;
+    writeField4(pufi);
+  }
+
+  private void writeField4(Cat pufi) {
+    pufi.lives = 10; // race
   }
 
   public void simpleWithReturn() {
@@ -130,14 +144,14 @@ public class Foo {
   public void simpleCalls3() {
     Cat mumu = new Cat();
 
-    Dog b = new Dog();
-    b.chases = mumu;
-    b.loves = mumu;
-    writeField(b);
+    Dog rex = new Dog();
+    rex.chases = mumu;
+    rex.loves = mumu;
+    writeField(rex);
 
-    Dog b1 = new Dog();
-    b1.chases = mumu;
-    writeField(b1);
+    Dog lassie = new Dog();
+    lassie.chases = mumu;
+    writeField(lassie);
   }
 
   public void simpleWithReturn2() {
