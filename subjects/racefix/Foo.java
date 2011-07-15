@@ -157,12 +157,23 @@ public class Foo {
   public void simpleWithReturn2() {
     Cat mumu = new Cat();
 
-    Dog b1 = makeDog(mumu);
-    Dog b = makeDog(mumu);
-    Cat v1 = b.chases;
-    v1.lives = 10;
+    Dog rex = makeDog(mumu);
+    rex = makeDog(mumu);
+    Cat pufi = rex.chases;
+    pufi.lives = 10;
+  }
+  
+  public void simpleWithReturn3() {
+    Dog rex = new Dog();
+    Cat mumu = new Cat();
+    Cat pufi = chaseCat(rex, mumu);
+    pufi.lives = 321;
   }
 
+  public Cat chaseCat(Dog rex, Cat mumu) {
+    rex.chases = mumu;
+    return rex.chases;
+  }
   public void simpleRecursive() {
     Cat mumu = new Cat();
 
