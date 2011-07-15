@@ -111,6 +111,20 @@ public class Foo {
     pufi.lives = 10;
   }
   
+//doesn't work on context insensitive
+ public void simpleCalls3() {
+   Cat mumu = new Cat();
+
+   Dog rex = new Dog();
+   rex.chases = mumu;
+   rex.loves = mumu;
+   writeField(rex);
+
+   Dog lassie = new Dog();
+   lassie.chases = mumu;
+   writeField(lassie);
+ }
+  
   public void simpleCalls4() {
     Cat mumu = new Cat();
 
@@ -138,20 +152,6 @@ public class Foo {
     rex.chases = pufi;
     rex.loves = pufi;
     return rex;
-  }
-
-  // doesn't work on context insensitive
-  public void simpleCalls3() {
-    Cat mumu = new Cat();
-
-    Dog rex = new Dog();
-    rex.chases = mumu;
-    rex.loves = mumu;
-    writeField(rex);
-
-    Dog lassie = new Dog();
-    lassie.chases = mumu;
-    writeField(lassie);
   }
 
   public void simpleWithReturn2() {
