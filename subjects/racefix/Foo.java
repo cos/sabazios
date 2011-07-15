@@ -128,16 +128,16 @@ public class Foo {
   public void simpleWithReturn() {
     Cat mumu = new Cat();
 
-    Dog b = makeBubu(mumu);
-    Cat v1 = b.chases;
-    v1.lives = 10;
+    Dog rex = makeDog(mumu);
+    Cat pufi = rex.chases;
+    pufi.lives = 10;
   }
 
-  private Dog makeBubu(Cat mumu) {
-    Dog b = new Dog();
-    b.chases = mumu;
-    b.loves = mumu;
-    return b;
+  private Dog makeDog(Cat pufi) {
+    Dog rex = new Dog();
+    rex.chases = pufi;
+    rex.loves = pufi;
+    return rex;
   }
 
   // doesn't work on context insensitive
@@ -157,8 +157,8 @@ public class Foo {
   public void simpleWithReturn2() {
     Cat mumu = new Cat();
 
-    Dog b1 = makeBubu(mumu);
-    Dog b = makeBubu(mumu);
+    Dog b1 = makeDog(mumu);
+    Dog b = makeDog(mumu);
     Cat v1 = b.chases;
     v1.lives = 10;
   }

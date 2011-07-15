@@ -171,5 +171,15 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
     
     runTest(startVariableName, "writeField4", expected);
   }
+  
+  @Test
+  public void simpleWithReturn() throws Exception {
+    String startVariableName = "pufi";
+    String expected = "IFK:Foo$Dog.chases\n" + 
+    		"O:Foo.simpleWithReturn-new Foo$Cat\n" + 
+    		"O:Foo.makeDog-new Foo$Dog\n";
+    
+    runTest(startVariableName, expected);
+  }
 
 }

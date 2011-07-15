@@ -89,16 +89,6 @@ public class AccessTrace {
         }
       }
 
-      // a.callGraph.getPredNodes(node);
-      // ... list of CGNodes
-
-      // a.callGraph.getPossibleSites(src, target);
-      // ... for each, set of callsitereferece
-
-      // ... for each, set of SSAInvokeInstructin
-      // node.getIR().getCalls(site)
-
-      // ... invokeInstruction.getUse(number - 1)
 
       // method invokation
 
