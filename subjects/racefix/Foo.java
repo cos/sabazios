@@ -204,38 +204,38 @@ public class Foo {
   public void simpleWithFieldWrites() {
     Cat mumu = new Cat();
 
-    Dog b = new Dog();
-    b.chases = mumu;
-    b.chases = new Cat();
-    Cat v1 = b.chases;
-    v1.lives = 10;
+    Dog dog = new Dog();
+    dog.chases = mumu;
+    dog.chases = new Cat();
+    Cat pufi = dog.chases;
+    pufi.lives = 10;
   }
 
   //
   public void simpleWithFieldWrites2() {
-    Cat pufi = new Cat();
+    Cat mumu = new Cat();
 
     Dog rex = new Dog();
     Cat cici = new Cat();
-    cici.follows = pufi;
-    Cat bibi = new Cat();
-    Cat x = cici.follows;
-    rex.chases = x;
-    Cat y = rex.chases;
-    y.lives -= 1;
+    cici.follows = mumu;
+    Cat bibi = new Cat(); //noise
+    Cat mimi = cici.follows;
+    rex.chases = mimi;
+    Cat pufi = rex.chases;
+    pufi.lives -= 1;
   }
 
   public void simpleWithFieldWrites3() {
-    Cat pufi = new Cat();
+    Cat mumu = new Cat();
 
     Dog rex = new Dog();
     Cat cici = new Cat();
-    cici.follows = pufi;
+    cici.follows = mumu;
     Cat bibi = new Cat();
     rex.chases = cici;
     rex.chases = bibi;
-    Cat y = rex.chases;
-    Cat z = y.follows;
-    z.lives -= 1;
+    Cat mimi = rex.chases;
+    Cat pufi = mimi.follows;
+    pufi.lives -= 1;
   }
 }

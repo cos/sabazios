@@ -187,6 +187,7 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
     String startVariableName = "pufi";
     String expected = "IFK:Foo$Dog.chases\n" + 
         "O:Foo.simpleWithReturn2-new Foo$Cat\n" + 
+        "O:Foo.makeDog-new Foo$Dog\n" +
         "O:Foo.makeDog-new Foo$Dog\n";
     
     runTest(startVariableName, expected);
@@ -200,6 +201,40 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
         "O:Foo.simpleWithReturn3-new Foo$Dog\n";
     
     runTest(startVariableName, expected);
-  }  
+  }
+  
+  @Test
+  public void simpleWithFieldWrites() throws Exception {
+    String startVariableName = "pufi";
+    String expected = "IFK:Foo$Dog.chases\n" + 
+        "O:Foo.simpleWithFieldWrites-new Foo$Cat\n" + 
+        "O:Foo.simpleWithFieldWrites-new Foo$Dog\n" +
+        "O:Foo.simpleWithFieldWrites-new Foo$Cat\n";
+    
+    runTest(startVariableName, expected);
+  }
+  
+  @Test
+  public void simpleWithFieldWrites2() throws Exception {
+    String startVariableName = "pufi";
+    String expected = "IFK:Foo$Dog.chases\n" + 
+        "O:Foo.simpleWithFieldWrites2-new Foo$Cat\n" + 
+        "O:Foo.simpleWithFieldWrites2-new Foo$Dog\n";
+    
+    runTest(startVariableName, expected);
+  }
+  
+  @Test
+  public void simpleWithFieldWrites3() throws Exception {
+    String startVariableName = "pufi";
+    String expected = "IFK:Foo$Cat.follows\n" + 
+    		"IFK:Foo$Dog.chases\n" + 
+    		"O:Foo.simpleWithFieldWrites3-new Foo$Cat\n" + 
+    		"O:Foo.simpleWithFieldWrites3-new Foo$Cat\n" + 
+    		"O:Foo.simpleWithFieldWrites3-new Foo$Dog\n" + 
+    		"O:Foo.simpleWithFieldWrites3-new Foo$Cat\n";
+    
+    runTest(startVariableName, expected);
+  }
   
 }
