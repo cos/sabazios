@@ -102,9 +102,8 @@ public class AccessTrace {
       if (def instanceof SSAInvokeInstruction) {
         SSAInvokeInstruction invoke = (SSAInvokeInstruction) def;
         CallSiteReference callSite = invoke.getCallSite();
-        MethodReference methodReference = callSite.getDeclaredTarget();
-        Set<CGNode> methodNodes = a.callGraph.getNodes(methodReference);
-        for (CGNode cgNode : methodNodes) {
+        Set<CGNode> possibleTargets = a.callGraph.getPossibleTargets(node, callSite);
+        for (CGNode cgNode : possibleTargets) {
           Iterator<SSAInstruction> instructionsIterator = cgNode.getIR().iterateAllInstructions();
           while (instructionsIterator.hasNext()) {
             SSAInstruction ssaInstruction = (SSAInstruction) instructionsIterator.next();
