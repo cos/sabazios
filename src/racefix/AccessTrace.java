@@ -25,6 +25,7 @@ import com.ibm.wala.ssa.SSAInvokeInstruction;
 import com.ibm.wala.ssa.SSAPhiInstruction;
 import com.ibm.wala.ssa.SSAReturnInstruction;
 import com.ibm.wala.types.FieldReference;
+import com.ibm.wala.util.collections.Filter;
 
 /**
  * 
@@ -35,15 +36,17 @@ public class AccessTrace {
   private final CGNode n;
   private final int v;
   private final A a;
+  private final Filter<CGNode> f;
   private LinkedHashSet<PointerKey> pointers = new LinkedHashSet<PointerKey>();
   private LinkedHashSet<InstanceKey> instances = new LinkedHashSet<InstanceKey>();
   private HashMap<CGNode, Set<Integer>> visited = new HashMap<CGNode, Set<Integer>>();
   private PointerForValue pv;
 
-  public AccessTrace(A a, CGNode n, int v) {
+  public AccessTrace(A a, CGNode n, int v, Filter<CGNode> f) {
     this.a = a;
     this.n = n;
     this.v = v;
+    this.f = f;
     pv = a.pointerForValue;
   }
 
@@ -54,6 +57,9 @@ public class AccessTrace {
   }
 
   private void solveNV(CGNode node, int value) {
+    if (!f.accepts(node))
+      return;
+
     Set<Integer> set = visited.get(node);
     if (set == null) {
       set = new LinkedHashSet<Integer>();

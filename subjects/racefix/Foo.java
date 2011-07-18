@@ -1,5 +1,7 @@
 package racefix;
 
+import racefix.Foo.Cat;
+
 
 public class Foo {
 
@@ -247,5 +249,18 @@ public class Foo {
     Cat mimi = rex.chases;
     Cat pufi = mimi.follows;
     pufi.lives -= 1;
+  }
+  
+  public void simpleFilter() {
+    Dog rex = new Dog();
+    rex.chases = new Cat();
+    Cat mumu = rex.chases;
+    mumu.follows = new Cat();
+    blablabla(mumu);
+  }
+
+  private void blablabla(Cat mumu) {
+    Cat pufi = mumu.follows;
+    pufi.lives = 1;
   }
 }

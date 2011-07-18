@@ -16,6 +16,7 @@ import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.collections.Filter;
+import com.ibm.wala.util.collections.IndiscriminateFilter;
 import com.ibm.wala.util.graph.Graph;
 import com.ibm.wala.util.graph.GraphSlicer;
 
@@ -39,6 +40,11 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
 
   private void runTest(String startVariableName, String raceMethod, String expected) throws ClassHierarchyException,
       CancelException, IOException {
+    runTest(startVariableName, raceMethod, expected, new IndiscriminateFilter<CGNode>());
+  }
+
+  private void runTest(String startVariableName, String raceMethod, String expected, Filter<CGNode> filter)
+      throws ClassHierarchyException, CancelException, IOException {
     String testString;
     final String methodName = name.getMethodName();
 
@@ -48,7 +54,7 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
     CGNode cgNode = a.findNodes(".*" + raceMethod + ".*").get(0);
     int value = U.getValueForVariableName(cgNode, startVariableName);
     System.out.println(cgNode + "" + value);
-    AccessTrace trace = new AccessTrace(a, cgNode, value);
+    AccessTrace trace = new AccessTrace(a, cgNode, value, filter);
     trace.compute();
     testString = trace.getTestString();
 
@@ -240,6 +246,22 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
         + "O:Foo.recurse-new Foo$Dog\n" + "O:Foo.recurse-new Foo$Dog\n" + "";
 
     runTest(startVariableName, expected);
+  }
+
+  @Test
+  public void simpleFilter() throws Exception {
+    String startVariableName = "pufi";
+    String expected = "IFK:Foo$Cat.follows\n" + 
+    		"O:Foo.simpleFilter-new Foo$Cat\n" + 
+    		"O:Foo.simpleFilter-new Foo$Cat\n";
+
+    runTest(startVariableName, "blablabla", expected, new Filter<CGNode>() {
+      @Override
+      public boolean accepts(CGNode n) {
+        return n.getMethod().getName().toString().contains("blablabla");
+      }
+
+    });
   }
 
 }
