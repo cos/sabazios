@@ -1,9 +1,9 @@
 package racefix;
 
-import racefix.Foo.Cat;
+import racefix.TraceSubject.Cat;
 
 
-public class Foo {
+public class TraceSubject {
 
   public static class Dog {
     public Cat chases;

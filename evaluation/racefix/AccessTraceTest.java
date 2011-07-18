@@ -48,7 +48,7 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
     String testString;
     final String methodName = name.getMethodName();
 
-    setup("Lracefix/Foo", methodName + "()V");
+    setup("Lracefix/TraceSubject", methodName + "()V");
     A a = new A(callGraph, pointerAnalysis);
     a.precompute();
     CGNode cgNode = a.findNodes(".*" + raceMethod + ".*").get(0);
@@ -63,7 +63,7 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
       Graph<Object> prunedHP = GraphSlicer.prune(a.heapGraph, new Filter<Object>() {
         @Override
         public boolean accepts(Object o) {
-          return o.toString().contains("Foo");
+          return o.toString().contains("TraceSubject");
         }
 
       });
@@ -72,7 +72,7 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
 
         @Override
         public boolean accepts(CGNode o) {
-          return o.toString().contains("Foo");
+          return o.toString().contains("TraceSubject");
         }
       });
 
@@ -86,29 +86,29 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
   @Test
   public void simple1() throws Exception {
     String startVariableName = "b";
-    String expected = "O:Foo.simple1-new Foo$Dog\n";
+    String expected = "O:TraceSubject.simple1-new TraceSubject$Dog\n";
     runTest(startVariableName, expected);
   }
 
   @Test
   public void simpleLabel() throws Exception {
     String startVariableName = "pufi";
-    String expected = "IFK:Foo$Dog.chases\n" + "O:Foo.simpleLabel-new Foo$Cat\n" + "O:Foo.simpleLabel-new Foo$Dog\n";
+    String expected = "IFK:TraceSubject$Dog.chases\n" + "O:TraceSubject.simpleLabel-new TraceSubject$Cat\n" + "O:TraceSubject.simpleLabel-new TraceSubject$Dog\n";
     runTest(startVariableName, expected);
   }
 
   @Test
   public void simpleLabel1() throws Exception {
     String startVariableName = "pufi";
-    String expected = "O:Foo.simpleLabel1-new Foo$Cat\n";
+    String expected = "O:TraceSubject.simpleLabel1-new TraceSubject$Cat\n";
     runTest(startVariableName, expected);
   }
 
   @Test
   public void simpleTwoLabelsDeep() throws Exception {
     String startVariableName = "fifi";
-    String expected = "IFK:Foo$Cat.follows\n" + "IFK:Foo$Dog.chases\n" + "O:Foo.simpleTwoLabelsDeep-new Foo$Cat\n"
-        + "O:Foo.simpleTwoLabelsDeep-new Foo$Cat\n" + "O:Foo.simpleTwoLabelsDeep-new Foo$Dog\n";
+    String expected = "IFK:TraceSubject$Cat.follows\n" + "IFK:TraceSubject$Dog.chases\n" + "O:TraceSubject.simpleTwoLabelsDeep-new TraceSubject$Cat\n"
+        + "O:TraceSubject.simpleTwoLabelsDeep-new TraceSubject$Cat\n" + "O:TraceSubject.simpleTwoLabelsDeep-new TraceSubject$Dog\n";
 
     runTest(startVariableName, expected);
   }
@@ -116,31 +116,31 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
   @Test
   public void simpleWithUninteresting() throws Exception {
     String startVariableName = "fifi";
-    String expected = "IFK:Foo$Dog.chases\n" + "O:Foo.simpleWithUninteresting-new Foo$Cat\n"
-        + "O:Foo.simpleWithUninteresting-new Foo$Dog\n";
+    String expected = "IFK:TraceSubject$Dog.chases\n" + "O:TraceSubject.simpleWithUninteresting-new TraceSubject$Cat\n"
+        + "O:TraceSubject.simpleWithUninteresting-new TraceSubject$Dog\n";
     runTest(startVariableName, expected);
   }
 
   @Test
   public void simplePhi() throws Exception {
     String startVariableName = "pufi";
-    String expected = "IFK:Foo$Dog.chases\n" + "IFK:Foo$Dog.loves\n" + "O:Foo.simplePhi-new Foo$Cat\n"
-        + "O:Foo.simplePhi-new Foo$Dog\n";
+    String expected = "IFK:TraceSubject$Dog.chases\n" + "IFK:TraceSubject$Dog.loves\n" + "O:TraceSubject.simplePhi-new TraceSubject$Cat\n"
+        + "O:TraceSubject.simplePhi-new TraceSubject$Dog\n";
     runTest(startVariableName, expected);
   }
 
   @Test
   public void notSoSimplePhi() throws Exception {
     String startVariableName = "pufi";
-    String expected = "IFK:Foo$Dog.chases\n" + "IFK:Foo$Dog.loves\n" + "O:Foo.notSoSimplePhi-new Foo$Cat\n"
-        + "O:Foo.notSoSimplePhi-new Foo$Dog\n" + "O:Foo.notSoSimplePhi-new Foo$Cat\n";
+    String expected = "IFK:TraceSubject$Dog.chases\n" + "IFK:TraceSubject$Dog.loves\n" + "O:TraceSubject.notSoSimplePhi-new TraceSubject$Cat\n"
+        + "O:TraceSubject.notSoSimplePhi-new TraceSubject$Dog\n" + "O:TraceSubject.notSoSimplePhi-new TraceSubject$Cat\n";
     runTest(startVariableName, expected);
   }
 
   @Test
   public void simpleCalls() throws Exception {
     String startVariableName = "pufi";
-    String expected = "IFK:Foo$Dog.chases\n" + "O:Foo.simpleCalls-new Foo$Cat\n" + "O:Foo.simpleCalls-new Foo$Dog\n";
+    String expected = "IFK:TraceSubject$Dog.chases\n" + "O:TraceSubject.simpleCalls-new TraceSubject$Cat\n" + "O:TraceSubject.simpleCalls-new TraceSubject$Dog\n";
 
     runTest(startVariableName, "writeField", expected);
   }
@@ -148,7 +148,7 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
   @Test
   public void simpleCalls2() throws Exception {
     String startVariableName = "pufi";
-    String expected = "IFK:Foo$Dog.chases\n" + "O:Foo.simpleCalls2-new Foo$Cat\n" + "O:Foo.simpleCalls2-new Foo$Dog\n";
+    String expected = "IFK:TraceSubject$Dog.chases\n" + "O:TraceSubject.simpleCalls2-new TraceSubject$Cat\n" + "O:TraceSubject.simpleCalls2-new TraceSubject$Dog\n";
 
     runTest(startVariableName, "writeField2", expected);
   }
@@ -156,7 +156,7 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
   @Test
   public void simpleCalls3() throws Exception {
     String startVariableName = "pufi";
-    String expected = "IFK:Foo$Dog.chases\n" + "O:Foo.simpleCalls3-new Foo$Cat\n" + "O:Foo.simpleCalls3-new Foo$Dog\n";
+    String expected = "IFK:TraceSubject$Dog.chases\n" + "O:TraceSubject.simpleCalls3-new TraceSubject$Cat\n" + "O:TraceSubject.simpleCalls3-new TraceSubject$Dog\n";
 
     runTest(startVariableName, "writeField", expected);
   }
@@ -164,7 +164,7 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
   @Test
   public void simpleCalls4() throws Exception {
     String startVariableName = "pufi";
-    String expected = "IFK:Foo$Dog.chases\n" + "O:Foo.simpleCalls4-new Foo$Cat\n" + "O:Foo.simpleCalls4-new Foo$Dog\n";
+    String expected = "IFK:TraceSubject$Dog.chases\n" + "O:TraceSubject.simpleCalls4-new TraceSubject$Cat\n" + "O:TraceSubject.simpleCalls4-new TraceSubject$Dog\n";
 
     runTest(startVariableName, "writeField4", expected);
   }
@@ -172,7 +172,7 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
   @Test
   public void simpleWithReturn() throws Exception {
     String startVariableName = "pufi";
-    String expected = "IFK:Foo$Dog.chases\n" + "O:Foo.simpleWithReturn-new Foo$Cat\n" + "O:Foo.makeDog-new Foo$Dog\n";
+    String expected = "IFK:TraceSubject$Dog.chases\n" + "O:TraceSubject.simpleWithReturn-new TraceSubject$Cat\n" + "O:TraceSubject.makeDog-new TraceSubject$Dog\n";
 
     runTest(startVariableName, expected);
   }
@@ -180,7 +180,7 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
   @Test
   public void simpleWithReturn2() throws Exception {
     String startVariableName = "pufi";
-    String expected = "IFK:Foo$Dog.chases\n" + "O:Foo.simpleWithReturn2-new Foo$Cat\n" + "O:Foo.makeDog-new Foo$Dog\n";
+    String expected = "IFK:TraceSubject$Dog.chases\n" + "O:TraceSubject.simpleWithReturn2-new TraceSubject$Cat\n" + "O:TraceSubject.makeDog-new TraceSubject$Dog\n";
 
     runTest(startVariableName, expected);
   }
@@ -188,8 +188,8 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
   @Test
   public void simpleWithReturn3() throws Exception {
     String startVariableName = "pufi";
-    String expected = "IFK:Foo$Dog.chases\n" + "O:Foo.simpleWithReturn3-new Foo$Cat\n"
-        + "O:Foo.simpleWithReturn3-new Foo$Dog\n";
+    String expected = "IFK:TraceSubject$Dog.chases\n" + "O:TraceSubject.simpleWithReturn3-new TraceSubject$Cat\n"
+        + "O:TraceSubject.simpleWithReturn3-new TraceSubject$Dog\n";
 
     runTest(startVariableName, expected);
   }
@@ -197,8 +197,8 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
   @Test
   public void simpleWithFieldWrites() throws Exception {
     String startVariableName = "pufi";
-    String expected = "IFK:Foo$Dog.chases\n" + "O:Foo.simpleWithFieldWrites-new Foo$Cat\n"
-        + "O:Foo.simpleWithFieldWrites-new Foo$Dog\n" + "O:Foo.simpleWithFieldWrites-new Foo$Cat\n";
+    String expected = "IFK:TraceSubject$Dog.chases\n" + "O:TraceSubject.simpleWithFieldWrites-new TraceSubject$Cat\n"
+        + "O:TraceSubject.simpleWithFieldWrites-new TraceSubject$Dog\n" + "O:TraceSubject.simpleWithFieldWrites-new TraceSubject$Cat\n";
 
     runTest(startVariableName, expected);
   }
@@ -206,8 +206,8 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
   @Test
   public void simpleWithFieldWrites2() throws Exception {
     String startVariableName = "pufi";
-    String expected = "IFK:Foo$Dog.chases\n" + "O:Foo.simpleWithFieldWrites2-new Foo$Cat\n"
-        + "O:Foo.simpleWithFieldWrites2-new Foo$Dog\n";
+    String expected = "IFK:TraceSubject$Dog.chases\n" + "O:TraceSubject.simpleWithFieldWrites2-new TraceSubject$Cat\n"
+        + "O:TraceSubject.simpleWithFieldWrites2-new TraceSubject$Dog\n";
 
     runTest(startVariableName, expected);
   }
@@ -215,9 +215,9 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
   @Test
   public void simpleWithFieldWrites3() throws Exception {
     String startVariableName = "pufi";
-    String expected = "IFK:Foo$Cat.follows\n" + "IFK:Foo$Dog.chases\n" + "O:Foo.simpleWithFieldWrites3-new Foo$Cat\n"
-        + "O:Foo.simpleWithFieldWrites3-new Foo$Cat\n" + "O:Foo.simpleWithFieldWrites3-new Foo$Dog\n"
-        + "O:Foo.simpleWithFieldWrites3-new Foo$Cat\n";
+    String expected = "IFK:TraceSubject$Cat.follows\n" + "IFK:TraceSubject$Dog.chases\n" + "O:TraceSubject.simpleWithFieldWrites3-new TraceSubject$Cat\n"
+        + "O:TraceSubject.simpleWithFieldWrites3-new TraceSubject$Cat\n" + "O:TraceSubject.simpleWithFieldWrites3-new TraceSubject$Dog\n"
+        + "O:TraceSubject.simpleWithFieldWrites3-new TraceSubject$Cat\n";
 
     runTest(startVariableName, expected);
   }
@@ -225,8 +225,8 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
   @Test
   public void simpleRecursiveInternal() throws Exception {
     String startVariableName = "pufi";
-    String expected = "IFK:Foo$Dog.chases\n" + "O:Foo.simpleRecursiveInternal-new Foo$Cat\n"
-        + "O:Foo.simpleRecursiveInternal-new Foo$Dog\n";
+    String expected = "IFK:TraceSubject$Dog.chases\n" + "O:TraceSubject.simpleRecursiveInternal-new TraceSubject$Cat\n"
+        + "O:TraceSubject.simpleRecursiveInternal-new TraceSubject$Dog\n";
 
     runTest(startVariableName, expected);
   }
@@ -234,7 +234,7 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
   @Test
   public void simpleRecursiveInternal2() throws Exception {
     String startVariableName = "pufi";
-    String expected = "O:Foo.simpleRecursiveInternal2-new Foo$Cat\n" + "O:Foo.simpleRecursiveInternal2-new Foo$Cat\n";
+    String expected = "O:TraceSubject.simpleRecursiveInternal2-new TraceSubject$Cat\n" + "O:TraceSubject.simpleRecursiveInternal2-new TraceSubject$Cat\n";
 
     runTest(startVariableName, expected);
   }
@@ -242,8 +242,8 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
   @Test
   public void simpleRecursiveExternal() throws Exception {
     String startVariableName = "pufi";
-    String expected = "IFK:Foo$Dog.chases\n" + "IFK:Foo$Dog.chases\n" + "O:Foo.simpleRecursiveExternal-new Foo$Cat\n"
-        + "O:Foo.recurse-new Foo$Dog\n" + "O:Foo.recurse-new Foo$Dog\n" + "";
+    String expected = "IFK:TraceSubject$Dog.chases\n" + "IFK:TraceSubject$Dog.chases\n" + "O:TraceSubject.simpleRecursiveExternal-new TraceSubject$Cat\n"
+        + "O:TraceSubject.recurse-new TraceSubject$Dog\n" + "O:TraceSubject.recurse-new TraceSubject$Dog\n" + "";
 
     runTest(startVariableName, expected);
   }
@@ -251,9 +251,9 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
   @Test
   public void simpleFilter() throws Exception {
     String startVariableName = "pufi";
-    String expected = "IFK:Foo$Cat.follows\n" + 
-    		"O:Foo.simpleFilter-new Foo$Cat\n" + 
-    		"O:Foo.simpleFilter-new Foo$Cat\n";
+    String expected = "IFK:TraceSubject$Cat.follows\n" + 
+    		"O:TraceSubject.simpleFilter-new TraceSubject$Cat\n" + 
+    		"O:TraceSubject.simpleFilter-new TraceSubject$Cat\n";
 
     runTest(startVariableName, "blablabla", expected, new Filter<CGNode>() {
       @Override
