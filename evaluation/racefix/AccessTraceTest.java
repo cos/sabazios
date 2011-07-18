@@ -196,8 +196,8 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
   public void simpleWithReturn3() throws Exception {
     String startVariableName = "pufi";
     String expected = "IFK:Foo$Dog.chases\n" + 
-        "O:Foo.simpleWithReturn2-new Foo$Cat\n" + 
-        "O:Foo.makeDog-new Foo$Dog\n";
+        "O:Foo.simpleWithReturn3-new Foo$Cat\n" + 
+        "O:Foo.simpleWithReturn3-new Foo$Dog\n";
     
     runTest(startVariableName, expected);
   }  

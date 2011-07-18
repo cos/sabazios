@@ -20,6 +20,7 @@ import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
 import com.ibm.wala.shrikeBT.MethodData;
 import com.ibm.wala.ssa.DefUse;
+import com.ibm.wala.ssa.ISSABasicBlock;
 import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
 import com.ibm.wala.ssa.SSAGetInstruction;
 import com.ibm.wala.ssa.SSAInstruction;
@@ -28,6 +29,7 @@ import com.ibm.wala.ssa.SSANewInstruction;
 import com.ibm.wala.ssa.SSAPhiInstruction;
 import com.ibm.wala.ssa.SSAReturnInstruction;
 import com.ibm.wala.types.FieldReference;
+import com.ibm.wala.types.MethodReference;
 import com.sun.org.apache.bcel.internal.generic.SALOAD;
 
 /**
@@ -82,7 +84,6 @@ public class AccessTrace {
               int use = ssaAbstractInvokeInstruction.getUse(value - 1);
               solveNV(cgNode, use);
             }
-
           }
         }
       }
@@ -101,13 +102,19 @@ public class AccessTrace {
       if (def instanceof SSAInvokeInstruction) {
         SSAInvokeInstruction invoke = (SSAInvokeInstruction) def;
         CallSiteReference callSite = invoke.getCallSite();
-        int numberOfTargets = a.callGraph.getNumberOfTargets(node, callSite);
-        
-        //TODO for Cosmin
-        
-        //here i could really use an SSAReturnInstruction, but I don't know 
-        //how to get it...
-        
+        MethodReference methodReference = callSite.getDeclaredTarget();
+        Set<CGNode> methodNodes = a.callGraph.getNodes(methodReference);
+        for (CGNode cgNode : methodNodes) {
+          Iterator<SSAInstruction> instructionsIterator = cgNode.getIR().iterateAllInstructions();
+          while (instructionsIterator.hasNext()) {
+            SSAInstruction ssaInstruction = (SSAInstruction) instructionsIterator.next();
+            if (ssaInstruction instanceof SSAReturnInstruction) {
+              SSAReturnInstruction returnInstr = (SSAReturnInstruction) ssaInstruction;
+              int use = returnInstr.getUse(0);
+              solveNV(cgNode, use);
+            }
+          }
+        }
       }
 
       if (def instanceof SSAGetInstruction) {

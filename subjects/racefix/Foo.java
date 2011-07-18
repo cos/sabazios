@@ -174,6 +174,7 @@ public class Foo {
     rex.chases = mumu;
     return rex.chases;
   }
+  
   public void simpleRecursive() {
     Cat mumu = new Cat();
 
