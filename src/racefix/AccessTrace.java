@@ -63,8 +63,6 @@ public class AccessTrace {
       InstanceKey o = (InstanceKey) succNodes.next();
       instances.add(o);
 
-      IMethod method = node.getMethod();
-
       DefUse du = node.getDU();
       SSAInstruction def = du.getDef(value);
 
@@ -89,7 +87,6 @@ public class AccessTrace {
         }
       }
 
-
       // method invokation
 
       // find the def
@@ -100,6 +97,18 @@ public class AccessTrace {
 
       // SSAReturnInstruction ssaRI;
       // ssaRI.getUse(j);
+
+      if (def instanceof SSAInvokeInstruction) {
+        SSAInvokeInstruction invoke = (SSAInvokeInstruction) def;
+        CallSiteReference callSite = invoke.getCallSite();
+        int numberOfTargets = a.callGraph.getNumberOfTargets(node, callSite);
+        
+        //TODO for Cosmin
+        
+        //here i could really use an SSAReturnInstruction, but I don't know 
+        //how to get it...
+        
+      }
 
       if (def instanceof SSAGetInstruction) {
         SSAGetInstruction get = (SSAGetInstruction) def;
