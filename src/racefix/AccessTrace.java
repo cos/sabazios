@@ -1,5 +1,6 @@
 package racefix;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -8,29 +9,22 @@ import java.util.Set;
 import sabazios.A;
 import sabazios.domains.PointerForValue;
 import sabazios.util.CodeLocation;
-import sabazios.util.U;
 
 import com.ibm.wala.classLoader.CallSiteReference;
-import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.propagation.AllocationSiteInNode;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceFieldKey;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
-import com.ibm.wala.shrikeBT.MethodData;
 import com.ibm.wala.ssa.DefUse;
-import com.ibm.wala.ssa.ISSABasicBlock;
 import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
 import com.ibm.wala.ssa.SSAGetInstruction;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSAInvokeInstruction;
-import com.ibm.wala.ssa.SSANewInstruction;
 import com.ibm.wala.ssa.SSAPhiInstruction;
 import com.ibm.wala.ssa.SSAReturnInstruction;
 import com.ibm.wala.types.FieldReference;
-import com.ibm.wala.types.MethodReference;
-import com.sun.org.apache.bcel.internal.generic.SALOAD;
 
 /**
  * 
@@ -43,6 +37,7 @@ public class AccessTrace {
   private final A a;
   private LinkedHashSet<PointerKey> pointers = new LinkedHashSet<PointerKey>();
   private LinkedHashSet<InstanceKey> instances = new LinkedHashSet<InstanceKey>();
+  private HashMap<CGNode, Set<Integer>> visited = new HashMap<CGNode, Set<Integer>>();
   private PointerForValue pv;
 
   public AccessTrace(A a, CGNode n, int v) {
@@ -59,6 +54,16 @@ public class AccessTrace {
   }
 
   private void solveNV(CGNode node, int value) {
+    Set<Integer> set = visited.get(node);
+    if (set == null) {
+      set = new LinkedHashSet<Integer>();
+      set.add(value);
+      visited.put(node, set);
+    } else if (set.contains(value))
+      return;
+    else
+      set.add(value);
+
     LocalPointerKey lpk = pv.get(node, value);
     Iterator<Object> succNodes = a.heapGraph.getSuccNodes(lpk);
     while (succNodes.hasNext()) {

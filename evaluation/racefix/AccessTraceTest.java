@@ -12,9 +12,7 @@ import sabazios.A;
 import sabazios.tests.DataRaceAnalysisTest;
 import sabazios.util.U;
 
-import com.ibm.wala.analysis.pointers.HeapGraph;
 import com.ibm.wala.ipa.callgraph.CGNode;
-import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.collections.Filter;
@@ -25,7 +23,7 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
 
   @Rule
   public TestName name = new TestName();
-  
+
   private final boolean printGraphs = false;
 
   public AccessTraceTest() {
@@ -33,13 +31,14 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
     this.addBinaryDependency("racefix");
     this.addBinaryDependency("../lib/parallelArray.mock");
   }
-  
-  private void runTest(String startVariableName, String expected) throws ClassHierarchyException, CancelException, IOException {
-    runTest(startVariableName, name.getMethodName(), expected);    
-  }  
 
-  private void runTest(String startVariableName, String raceMethod, String expected) throws ClassHierarchyException, CancelException,
+  private void runTest(String startVariableName, String expected) throws ClassHierarchyException, CancelException,
       IOException {
+    runTest(startVariableName, name.getMethodName(), expected);
+  }
+
+  private void runTest(String startVariableName, String raceMethod, String expected) throws ClassHierarchyException,
+      CancelException, IOException {
     String testString;
     final String methodName = name.getMethodName();
 
@@ -62,7 +61,7 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
         }
 
       });
-      
+
       Graph<CGNode> prunedCG = GraphSlicer.prune(a.callGraph, new Filter<CGNode>() {
 
         @Override
@@ -135,105 +134,112 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
   @Test
   public void simpleCalls() throws Exception {
     String startVariableName = "pufi";
-    String expected = "IFK:Foo$Dog.chases\n" + 
-    		"O:Foo.simpleCalls-new Foo$Cat\n" + 
-    		"O:Foo.simpleCalls-new Foo$Dog\n";
+    String expected = "IFK:Foo$Dog.chases\n" + "O:Foo.simpleCalls-new Foo$Cat\n" + "O:Foo.simpleCalls-new Foo$Dog\n";
 
     runTest(startVariableName, "writeField", expected);
   }
-  
+
   @Test
   public void simpleCalls2() throws Exception {
     String startVariableName = "pufi";
-    String expected = "IFK:Foo$Dog.chases\n" + 
-        "O:Foo.simpleCalls2-new Foo$Cat\n" + 
-        "O:Foo.simpleCalls2-new Foo$Dog\n";
-    
+    String expected = "IFK:Foo$Dog.chases\n" + "O:Foo.simpleCalls2-new Foo$Cat\n" + "O:Foo.simpleCalls2-new Foo$Dog\n";
+
     runTest(startVariableName, "writeField2", expected);
   }
-  
+
   @Test
   public void simpleCalls3() throws Exception {
     String startVariableName = "pufi";
-    String expected = "IFK:Foo$Dog.chases\n" + 
-        "O:Foo.simpleCalls3-new Foo$Cat\n" + 
-        "O:Foo.simpleCalls3-new Foo$Dog\n";
-    
+    String expected = "IFK:Foo$Dog.chases\n" + "O:Foo.simpleCalls3-new Foo$Cat\n" + "O:Foo.simpleCalls3-new Foo$Dog\n";
+
     runTest(startVariableName, "writeField", expected);
   }
-  
+
   @Test
   public void simpleCalls4() throws Exception {
     String startVariableName = "pufi";
-    String expected = "IFK:Foo$Dog.chases\n" + 
-    		"O:Foo.simpleCalls4-new Foo$Cat\n" + 
-    		"O:Foo.simpleCalls4-new Foo$Dog\n";
-    
+    String expected = "IFK:Foo$Dog.chases\n" + "O:Foo.simpleCalls4-new Foo$Cat\n" + "O:Foo.simpleCalls4-new Foo$Dog\n";
+
     runTest(startVariableName, "writeField4", expected);
   }
-  
+
   @Test
   public void simpleWithReturn() throws Exception {
     String startVariableName = "pufi";
-    String expected = "IFK:Foo$Dog.chases\n" + 
-    		"O:Foo.simpleWithReturn-new Foo$Cat\n" + 
-    		"O:Foo.makeDog-new Foo$Dog\n";
-    
+    String expected = "IFK:Foo$Dog.chases\n" + "O:Foo.simpleWithReturn-new Foo$Cat\n" + "O:Foo.makeDog-new Foo$Dog\n";
+
     runTest(startVariableName, expected);
   }
-  
+
   @Test
   public void simpleWithReturn2() throws Exception {
     String startVariableName = "pufi";
-    String expected = "IFK:Foo$Dog.chases\n" + 
-        "O:Foo.simpleWithReturn2-new Foo$Cat\n" + 
-        "O:Foo.makeDog-new Foo$Dog\n";
-    
+    String expected = "IFK:Foo$Dog.chases\n" + "O:Foo.simpleWithReturn2-new Foo$Cat\n" + "O:Foo.makeDog-new Foo$Dog\n";
+
     runTest(startVariableName, expected);
   }
-  
+
   @Test
   public void simpleWithReturn3() throws Exception {
     String startVariableName = "pufi";
-    String expected = "IFK:Foo$Dog.chases\n" + 
-        "O:Foo.simpleWithReturn3-new Foo$Cat\n" + 
-        "O:Foo.simpleWithReturn3-new Foo$Dog\n";
-    
+    String expected = "IFK:Foo$Dog.chases\n" + "O:Foo.simpleWithReturn3-new Foo$Cat\n"
+        + "O:Foo.simpleWithReturn3-new Foo$Dog\n";
+
     runTest(startVariableName, expected);
   }
-  
+
   @Test
   public void simpleWithFieldWrites() throws Exception {
     String startVariableName = "pufi";
-    String expected = "IFK:Foo$Dog.chases\n" + 
-        "O:Foo.simpleWithFieldWrites-new Foo$Cat\n" + 
-        "O:Foo.simpleWithFieldWrites-new Foo$Dog\n" +
-        "O:Foo.simpleWithFieldWrites-new Foo$Cat\n";
-    
+    String expected = "IFK:Foo$Dog.chases\n" + "O:Foo.simpleWithFieldWrites-new Foo$Cat\n"
+        + "O:Foo.simpleWithFieldWrites-new Foo$Dog\n" + "O:Foo.simpleWithFieldWrites-new Foo$Cat\n";
+
     runTest(startVariableName, expected);
   }
-  
+
   @Test
   public void simpleWithFieldWrites2() throws Exception {
     String startVariableName = "pufi";
-    String expected = "IFK:Foo$Dog.chases\n" + 
-        "O:Foo.simpleWithFieldWrites2-new Foo$Cat\n" + 
-        "O:Foo.simpleWithFieldWrites2-new Foo$Dog\n";
-    
+    String expected = "IFK:Foo$Dog.chases\n" + "O:Foo.simpleWithFieldWrites2-new Foo$Cat\n"
+        + "O:Foo.simpleWithFieldWrites2-new Foo$Dog\n";
+
     runTest(startVariableName, expected);
   }
-  
+
   @Test
   public void simpleWithFieldWrites3() throws Exception {
     String startVariableName = "pufi";
-    String expected = "IFK:Foo$Cat.follows\n" + 
-    		"IFK:Foo$Dog.chases\n" + 
-    		"O:Foo.simpleWithFieldWrites3-new Foo$Cat\n" + 
-    		"O:Foo.simpleWithFieldWrites3-new Foo$Cat\n" + 
-    		"O:Foo.simpleWithFieldWrites3-new Foo$Dog\n" + 
-    		"O:Foo.simpleWithFieldWrites3-new Foo$Cat\n";
-    
+    String expected = "IFK:Foo$Cat.follows\n" + "IFK:Foo$Dog.chases\n" + "O:Foo.simpleWithFieldWrites3-new Foo$Cat\n"
+        + "O:Foo.simpleWithFieldWrites3-new Foo$Cat\n" + "O:Foo.simpleWithFieldWrites3-new Foo$Dog\n"
+        + "O:Foo.simpleWithFieldWrites3-new Foo$Cat\n";
+
     runTest(startVariableName, expected);
   }
-  
+
+  @Test
+  public void simpleRecursiveInternal() throws Exception {
+    String startVariableName = "pufi";
+    String expected = "IFK:Foo$Dog.chases\n" + "O:Foo.simpleRecursiveInternal-new Foo$Cat\n"
+        + "O:Foo.simpleRecursiveInternal-new Foo$Dog\n";
+
+    runTest(startVariableName, expected);
+  }
+
+  @Test
+  public void simpleRecursiveInternal2() throws Exception {
+    String startVariableName = "pufi";
+    String expected = "O:Foo.simpleRecursiveInternal2-new Foo$Cat\n" + "O:Foo.simpleRecursiveInternal2-new Foo$Cat\n";
+
+    runTest(startVariableName, expected);
+  }
+
+  @Test
+  public void simpleRecursiveExternal() throws Exception {
+    String startVariableName = "pufi";
+    String expected = "IFK:Foo$Dog.chases\n" + "IFK:Foo$Dog.chases\n" + "O:Foo.simpleRecursiveExternal-new Foo$Cat\n"
+        + "O:Foo.recurse-new Foo$Dog\n" + "O:Foo.recurse-new Foo$Dog\n" + "";
+
+    runTest(startVariableName, expected);
+  }
+
 }

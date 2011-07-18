@@ -1,11 +1,5 @@
 package racefix;
 
-import java.util.HashSet;
-
-import extra166y.Ops;
-import extra166y.Ops.Generator;
-import extra166y.Ops.Procedure;
-import extra166y.ParallelArray;
 
 public class Foo {
 
@@ -175,30 +169,46 @@ public class Foo {
     return rex.chases;
   }
   
-  public void simpleRecursive() {
+  public void simpleRecursiveInternal() {
     Cat mumu = new Cat();
 
-    Dog b = null;
+    Dog rex = null;
     while (mumu.lives > 0) {
-      b = new Dog();
-      b.chases = mumu;
-      b.loves = mumu;
+      rex = new Dog();
+      rex.chases = mumu;
+      rex.loves = mumu;
     }
 
-    Cat v1 = b.chases;
-    v1.lives = 10;
+    Cat pufi = rex.chases;
+    pufi.lives = 10;
   }
 
-  public void simpleRecursive2() {
-    Cat p = new Cat();
+  public void simpleRecursiveInternal2() {
+    Cat pufi = new Cat();
 
-    while (p.lives > 0) {
-      Cat p1 = new Cat();
-      p.follows = p1;
-      p = p1;
+    while (pufi.lives > 0) {
+      Cat mumu = new Cat();
+      pufi.follows = mumu;
+      pufi = mumu;
     }
 
-    p.lives = 10;
+    pufi.lives = 10;
+  }
+  
+  public void simpleRecursiveExternal() {
+    Cat mumu = new Cat();
+    
+    Cat pufi = recurse(mumu);
+    pufi.lives--;
+  }
+
+  private Cat recurse(Cat mumu) {
+    Dog d = new Dog();
+    d.chases = mumu;
+    if (mumu.lives > 321)
+      return recurse(mumu);
+    
+    return d.chases;
   }
 
   public void simpleWithFieldWrites() {
