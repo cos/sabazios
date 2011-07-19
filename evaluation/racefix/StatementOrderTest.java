@@ -88,5 +88,15 @@ public class StatementOrderTest extends DataRaceAnalysisTest {
   public void testFalseOnReturnPath() throws Exception {
     runTest("setAge", "setGender", false);
   }
+  
+  @Test
+  public void testRecursiveIntraprocedural() throws Exception {
+    runTest(name.getMethodName(), "setGender", true);
+  }
+  
+  @Test
+  public void testRecursiveInterprocedural() throws Exception {
+    runTest(name.getMethodName(), "recursiveGenderSet", true);
+  }
 
 }

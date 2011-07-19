@@ -1,5 +1,7 @@
 package racefix;
 
+import com.ibm.wala.demandpa.alg.ContextSensitiveStateMachine.RecursionHandler;
+
 public class StatementOrderSubject {
   
   public class Dog {
@@ -39,6 +41,26 @@ public class StatementOrderSubject {
     rex.age = 432;
   }
   
+  public void testRecursiveIntraprocedural() {
+    Dog rex = new Dog();
+    rex.age = 13;
+    while(rex.age > 0)
+      setGender(rex);
+  }
+  
+  public void testRecursiveInterprocedural() {
+    Dog rex = new Dog();
+    rex.age = 13;
+    recursiveGenderSet(rex);
+  }
+  
+  private void recursiveGenderSet(Dog rex) {
+    if (rex.age > 0)
+      recursiveGenderSet(rex);
+    else
+      rex.gender = 0;
+  }
+
   public void testTrueOnReturnPath() {
     Dog rex = new Dog();
     setAge(rex);
