@@ -14,6 +14,7 @@ import com.ibm.wala.classLoader.CallSiteReference;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
 import com.ibm.wala.ssa.ISSABasicBlock;
+import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
 import com.ibm.wala.ssa.SSACFG;
 import com.ibm.wala.ssa.SSACFG.BasicBlock;
 import com.ibm.wala.ssa.SSAInstruction;
@@ -46,13 +47,33 @@ public class StatementOrder {
     BasicBlock block = cfg.getBlockForInstruction(ssaInstructionNo);
     List<SSAInstruction> allInstructions = block.getAllInstructions();
     List<SSAInstruction> instructionsAfter = new ArrayList<SSAInstruction>();
+    boolean sw = false;
     for (Iterator iterator = allInstructions.iterator(); iterator.hasNext();) {
       SSAInstruction ssaInstruction = (SSAInstruction) iterator.next();
-      if (ssaInstruction.equals(i) || !instructionsAfter.isEmpty())
+      if(sw)
         instructionsAfter.add(i);
+      if (ssaInstruction.equals(i))
+        sw = true;
     }
 
-    return visitInstructions(n, instructionsAfter) || visitNextBlocks(n, block);
+    return visitInstructions(n, instructionsAfter) || visitNextBlocks(n, block) || visitCallingMethods(n);
+  }
+
+  private boolean visitCallingMethods(CGNode n) {
+    Iterator<CGNode> predNodes = callGraph.getPredNodes(n);
+    while (predNodes.hasNext()) {
+      CGNode cgNode = (CGNode) predNodes.next();
+      Iterator<CallSiteReference> possibleSites = callGraph.getPossibleSites(cgNode, n);
+      while (possibleSites.hasNext()) {
+        CallSiteReference callSiteReference = (CallSiteReference) possibleSites.next();
+        SSAAbstractInvokeInstruction[] calls = cgNode.getIR().getCalls(callSiteReference);
+        for (SSAAbstractInvokeInstruction ssaAbstractInvokeInstruction : calls) {
+          if (visit(cgNode, ssaAbstractInvokeInstruction))
+            return true;
+        }
+      }
+    }
+    return false;
   }
 
   private Map<CGNode, Set<BasicBlock>> map = new HashMap<CGNode, Set<BasicBlock>>();
@@ -83,8 +104,12 @@ public class StatementOrder {
     }
     return false;
   }
-
+  
   private boolean visitInstructions(CGNode n, List<SSAInstruction> allInstructions) {
+    return visitInstructions(n, allInstructions.toArray(new SSAInstruction[0]));
+  }
+
+  private boolean visitInstructions(CGNode n, SSAInstruction[] allInstructions) {
     for (SSAInstruction ssaInstruction : allInstructions) {
       if (n.equals(n2) && ssaInstruction.equals(i2)) {
         return true;
@@ -95,11 +120,12 @@ public class StatementOrder {
         CallSiteReference callSite = invoke.getCallSite();
         Set<CGNode> possibleTargets = callGraph.getPossibleTargets(n, callSite);
         for (CGNode cgNode : possibleTargets) {
+          if(cgNode.getIR() == null)
+            continue;
           BasicBlock entryBlock = cgNode.getIR().getControlFlowGraph().entry();
           if (visit(cgNode, entryBlock))
             return true;
         }
-        return visit(n, ssaInstruction);
       }
     }
     return false;
