@@ -2,15 +2,23 @@ package sabazios;
 
 import sabazios.util.wala.viz.NodeDecorator;
 
+import com.ibm.wala.analysis.pointers.HeapGraph;
 import com.ibm.wala.ipa.callgraph.propagation.AllocationSiteInNode;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceFieldKey;
 import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.ReturnValueKey;
+import com.ibm.wala.util.graph.Graph;
 import com.ibm.wala.util.warnings.WalaException;
 
 public class HeapGraphNodeDecorator implements NodeDecorator {
 
+	private final Graph<Object> heapGraph;
+
+	public HeapGraphNodeDecorator(Graph<Object> heapGraph) {
+		this.heapGraph = heapGraph;
+	}
+	
 	@Override
 	public String getLabel(Object obj) throws WalaException {
 		if(obj instanceof AllocationSiteInNode) {
@@ -38,5 +46,10 @@ public class HeapGraphNodeDecorator implements NodeDecorator {
 		if(obj instanceof PointerKey)
 			return "shape=box";
 		return "";
+	}
+
+	@Override
+	public boolean shouldDisplay(Object n) {
+		return heapGraph.getSuccNodeCount(n) > 0 || heapGraph.getPredNodeCount(n) > 0;
 	}
 }

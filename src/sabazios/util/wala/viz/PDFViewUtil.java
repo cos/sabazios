@@ -91,6 +91,11 @@ public class PDFViewUtil {
 	public String getDecoration(Object n) {
 		return "";
 	}
+
+	@Override
+	public boolean shouldDisplay(Object n) {
+		return true;
+	}
     };
     return labels;
   }
@@ -116,6 +121,11 @@ public class PDFViewUtil {
 	@Override
 	public String getDecoration(Object n) {
 		return "";
+	}
+
+	@Override
+	public boolean shouldDisplay(Object n) {
+		return true;
 	}
 
   }

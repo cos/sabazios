@@ -24,6 +24,11 @@ public interface NodeDecorator {
 	@Override
 	public String getDecoration(Object n) {
 		return "";
+	}
+
+	@Override
+	public boolean shouldDisplay(Object n) {
+		return true;
 	} };
   
   /**
@@ -33,5 +38,7 @@ public interface NodeDecorator {
   String getLabel(Object o) throws WalaException;
 
   public String getDecoration(Object n);
+  
+  public boolean shouldDisplay(Object n);
   
 }

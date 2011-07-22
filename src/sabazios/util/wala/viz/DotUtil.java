@@ -252,7 +252,9 @@ public class DotUtil {
 	private static void outputNodes(NodeDecorator labels, StringBuffer result, Collection dotNodes)
 			throws WalaException {
 		for (Iterator it = dotNodes.iterator(); it.hasNext();) {
-			outputNode(labels, result, it.next());
+			Object next = it.next();
+			if(labels == null || labels.shouldDisplay(next))
+				outputNode(labels, result, next);
 		}
 	}
 
