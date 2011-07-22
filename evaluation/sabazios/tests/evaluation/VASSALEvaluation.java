@@ -19,6 +19,7 @@ import com.ibm.wala.util.warnings.WalaException;
 
 import racefix.AccessTrace;
 import sabazios.A;
+import sabazios.HeapGraphNodeDecorator;
 import sabazios.tests.DataRaceAnalysisTest;
 import sabazios.util.U;
 import sabazios.util.wala.viz.NodeDecorator;
@@ -59,35 +60,15 @@ public class VASSALEvaluation extends DataRaceAnalysisTest {
       strings.add(pointerKey.toString());
     }
     
-    NodeDecorator decorator = new NodeDecorator() {
-      
-      @Override
-      public String getLabel(Object o) throws WalaException {
-        String init = o.toString();
-        String fin = init;
-        if (strings.contains(o.toString())) {
-          fin = "{MARKED}  " + init;
-          System.out.println(o.toString());
-        }
-        return fin;
-      }
-
-      @Override
-      public String getDecoration(Object n) {
-        // TODO Auto-generated method stub
-        return null;
-      }
-    };
-    
     Graph<Object> prunedHP = GraphSlicer.prune(a.heapGraph, new Filter<Object>() {
 
       @Override
       public boolean accepts(Object o) {
-        return o.toString().contains("zoom") && o.toString().contains("GeneralFilter");
+        return o.toString().contains("GeneralFilter");
       }
 
     });
 
-    a.dotGraph(prunedHP, "VASSALEvaluation" + "_HP", decorator);
+    a.dotGraph(prunedHP, "VASSALEvaluation" + "_HP", new HeapGraphNodeDecorator());
   }
 }
