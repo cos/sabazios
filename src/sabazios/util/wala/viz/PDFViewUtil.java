@@ -86,6 +86,11 @@ public class PDFViewUtil {
       public String getLabel(Object o) {
         return labelMap.get(o);
       }
+
+	@Override
+	public String getDecoration(Object n) {
+		return "";
+	}
     };
     return labels;
   }
@@ -107,6 +112,11 @@ public class PDFViewUtil {
     public String getLabel(Object o) throws WalaException {
       return a.getLabel(o) + b.getLabel(o);
     }
+
+	@Override
+	public String getDecoration(Object n) {
+		return "";
+	}
 
   }
 

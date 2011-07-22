@@ -1,4 +1,5 @@
 /bin/
 /chord_output/
 /debug/
-walaExclusions.txt
+/.settings/
+/walaExclusions.txt

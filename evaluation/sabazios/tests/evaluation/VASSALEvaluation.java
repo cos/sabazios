@@ -71,6 +71,12 @@ public class VASSALEvaluation extends DataRaceAnalysisTest {
         }
         return fin;
       }
+
+      @Override
+      public String getDecoration(Object n) {
+        // TODO Auto-generated method stub
+        return null;
+      }
     };
     
     Graph<Object> prunedHP = GraphSlicer.prune(a.heapGraph, new Filter<Object>() {

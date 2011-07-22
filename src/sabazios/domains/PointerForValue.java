@@ -14,11 +14,11 @@ import com.ibm.wala.util.collections.SparseVector;
 public class PointerForValue {
 	private boolean computed = false;
 
-	private Map<CGNode, SparseVector<LocalPointerKey>> pointedObjects;
+	private Map<CGNode, SparseVector<LocalPointerKey>> pointers;
 //	private HashMap<IClass, ConcreteTypeKey> classToInstanceKey = new HashMap<IClass, ConcreteTypeKey>(); 
 
 	public void compute(HeapGraph heapGraph) {
-		pointedObjects = new LinkedHashMap<CGNode, SparseVector<LocalPointerKey>>();
+		pointers = new LinkedHashMap<CGNode, SparseVector<LocalPointerKey>>();
 		Iterator<Object> iterator = heapGraph.iterator();
 		while (iterator.hasNext()) {
 			Object ik = iterator.next();
@@ -26,9 +26,9 @@ public class PointerForValue {
 				LocalPointerKey pk = (LocalPointerKey) ik;
 				CGNode n = pk.getNode();
 				int v = pk.getValueNumber();
-				if (!pointedObjects.containsKey(n))
-					pointedObjects.put(n, new SparseVector<LocalPointerKey>());
-				pointedObjects.get(n).set(v, pk);
+				if (!pointers.containsKey(n))
+					pointers.put(n, new SparseVector<LocalPointerKey>());
+				pointers.get(n).set(v, pk);
 			}
 //			if(ik instanceof ConcreteTypeKey) {
 //				ConcreteTypeKey ctk = (ConcreteTypeKey) ik;
@@ -43,7 +43,7 @@ public class PointerForValue {
 		if (!computed)
 			throw new RuntimeException("Not computed yet");
 
-		SparseVector<LocalPointerKey> pks = pointedObjects.get(n);
+		SparseVector<LocalPointerKey> pks = pointers.get(n);
 		if (pks == null)
 			return null;
 		return pks.get(v);
