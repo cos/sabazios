@@ -30,7 +30,7 @@ public final class CS extends nCFAContextSelector {
 	public static final ContextKey OPERATOR_CALLER = new FlexibleContext.NamedContextKey("OP_CALLER");
 	public static final ContextKey RECEIVER_INSTANCE = new FlexibleContext.NamedContextKey("RECEIVER_INSTANCE");
 	public static final ContextKey EXTRA_CONTEXT = new FlexibleContext.NamedContextKey("EXTRA_CONTEXT");
-	public static int NCFA = 0;
+	public static int NCFA = 1;
 
 	ZeroXInstanceKeys keyFactory;
 

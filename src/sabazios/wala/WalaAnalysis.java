@@ -78,6 +78,33 @@ public class WalaAnalysis {
 	public void addExtensionBinaryDependency(String path) {
 		this.extensionBinaryDependencies.add(path);
 	}
+	
+	public void addJarFolderDependency(String path) {
+	  File dir = new File(path);
+	  String delim;
+	  
+	  if (path.endsWith("/"))
+	    delim = "";
+	  else
+	    delim = "/";
+	  
+	  if (!dir.isDirectory())
+	    return;
+	  
+	  String[] files = dir.list();
+	  if (files == null)
+	    return;
+	  
+	  for (String fileName : files) {
+      if (fileName.endsWith(".jar"))
+        addJarDependency(path + delim + fileName);
+      else {
+        File file = new File(fileName);
+        if (file.isDirectory())
+          addJarFolderDependency(file.getAbsolutePath());
+      }
+    }
+	}
 
 	public void addJarDependency(String file) {
 		this.jarDependencies.add(file);

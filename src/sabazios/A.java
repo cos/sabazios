@@ -68,11 +68,7 @@ public class A {
 		// }
 		// });
 
-		System.out.println("---- Compute map value -> PointerKey ------------------- ");
-		pointerForValue.compute(this.heapGraph);
-		Log.log("Function CGNode x SSAvalue -> Object precomputed");
-		Log.reportTime(":map_vars_to_pointers_time");
-		System.out.println("-------------------------------------------------------- \n");
+		precompute();
 
 		System.out.println("---- Reads and writes ---------------------------------- ");
 		alphaAccesses.compute(this);
@@ -153,6 +149,14 @@ public class A {
 		return shallowRaces;
 	}
 
+	public void precompute() {
+		System.out.println("---- Compute map value -> PointerKey ------------------- ");
+		pointerForValue.compute(this.heapGraph);
+		Log.log("Function CGNode x SSAvalue -> Object precomputed");
+		Log.reportTime(":map_vars_to_pointers_time");
+		System.out.println("-------------------------------------------------------- \n");
+	}
+
 	private void interactiveDebug() {
 	  String s = "";
 		do {
@@ -229,7 +233,7 @@ public class A {
 		String dotFile = "debug/" + name + ".dot";
 		String outputFile = "./debug/" + name + ".pdf";
 		try {
-			DotUtil.dotify(m, decorator, dotFile, outputFile, "/opt/local/bin/dot");
+			DotUtil.dotify(m, decorator, dotFile, outputFile, "dot");
 			PDFViewUtil.launchPDFView(outputFile, "open");
 		} catch (WalaException e) {
 			// TODO Auto-generated catch block
