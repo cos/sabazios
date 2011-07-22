@@ -221,7 +221,7 @@ public class A {
 					System.out.println("Generated: " + "debug/irPdf" + cgNode.getGraphNodeId());
 
 					PDFViewUtil.ghostviewIR(cha, cgNode, "debug/irPdf" + cgNode.getGraphNodeId(), "./debug/irDot"
-							+ cgNode.getGraphNodeId(), "/opt/local/bin/dot", "open");
+							+ cgNode.getGraphNodeId(), "dot", "open");
 				} catch (WalaException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
