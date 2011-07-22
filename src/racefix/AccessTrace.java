@@ -214,4 +214,12 @@ public class AccessTrace {
     }
     return s;
   }
+  
+  public LinkedHashSet<PointerKey> getPointers() {
+    return pointers;
+  }
+  
+  public LinkedHashSet<InstanceKey> getinstances() {
+    return instances;
+  }
 }
