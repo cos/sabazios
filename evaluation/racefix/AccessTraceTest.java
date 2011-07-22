@@ -25,7 +25,7 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
   @Rule
   public TestName name = new TestName();
 
-  private final boolean printGraphs = false;
+  private final boolean printGraphs = true;
 
   public AccessTraceTest() {
     super();
