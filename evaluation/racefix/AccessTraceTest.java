@@ -77,7 +77,7 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
         }
       });
 
-      a.dotGraph(prunedHP, methodName + "_HP", new HeapGraphNodeDecorator(prunedHP));
+      a.dotGraph(prunedHP, methodName + "_HP", null);
       a.dotGraph(prunedCG, methodName + "_CG", null);
     }
 

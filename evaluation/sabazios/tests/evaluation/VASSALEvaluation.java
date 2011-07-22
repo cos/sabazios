@@ -36,20 +36,18 @@ public class VASSALEvaluation extends DataRaceAnalysisTest {
   @Test
   public void test() throws Exception {
     String racyMethodSignature = "zoom(Ljava/awt/image/WritableRaster;Ljava/awt/Rectangle;Ljava/awt/image/BufferedImage;LVASSAL/tools/image/GeneralFilter$Filter;)V";
-    setup(
-        "LVASSAL/tools/image/GeneralFilter",
-        racyMethodSignature);
+    setup("LVASSAL/tools/image/GeneralFilter", racyMethodSignature);
 
     A a = new A(callGraph, pointerAnalysis);
     a.precompute();
-    
+
     List<CGNode> foundNodes = a.findNodes(".*" + "zoom" + ".*");
     CGNode cgNode = foundNodes.get(0);
     int value = U.getValueForVariableName(cgNode, "work");
-    
+
     AccessTrace trace = new AccessTrace(a, cgNode, value, new IndiscriminateFilter<CGNode>());
     trace.compute();
-    
+
     final List<String> strings = new ArrayList<String>();
     LinkedHashSet<InstanceKey> instances = trace.getinstances();
     for (InstanceKey instanceKey : instances) {
@@ -59,7 +57,7 @@ public class VASSALEvaluation extends DataRaceAnalysisTest {
     for (PointerKey pointerKey : pointers) {
       strings.add(pointerKey.toString());
     }
-    
+
     Graph<Object> prunedHP = GraphSlicer.prune(a.heapGraph, new Filter<Object>() {
 
       @Override
@@ -69,6 +67,6 @@ public class VASSALEvaluation extends DataRaceAnalysisTest {
 
     });
 
-    a.dotGraph(prunedHP, "VASSALEvaluation" + "_HP", new HeapGraphNodeDecorator());
+    a.dotGraph(prunedHP, "VASSALEvaluation" + "_HP", new HeapGraphNodeDecorator(prunedHP));
   }
 }
