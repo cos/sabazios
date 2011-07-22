@@ -7,7 +7,9 @@ import java.util.List;
 import org.junit.Test;
 
 import com.ibm.wala.ipa.callgraph.CGNode;
+import com.ibm.wala.ipa.callgraph.propagation.AbstractFieldPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
+import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
 import com.ibm.wala.util.collections.Filter;
 import com.ibm.wala.util.collections.IndiscriminateFilter;
@@ -42,7 +44,7 @@ public class VASSALEvaluation extends DataRaceAnalysisTest {
     A a = new A(callGraph, pointerAnalysis);
     a.precompute();
 
-    List<CGNode> foundNodes = a.findNodes(".*" + "zoom" + ".*");
+    List<CGNode> foundNodes = a.findNodes(".*" + "apply_horizontal" + ".*");
     CGNode cgNode = foundNodes.get(0);
     int value = U.getValueForVariableName(cgNode, "work");
 
@@ -59,16 +61,16 @@ public class VASSALEvaluation extends DataRaceAnalysisTest {
       strings.add(pointerKey.toString());
     }
 
-//    Graph<Object> prunedHP = GraphSlicer.prune(a.heapGraph, new Filter<Object>() {
-//
-//      @Override
-//      public boolean accepts(Object o) {
-//        return o.toString().contains("GeneralFilter");
-//      }
-//
-//    });
+    Graph<Object> prunedHP = GraphSlicer.prune(a.heapGraph, new Filter<Object>() {
 
-    a.dotGraph(a.heapGraph, "VASSALEvaluation" + "_HP", new ColoredHeapGraphNodeDecorator(a.heapGraph, new Filter<Object>(){
+      @Override
+      public boolean accepts(Object o) {
+        return o.toString().contains("GeneralFilter") && !(o instanceof LocalPointerKey);
+      }
+
+    });
+
+    a.dotGraph(prunedHP, "VASSALEvaluation" + "_HP", new ColoredHeapGraphNodeDecorator(prunedHP, new Filter<Object>(){
 
       @Override
       public boolean accepts(Object o) {
