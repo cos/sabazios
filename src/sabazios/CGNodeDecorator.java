@@ -37,4 +37,9 @@ public class CGNodeDecorator implements NodeDecorator {
 		return "";
 	}
 
+	@Override
+	public boolean shouldDisplay(Object n) {
+		return true;
+	}
+
 }
