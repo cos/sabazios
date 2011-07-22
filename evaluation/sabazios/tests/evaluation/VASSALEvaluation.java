@@ -19,6 +19,7 @@ import com.ibm.wala.util.warnings.WalaException;
 
 import racefix.AccessTrace;
 import sabazios.A;
+import sabazios.ColoredHeapGraphNodeDecorator;
 import sabazios.HeapGraphNodeDecorator;
 import sabazios.tests.DataRaceAnalysisTest;
 import sabazios.util.U;
@@ -49,24 +50,39 @@ public class VASSALEvaluation extends DataRaceAnalysisTest {
     trace.compute();
 
     final List<String> strings = new ArrayList<String>();
-    LinkedHashSet<InstanceKey> instances = trace.getinstances();
+    final LinkedHashSet<InstanceKey> instances = trace.getinstances();
     for (InstanceKey instanceKey : instances) {
       strings.add(instanceKey.toString());
     }
-    LinkedHashSet<PointerKey> pointers = trace.getPointers();
+    final LinkedHashSet<PointerKey> pointers = trace.getPointers();
     for (PointerKey pointerKey : pointers) {
       strings.add(pointerKey.toString());
     }
 
-    Graph<Object> prunedHP = GraphSlicer.prune(a.heapGraph, new Filter<Object>() {
+//    Graph<Object> prunedHP = GraphSlicer.prune(a.heapGraph, new Filter<Object>() {
+//
+//      @Override
+//      public boolean accepts(Object o) {
+//        return o.toString().contains("GeneralFilter");
+//      }
+//
+//    });
+
+    a.dotGraph(a.heapGraph, "VASSALEvaluation" + "_HP", new ColoredHeapGraphNodeDecorator(a.heapGraph, new Filter<Object>(){
 
       @Override
       public boolean accepts(Object o) {
-        return o.toString().contains("GeneralFilter");
+        if (o instanceof InstanceKey)
+          if (instances.contains(o))
+            return true;
+        
+        if (o instanceof PointerKey)
+          if (pointers.contains(o))
+            return true;
+        
+        return false;
       }
-
-    });
-
-    a.dotGraph(prunedHP, "VASSALEvaluation" + "_HP", new HeapGraphNodeDecorator(prunedHP));
+      
+    }));
   }
 }
