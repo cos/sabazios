@@ -283,7 +283,10 @@ public class DotUtil {
 	 */
 	private static String decorateNode(Object n, NodeDecorator d) throws WalaException {
 		StringBuffer result = new StringBuffer();
-		result.append(" [ ]\n");
+		if(d != null)
+			result.append(" ["+d.getDecoration(n)+" ]\n");
+		else
+			result.append(" [ ]\n");
 		return result.toString();
 	}
 

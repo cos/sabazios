@@ -19,12 +19,19 @@ public interface NodeDecorator {
   public static final NodeDecorator DEFAULT = new NodeDecorator() {
     public String getLabel(Object o) {
       return o.toString();
-    } };
+    }
+
+	@Override
+	public String getDecoration(Object n) {
+		return "";
+	} };
   
   /**
    * @param o
    * @return the String label for node o
    */
   String getLabel(Object o) throws WalaException;
+
+  public String getDecoration(Object n);
   
 }

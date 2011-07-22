@@ -32,4 +32,9 @@ public class CGNodeDecorator implements NodeDecorator {
 		return s.substring(1);
 	}
 
+	@Override
+	public String getDecoration(Object n) {
+		return "";
+	}
+
 }
