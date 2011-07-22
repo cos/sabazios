@@ -3,6 +3,7 @@ package sabazios;
 import sabazios.util.wala.viz.NodeDecorator;
 
 import com.ibm.wala.analysis.pointers.HeapGraph;
+import com.ibm.wala.ipa.callgraph.propagation.AbstractFieldPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.AllocationSiteInNode;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceFieldKey;
 import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
@@ -25,7 +26,7 @@ public class HeapGraphNodeDecorator implements NodeDecorator {
 			AllocationSiteInNode o = (AllocationSiteInNode) obj;
 			return o.getSite().getDeclaredType().getName().getClassName() + " [ "+o.getNode().getMethod().getName().toString() +  "@" + o.getSite().getProgramCounter()+" ]";
 		}
-		if(obj instanceof InstanceFieldKey) {
+		if(obj instanceof AbstractFieldPointerKey) {
 			InstanceFieldKey f = (InstanceFieldKey) obj;
 			return f.getField().getName().toString();
 		}
