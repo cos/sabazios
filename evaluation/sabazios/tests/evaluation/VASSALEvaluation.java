@@ -70,21 +70,13 @@ public class VASSALEvaluation extends DataRaceAnalysisTest {
 
     });
 
-    a.dotGraph(prunedHP, "VASSALEvaluation" + "_HP", new ColoredHeapGraphNodeDecorator(prunedHP, new Filter<Object>(){
+    a.dotGraph(prunedHP, "VASSALEvaluation" + "_HP", new ColoredHeapGraphNodeDecorator(prunedHP, new Filter<Object>() {
 
       @Override
       public boolean accepts(Object o) {
-        if (o instanceof InstanceKey)
-          if (instances.contains(o))
-            return true;
-        
-        if (o instanceof PointerKey)
-          if (pointers.contains(o))
-            return true;
-        
-        return false;
+        return ((o instanceof InstanceKey) && instances.contains(o)) || ((o instanceof PointerKey) && pointers.contains(o));
       }
-      
+
     }));
   }
 }
