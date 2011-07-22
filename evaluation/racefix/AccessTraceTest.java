@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 
 import sabazios.A;
+import sabazios.ColoredHeapGraphNodeDecorator;
 import sabazios.HeapGraphNodeDecorator;
 import sabazios.tests.DataRaceAnalysisTest;
 import sabazios.util.U;
@@ -77,7 +78,7 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
         }
       });
 
-      a.dotGraph(prunedHP, methodName + "_HP", null);
+      a.dotGraph(prunedHP, methodName + "_HP", new ColoredHeapGraphNodeDecorator(prunedHP, new IndiscriminateFilter<Object>()));
       a.dotGraph(prunedCG, methodName + "_CG", null);
     }
 

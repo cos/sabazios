@@ -43,9 +43,11 @@ public class HeapGraphNodeDecorator implements NodeDecorator {
 
 	@Override
 	public String getDecoration(Object obj) {
+		if(obj instanceof LocalPointerKey) 
+			return "shape=diamond";
 		if(obj instanceof PointerKey)
 			return "shape=box";
-		return "";
+		return "shape=oval";
 	}
 
 	@Override
