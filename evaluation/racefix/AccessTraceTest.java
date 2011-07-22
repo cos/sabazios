@@ -10,17 +10,16 @@ import org.junit.rules.TestName;
 
 import sabazios.A;
 import sabazios.ColoredHeapGraphNodeDecorator;
-import sabazios.HeapGraphNodeDecorator;
 import sabazios.tests.DataRaceAnalysisTest;
 import sabazios.util.U;
 
 import com.ibm.wala.ipa.callgraph.CGNode;
+import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
+import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.collections.Filter;
 import com.ibm.wala.util.collections.IndiscriminateFilter;
-import com.ibm.wala.util.graph.Graph;
-import com.ibm.wala.util.graph.GraphSlicer;
 
 public class AccessTraceTest extends DataRaceAnalysisTest {
 
@@ -56,30 +55,45 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
     CGNode cgNode = a.findNodes(".*" + raceMethod + ".*").get(0);
     int value = U.getValueForVariableName(cgNode, startVariableName);
     System.out.println(cgNode + "" + value);
-    AccessTrace trace = new AccessTrace(a, cgNode, value, filter);
+    final AccessTrace trace = new AccessTrace(a, cgNode, value, filter);
     trace.compute();
     testString = trace.getTestString();
 
     if (printGraphs) {
 
-      Graph<Object> prunedHP = GraphSlicer.prune(a.heapGraph, new Filter<Object>() {
+//      Graph<Object> prunedHP = GraphSlicer.prune(a.heapGraph, new Filter<Object>() {
+//        @Override
+//        public boolean accepts(Object o) {
+//          return o.toString().contains("TraceSubject");
+//        }
+//
+//      });
+
+//      Graph<CGNode> prunedCG = GraphSlicer.prune(a.callGraph, new Filter<CGNode>() {
+//
+//        @Override
+//        public boolean accepts(CGNode o) {
+//          return o.toString().contains("TraceSubject");
+//        }
+//      });
+
+      a.dotGraph(a.heapGraph, methodName + "_HP", new ColoredHeapGraphNodeDecorator(a.heapGraph, new Filter<Object>(){
+
         @Override
         public boolean accepts(Object o) {
-          return o.toString().contains("TraceSubject");
+          if (o instanceof InstanceKey)
+            if (trace.getinstances().contains(o))
+              return true;
+          
+          if (o instanceof PointerKey)
+            if (trace.getPointers().contains(o))
+              return true;
+          
+          return false;
         }
-
-      });
-
-      Graph<CGNode> prunedCG = GraphSlicer.prune(a.callGraph, new Filter<CGNode>() {
-
-        @Override
-        public boolean accepts(CGNode o) {
-          return o.toString().contains("TraceSubject");
-        }
-      });
-
-      a.dotGraph(prunedHP, methodName + "_HP", new ColoredHeapGraphNodeDecorator(prunedHP, new IndiscriminateFilter<Object>()));
-      a.dotGraph(prunedCG, methodName + "_CG", null);
+        
+      }));
+//      a.dotGraph(prunedCG, methodName + "_CG", null);
     }
 
     Assert.assertEquals(expected, testString);
