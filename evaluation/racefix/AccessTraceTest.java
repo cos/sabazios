@@ -26,12 +26,13 @@ import com.ibm.wala.util.collections.IndiscriminateFilter;
 import com.ibm.wala.util.graph.Graph;
 import com.ibm.wala.util.graph.GraphSlicer;
 
+@SuppressWarnings("deprecation")
 public class AccessTraceTest extends DataRaceAnalysisTest {
 
   @Rule
   public TestName name = new TestName();
 
-  private final boolean printGraphs = true;
+  private final boolean printGraphs = false;
 
   public AccessTraceTest() {
     super();
@@ -106,12 +107,12 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
     Assert.assertEquals(expected, testString);
   }
 
-  private void runJmol() throws Exception {
+  private void runJmol(String traceStartMethod) throws Exception {
     setup("Lracefix/jmol/Main", "jmol()V");
     A a = new A(callGraph, pointerAnalysis);
     a.precompute();
 
-    List<CGNode> line3D = a.findNodes(".*" + "plotLine\\(" + ".*");
+    List<CGNode> line3D = a.findNodes(".*" + traceStartMethod + ".*");
     CGNode plotLine = line3D.get(0);
 
     final AccessTrace traceLine = new AccessTrace(a, plotLine, 1, new IndiscriminateFilter<CGNode>());
@@ -120,7 +121,6 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
     final AccessTrace[] traces = { traceLine };
     // final AccessTrace[] traces = { traceLine };
 
-    @SuppressWarnings("deprecation")
     Graph<Object> prunedHeapGraph = GraphSlicer.prune(a.heapGraph, new Filter<Object>() {
       @Override
       public boolean accepts(Object o) {
@@ -141,8 +141,8 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
           return true;
 
         String temp = o.toString();
-        String[] str = { "ShapeRenderer","SticksRenderer", "Graphics3D", "Circle3D", "Cylinder3D", "Line3D", "plotLine",
-            "fillCylinder", "fillSphere", "drawDashed", "getTrimmedLine", "plotLineClipped" };
+        String[] str = { "ShapeRenderer", "SticksRenderer", "Graphics3D", "Circle3D", "Cylinder3D", "Line3D",
+            "plotLine", "fillCylinder", "fillSphere", "drawDashed", "getTrimmedLine", "plotLineClipped" };
         for (String s : str) {
           if (temp.contains(s))
             return true;
@@ -169,7 +169,6 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
 
     });
 
-    @SuppressWarnings("deprecation")
     Graph<CGNode> prunedCallGraph = GraphSlicer.prune(a.callGraph, new Filter<CGNode>() {
       @Override
       public boolean accepts(CGNode o) {
@@ -178,8 +177,8 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
 
       private boolean isWanted(CGNode o) {
         String temp = o.toString();
-        String[] str = { "ShapeRenderer","fillCylinder", "drawDashed", "getTrimmedLine", "plotLineClipped", "drawLine", "plotLine",
-            "plotLineDelta" };
+        String[] str = { "ShapeRenderer", "fillCylinder", "drawDashed", "getTrimmedLine", "plotLineClipped",
+            "drawLine", "plotLine", "plotLineDelta" };
         for (String s : str) {
           if (temp.contains(s))
             return true;
@@ -188,7 +187,6 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
       }
 
     });
-    @SuppressWarnings("deprecation")
     Filter<Object> filter = new Filter<Object>() {
       @Override
       public boolean accepts(Object o) {
@@ -201,21 +199,13 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
     };
 
     ColoredHeapGraphNodeDecorator color = new ColoredHeapGraphNodeDecorator(prunedHeapGraph, filter);
-    // a.dotGraph(prunedHeapGraph, "Jmol_HeapGraph", new HeapGraphNodeDecorator(prunedHeapGraph));
-
-    try {
-      a.dotGraph(prunedHeapGraph, "heapGraph_color", color);
-    } catch (Exception e) {
-    }
-    try {
-      a.dotGraph(prunedCallGraph, "callGraph", new CGNodeDecorator(a));
-    } catch (Exception e) {
-    }
+    a.dotGraph(prunedHeapGraph, "Jmol_heapGraph_color", color);
+    a.dotGraph(prunedCallGraph, "Jmol_callGraph", new CGNodeDecorator(a));
   }
 
   @Test
   public void jmol() throws Exception {
-    runJmol();
+    runJmol("plotLine\\(");
   }
 
   @Test
@@ -412,6 +402,16 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
       }
 
     });
+  }
+  
+  @Test
+  public void simpleInheritance() throws Exception {
+    String startVariableName = "food";
+    String expected = "IFK:TraceSubject$Animal.food\n"+
+        "O:TraceSubject.simpleInheritance-new Object\n"+
+        "O:TraceSubject.simpleInheritance-new TraceSubject$Dog\n";
+
+    runTest(startVariableName, expected);
   }
 
 }

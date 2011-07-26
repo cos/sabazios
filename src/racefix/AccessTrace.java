@@ -11,6 +11,7 @@ import sabazios.domains.PointerForValue;
 import sabazios.util.CodeLocation;
 
 import com.ibm.wala.classLoader.CallSiteReference;
+import com.ibm.wala.classLoader.IField;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.propagation.AllocationSiteInNode;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceFieldKey;
@@ -32,6 +33,7 @@ import com.ibm.wala.util.collections.Filter;
  * @author caius
  * 
  */
+@SuppressWarnings("deprecation")
 public class AccessTrace {
   private final CGNode n;
   private final int v;
@@ -76,9 +78,6 @@ public class AccessTrace {
       InstanceKey o = (InstanceKey) succNodes.next();
       instances.add(o);
 
-      DefUse du = node.getDU();
-      SSAInstruction def = du.getDef(value);
-
       if (node.getMethod().getNumberOfParameters() >= value) {
         Iterator<CGNode> predNodes = a.callGraph.getPredNodes(node);
         while (predNodes.hasNext()) {
@@ -109,6 +108,9 @@ public class AccessTrace {
 
       // SSAReturnInstruction ssaRI;
       // ssaRI.getUse(j);
+
+      DefUse du = node.getDU();
+      SSAInstruction def = du.getDef(value);
 
       if (def instanceof SSAInvokeInstruction) {
         SSAInvokeInstruction invoke = (SSAInvokeInstruction) def;
@@ -144,8 +146,9 @@ public class AccessTrace {
           Object prev = (Object) pred.next();
           if (prev instanceof InstanceFieldKey) {
             InstanceFieldKey field = (InstanceFieldKey) prev;
-
-            if (field.getField().getReference().equals(declaredField)) {
+            IField ifield = field.getField();
+            if (ifield.getName().equals(declaredField.getName())
+                && a.cha.resolveField(ifield.getDeclaringClass(), declaredField).equals(ifield)) {
               Iterator<Object> predNodes2 = a.heapGraph.getPredNodes(field);
               while (predNodes2.hasNext()) {
                 Object object = (Object) predNodes2.next();
@@ -214,11 +217,11 @@ public class AccessTrace {
     }
     return s;
   }
-  
+
   public LinkedHashSet<PointerKey> getPointers() {
     return pointers;
   }
-  
+
   public LinkedHashSet<InstanceKey> getinstances() {
     return instances;
   }
