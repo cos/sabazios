@@ -173,6 +173,7 @@ public final class CS extends nCFAContextSelector {
 		return ContainerUtil.isContainer(callee.getDeclaringClass()) || callee.toString().contains("DateFormat");
 	}
 	
+	// 
 	public static String[] threadSafeMethods = new String[] { 
 		"java/util/regex/Pattern", "java/lang/System, exit",
 		"java/io/PrintStream, ",
@@ -181,7 +182,7 @@ public final class CS extends nCFAContextSelector {
 		"java/util/Vector, ",
 		"java/lang/Throwable, ",
 		"java/security/AccessControlContext, getDebug", // not relevant
-		"java/util/Random, <init>" , "Integer, <init>",
+		"java/util/Random, <init>" , "java/lang/Integer, <init>",
 		"java/lang/SecurityManager, ",
 		"java/lang/ClassLoader, initSystemClassLoader",
 		"java/util/Properties, "
