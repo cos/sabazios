@@ -26,8 +26,8 @@ public class HeapGraphNodeDecorator implements NodeDecorator {
 			AllocationSiteInNode o = (AllocationSiteInNode) obj;
 			return o.getSite().getDeclaredType().getName().getClassName() + " [ "+o.getNode().getMethod().getName().toString() +  "@" + o.getSite().getProgramCounter()+" ]";
 		}
-		if(obj instanceof AbstractFieldPointerKey) {
-			InstanceFieldKey f = (InstanceFieldKey) obj;
+		if(obj instanceof InstanceFieldKey) {
+		  InstanceFieldKey f = (InstanceFieldKey) obj;
 			return f.getField().getName().toString();
 		}
 		if(obj instanceof LocalPointerKey) {
