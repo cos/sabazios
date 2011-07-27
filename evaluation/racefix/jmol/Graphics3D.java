@@ -223,6 +223,8 @@ final public class Graphics3D implements JmolRendererInterface {
    *          the java.awt.Component where the image will be drawn
    */
   public Graphics3D() {
+    this.platform = Platform3D.createInstance();
+    this.platform.allocateBuffers(42, 42, true);
     this.line3d = new Line3D(this);
     this.circle3d = new Circle3D(this);
     this.sphere3d = new Sphere3D(this);

@@ -23,7 +23,6 @@
  */
 package racefix.jmol.mock;
 
-import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -62,9 +61,7 @@ public class Platform3D {
 
   ClearingThread clearingThread;
 
-  static Platform3D createInstance(Component awtComponent) {
-    if (awtComponent == null)
-      return null;
+  public static Platform3D createInstance() {
     Platform3D platform = new Platform3D();
     platform.initialize(desireClearingThread);
     platform.graphicsOffscreen = platform.allocateOffscreenImage(1, 1).getGraphics();
@@ -86,7 +83,7 @@ public class Platform3D {
     pBufferT = new int[bufferSizeT];    
   }
   
-  void allocateBuffers(int width, int height, boolean antialias) {
+  public void allocateBuffers(int width, int height, boolean antialias) {
     windowWidth = width;
     windowHeight = height;
     windowSize = width * height;

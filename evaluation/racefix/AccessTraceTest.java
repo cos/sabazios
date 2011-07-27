@@ -1,7 +1,9 @@
 package racefix;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import junit.framework.Assert;
 
@@ -9,6 +11,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 
+import racefix.jmol.util.JmolCallGraphFilter;
+import racefix.jmol.util.JmolHeapGraphFilter;
+import racefix.util.AccessTraceFilter;
 import sabazios.A;
 import sabazios.CGNodeDecorator;
 import sabazios.ColoredHeapGraphNodeDecorator;
@@ -17,7 +22,6 @@ import sabazios.util.U;
 
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
-import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.util.CancelException;
@@ -107,105 +111,47 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
     Assert.assertEquals(expected, testString);
   }
 
-  private void runJmol(String traceStartMethod) throws Exception {
+  private void runJmol(Map<String, String> traceStartingPoint) throws Exception {
     setup("Lracefix/jmol/Main", "jmol()V");
     A a = new A(callGraph, pointerAnalysis);
     a.precompute();
 
-    List<CGNode> line3D = a.findNodes(".*" + traceStartMethod + ".*");
-    CGNode plotLine = line3D.get(0);
+    int i = 0;
+    final AccessTrace[] traces = new AccessTrace[traceStartingPoint.size()];
+    for (String methodName : traceStartingPoint.keySet()) {
+      List<CGNode> possibleStartNode = a.findNodes(".*" + methodName + ".*");
+      CGNode traceStartMethodeNode = possibleStartNode.get(0);
 
-    final AccessTrace traceLine = new AccessTrace(a, plotLine, 1, new IndiscriminateFilter<CGNode>());
-    traceLine.compute();
+      String varName = traceStartingPoint.get(methodName);
+      int ssaValue = 0;
+      if (varName.equals("this"))
+        ssaValue = 1;
+      else
+        ssaValue = U.getValueForVariableName(traceStartMethodeNode, traceStartingPoint.get(methodName));
 
-    final AccessTrace[] traces = { traceLine };
-    // final AccessTrace[] traces = { traceLine };
+      final AccessTrace accessTrace = new AccessTrace(a, traceStartMethodeNode, ssaValue,
+          new IndiscriminateFilter<CGNode>());
+      accessTrace.compute();
+      traces[i++] = accessTrace;
+    }
+    Graph<Object> prunedHeapGraph = GraphSlicer.prune(a.heapGraph, new JmolHeapGraphFilter(traces));
 
-    Graph<Object> prunedHeapGraph = GraphSlicer.prune(a.heapGraph, new Filter<Object>() {
-      @Override
-      public boolean accepts(Object o) {
-        return !isUnwanted(o) && isWanted(o);
-      }
+    Graph<CGNode> prunedCallGraph = GraphSlicer.prune(a.callGraph, new JmolCallGraphFilter());
 
-      private boolean isInTrace(Object o) {
-        for (AccessTrace trace : traces) {
-          if (trace.getinstances().contains(o) || trace.getPointers().contains(o))
-            return true;
-        }
-        return false;
-      }
+    ColoredHeapGraphNodeDecorator color = new ColoredHeapGraphNodeDecorator(prunedHeapGraph, new AccessTraceFilter(
+        traces));
 
-      private boolean isWanted(Object o) {
-
-        if (isInTrace(o))
-          return true;
-
-        String temp = o.toString();
-        String[] str = { "ShapeRenderer", "SticksRenderer", "Graphics3D", "Circle3D", "Cylinder3D", "Line3D",
-            "plotLine", "fillCylinder", "fillSphere", "drawDashed", "getTrimmedLine", "plotLineClipped" };
-        for (String s : str) {
-          if (temp.contains(s))
-            return true;
-        }
-        return false;
-      }
-
-      private boolean isUnwanted(Object o) {
-        if (o instanceof LocalPointerKey) {
-          return true;
-        }
-
-        String temp = o.toString();
-        String str[] = { "Exception", "Assertion", "error", "StackTrace", "Vector3f", "Point3f", "Vector3i", "Point3i",
-            "BitSet", "Iterator", "HashTable", "Class", "CurrentThread", "getComponentType", "InternalError",
-            "Sphere3D", "Hermite3D", "Normix3D", "Triangle3D" };
-
-        for (String s : str) {
-          if (temp.contains(s))
-            return true;
-        }
-        return false;
-      }
-
-    });
-
-    Graph<CGNode> prunedCallGraph = GraphSlicer.prune(a.callGraph, new Filter<CGNode>() {
-      @Override
-      public boolean accepts(CGNode o) {
-        return isWanted(o);
-      }
-
-      private boolean isWanted(CGNode o) {
-        String temp = o.toString();
-        String[] str = { "ShapeRenderer", "fillCylinder", "drawDashed", "getTrimmedLine", "plotLineClipped",
-            "drawLine", "plotLine", "plotLineDelta" };
-        for (String s : str) {
-          if (temp.contains(s))
-            return true;
-        }
-        return false;
-      }
-
-    });
-    Filter<Object> filter = new Filter<Object>() {
-      @Override
-      public boolean accepts(Object o) {
-        for (AccessTrace trace : traces) {
-          if ((trace.getinstances().contains(o) || trace.getPointers().contains(o)) == true)
-            return true;
-        }
-        return false;
-      }
-    };
-
-    ColoredHeapGraphNodeDecorator color = new ColoredHeapGraphNodeDecorator(prunedHeapGraph, filter);
-    a.dotGraph(prunedHeapGraph, "Jmol_heapGraph_color", color);
-    a.dotGraph(prunedCallGraph, "Jmol_callGraph", new CGNodeDecorator(a));
+    a.dotGraph(prunedHeapGraph, "Jmol_mock_heapGraph_color", color);
+    a.dotGraph(prunedCallGraph, "Jmol_mock_callGraph", new CGNodeDecorator(a));
   }
 
   @Test
   public void jmol() throws Exception {
-    runJmol("plotLine\\(");
+    Map<String, String> start = new HashMap<String, String>();
+    start.put("plotLine\\(", "this");
+    start.put("Cylinder3D, render\\(", "this");
+    // start.put("plotLineClipped\\(I", "zbuf");
+    runJmol(start);
   }
 
   @Test
@@ -403,13 +349,12 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
 
     });
   }
-  
+
   @Test
   public void simpleInheritance() throws Exception {
     String startVariableName = "food";
-    String expected = "IFK:TraceSubject$Animal.food\n"+
-        "O:TraceSubject.simpleInheritance-new Object\n"+
-        "O:TraceSubject.simpleInheritance-new TraceSubject$Dog\n";
+    String expected = "IFK:TraceSubject$Animal.food\n" + "O:TraceSubject.simpleInheritance-new Object\n"
+        + "O:TraceSubject.simpleInheritance-new TraceSubject$Dog\n";
 
     runTest(startVariableName, expected);
   }
