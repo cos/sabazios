@@ -111,8 +111,9 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
     Assert.assertEquals(expected, testString);
   }
 
-  private void runJmol(Map<String, String> traceStartingPoint) throws Exception {
-    setup("Lracefix/jmol/Main", "jmol()V");
+  private void runJmol(Map<String, String> traceStartingPoint, String entryClass, String entryMethod,
+      boolean printGraphs, String graphNames) throws Exception {
+    setup(entryClass, entryMethod);
     A a = new A(callGraph, pointerAnalysis);
     a.precompute();
 
@@ -134,15 +135,15 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
       accessTrace.compute();
       traces[i++] = accessTrace;
     }
-    Graph<Object> prunedHeapGraph = GraphSlicer.prune(a.heapGraph, new JmolHeapGraphFilter(traces));
 
-    Graph<CGNode> prunedCallGraph = GraphSlicer.prune(a.callGraph, new JmolCallGraphFilter());
-
-    ColoredHeapGraphNodeDecorator color = new ColoredHeapGraphNodeDecorator(prunedHeapGraph, new AccessTraceFilter(
-        traces));
-
-    a.dotGraph(prunedHeapGraph, "Jmol_mock_heapGraph_color", color);
-    a.dotGraph(prunedCallGraph, "Jmol_mock_callGraph", new CGNodeDecorator(a));
+    if (printGraphs) {
+      Graph<Object> prunedHeapGraph = GraphSlicer.prune(a.heapGraph, new JmolHeapGraphFilter(traces));
+      Graph<CGNode> prunedCallGraph = GraphSlicer.prune(a.callGraph, new JmolCallGraphFilter());
+      ColoredHeapGraphNodeDecorator color = new ColoredHeapGraphNodeDecorator(prunedHeapGraph, new AccessTraceFilter(
+          traces));
+      a.dotGraph(prunedHeapGraph, graphNames + "_heapGraph", color);
+      a.dotGraph(prunedCallGraph, graphNames + "_callGraph", new CGNodeDecorator(a));
+    }
   }
 
   @Test
@@ -150,8 +151,11 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
     Map<String, String> start = new HashMap<String, String>();
     start.put("plotLine\\(", "this");
     start.put("Cylinder3D, render\\(", "this");
-    // start.put("plotLineClipped\\(I", "zbuf");
-    runJmol(start);
+    start.put("plotLineClipped\\(I", "zbuf");
+
+    String entryClass = "Lracefix/jmol/Main";
+    String entryMethod = "jmol()V";
+    runJmol(start, entryClass, entryMethod, true, "Jmol_mock");
   }
 
   @Test
