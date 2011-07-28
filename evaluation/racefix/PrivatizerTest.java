@@ -55,14 +55,8 @@ public class PrivatizerTest extends DataRaceAnalysisTest {
     access.alphaAccesses.add(o1);
     access.betaAccesses.add(o2);
 
-    ConcurrentAccesses cfas = new ConcurrentFieldAccesses(a);
-    Loop loop = new Loop(null, null, null);
-    cfas.put(loop, Sets.newHashSet(access));
-
-    Privatizer p = new Privatizer(a, cfas);
-
   }
-
+  
   private SSAPutInstruction findInstructionForName(String string, List<CGNode> startNodes) {
     SSAPutInstruction startInstr = null;
 
