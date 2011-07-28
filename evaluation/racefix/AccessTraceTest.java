@@ -127,8 +127,11 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
       int ssaValue = 0;
       if (varName.equals("this"))
         ssaValue = 1;
-      else
+      else {
         ssaValue = U.getValueForVariableName(traceStartMethodeNode, traceStartingPoint.get(methodName));
+        if (ssaValue <= 0)
+          throw new Exception("Could not find SSA value for variable: " + traceStartingPoint.get(methodName));
+      }
 
       final AccessTrace accessTrace = new AccessTrace(a, traceStartMethodeNode, ssaValue,
           new IndiscriminateFilter<CGNode>());
