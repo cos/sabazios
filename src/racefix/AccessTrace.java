@@ -39,11 +39,15 @@ public class AccessTrace {
   private final int v;
   private final A a;
   private final Filter<CGNode> f;
-  private LinkedHashSet<PointerKey> pointers = new LinkedHashSet<PointerKey>();
+  private LinkedHashSet<InstanceFieldKey> pointers = new LinkedHashSet<InstanceFieldKey>();
   private LinkedHashSet<InstanceKey> instances = new LinkedHashSet<InstanceKey>();
   private HashMap<CGNode, Set<Integer>> visited = new HashMap<CGNode, Set<Integer>>();
   private PointerForValue pv;
 
+  public AccessTrace(A a, CGNode n, int v) {
+    this(a, n, v, null);
+  }
+  
   public AccessTrace(A a, CGNode n, int v, Filter<CGNode> f) {
     this.a = a;
     this.n = n;
@@ -59,7 +63,7 @@ public class AccessTrace {
   }
 
   private void solveNV(CGNode node, int value) {
-    if (!f.accepts(node))
+    if (f != null && !f.accepts(node))
       return;
 
     Set<Integer> set = visited.get(node);
@@ -218,7 +222,7 @@ public class AccessTrace {
     return s;
   }
 
-  public LinkedHashSet<PointerKey> getPointers() {
+  public LinkedHashSet<InstanceFieldKey> getPointers() {
     return pointers;
   }
 
