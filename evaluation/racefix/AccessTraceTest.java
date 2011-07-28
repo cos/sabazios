@@ -111,56 +111,6 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
     Assert.assertEquals(expected, testString);
   }
 
-  private void runJmol(Map<String, String> traceStartingPoint, String entryClass, String entryMethod,
-      boolean printGraphs, String graphNames) throws Exception {
-    setup(entryClass, entryMethod);
-    A a = new A(callGraph, pointerAnalysis);
-    a.precompute();
-
-    int i = 0;
-    final AccessTrace[] traces = new AccessTrace[traceStartingPoint.size()];
-    for (String methodName : traceStartingPoint.keySet()) {
-      List<CGNode> possibleStartNode = a.findNodes(".*" + methodName + ".*");
-      CGNode traceStartMethodeNode = possibleStartNode.get(0);
-
-      String varName = traceStartingPoint.get(methodName);
-      int ssaValue = 0;
-      if (varName.equals("this"))
-        ssaValue = 1;
-      else {
-        ssaValue = U.getValueForVariableName(traceStartMethodeNode, traceStartingPoint.get(methodName));
-        if (ssaValue <= 0)
-          throw new Exception("Could not find SSA value for variable: " + traceStartingPoint.get(methodName));
-      }
-
-      final AccessTrace accessTrace = new AccessTrace(a, traceStartMethodeNode, ssaValue,
-          new IndiscriminateFilter<CGNode>());
-      accessTrace.compute();
-      traces[i++] = accessTrace;
-    }
-
-    if (printGraphs) {
-      Graph<Object> prunedHeapGraph = GraphSlicer.prune(a.heapGraph, new JmolHeapGraphFilter(traces));
-      Graph<CGNode> prunedCallGraph = GraphSlicer.prune(a.callGraph, new JmolCallGraphFilter());
-      ColoredHeapGraphNodeDecorator color = new ColoredHeapGraphNodeDecorator(prunedHeapGraph, new AccessTraceFilter(
-          traces));
-      a.dotGraph(prunedHeapGraph, graphNames + "_heapGraph", color);
-      a.dotGraph(prunedCallGraph, graphNames + "_callGraph", new CGNodeDecorator(a));
-    }
-  }
-
-  @Test
-  public void jmol() throws Exception {
-    Map<String, String> start = new HashMap<String, String>();
-    start.put("plotLine\\(", "this");
-    start.put("Cylinder3D, render\\(", "this");
-    start.put("plotLineClipped\\(I", "zbuf");
-
-    String entryClass = "Lracefix/jmol/Main";
-    String entryMethod = "jmol()V";
-    runJmol(start, entryClass, entryMethod, true, "Jmol_mock");
-  }
-
   @Test
   public void simple1() throws Exception {
     String startVariableName = "b";

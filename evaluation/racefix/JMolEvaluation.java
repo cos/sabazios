@@ -34,7 +34,7 @@ public class JMolEvaluation extends DataRaceAnalysisTest {
   }
 
   @Test
-  public void test() throws Exception {
+  public void testJmolFull() throws Exception {
     CS.NCFA = 0;
     Map<String, String> start = new HashMap<String, String>();
     start.put("plotLine\\(", "this");
@@ -46,6 +46,19 @@ public class JMolEvaluation extends DataRaceAnalysisTest {
 
     runJmol(start, entryClass, mainMethod, true, "Jmol");
   }
+  
+  @Test
+  public void testJmolStripped() throws Exception {
+    Map<String, String> start = new HashMap<String, String>();
+    start.put("plotLine\\(", "this");
+    start.put("Cylinder3D, render\\(", "this");
+    start.put("plotLineClipped\\(I", "zbuf");
+
+    String entryClass = "Lracefix/jmol/Main";
+    String entryMethod = "jmol()V";
+    runJmol(start, entryClass, entryMethod, true, "Jmol_mock");
+  }
+
 
   private void runJmol(Map<String, String> traceStartingPoint, String entryClass, String entryMethod,
       boolean printGraphs, String graphNames) throws Exception {
