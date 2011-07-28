@@ -49,7 +49,7 @@ public class Platform3D {
 
   Image imagePixelBuffer;
   int[] pBuffer, pBufferT;
-  int[] zBuffer, zBufferT;
+  public int[] zBuffer, zBufferT;
 
   int widthOffscreen, heightOffscreen;
   Image imageOffscreen;

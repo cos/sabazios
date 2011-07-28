@@ -24,6 +24,7 @@ import sabazios.tests.DataRaceAnalysisTest;
 import sabazios.util.U;
 import sabazios.wala.CS;
 
+@SuppressWarnings("deprecation")
 public class JMolEvaluation extends DataRaceAnalysisTest {
   public JMolEvaluation() {
     super();
@@ -39,12 +40,16 @@ public class JMolEvaluation extends DataRaceAnalysisTest {
     start.put("plotLine\\(", "this");
     start.put("Cylinder3D, render\\(", "this");
     start.put("plotLineClipped\\(I", "zbuf");
-    runJmol(start);
+
+    String entryClass = "Lorg/openscience/jmol/app/Jmol";
+    String mainMethod = MAIN_METHOD;
+
+    runJmol(start, entryClass, mainMethod, true, "Jmol");
   }
 
-  @SuppressWarnings("deprecation")
-  private void runJmol(Map<String, String> traceStartingPoint) throws Exception {
-    setup("Lorg/openscience/jmol/app/Jmol", MAIN_METHOD);
+  private void runJmol(Map<String, String> traceStartingPoint, String entryClass, String entryMethod,
+      boolean printGraphs, String graphNames) throws Exception {
+    setup(entryClass, entryMethod);
     A a = new A(callGraph, pointerAnalysis);
     a.precompute();
 
@@ -66,14 +71,15 @@ public class JMolEvaluation extends DataRaceAnalysisTest {
       accessTrace.compute();
       traces[i++] = accessTrace;
     }
-    Graph<Object> prunedHeapGraph = GraphSlicer.prune(a.heapGraph, new JmolHeapGraphFilter(traces));
 
-    Graph<CGNode> prunedCallGraph = GraphSlicer.prune(a.callGraph, new JmolCallGraphFilter());
-
-    ColoredHeapGraphNodeDecorator color = new ColoredHeapGraphNodeDecorator(prunedHeapGraph, new AccessTraceFilter(
-        traces));
-    a.dotGraph(prunedHeapGraph, "Jmol_heapGraph_color", color);
-    a.dotGraph(prunedCallGraph, "Jmol_callGraph", new CGNodeDecorator(a));
+    if (printGraphs) {
+      Graph<Object> prunedHeapGraph = GraphSlicer.prune(a.heapGraph, new JmolHeapGraphFilter(traces));
+      Graph<CGNode> prunedCallGraph = GraphSlicer.prune(a.callGraph, new JmolCallGraphFilter());
+      ColoredHeapGraphNodeDecorator color = new ColoredHeapGraphNodeDecorator(prunedHeapGraph, new AccessTraceFilter(
+          traces));
+      a.dotGraph(prunedHeapGraph, graphNames + "_heapGraph", color);
+      a.dotGraph(prunedCallGraph, graphNames + "_callGraph", new CGNodeDecorator(a));
+    }
   }
 
   @SuppressWarnings("unused")

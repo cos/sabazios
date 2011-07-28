@@ -225,6 +225,7 @@ final public class Graphics3D implements JmolRendererInterface {
   public Graphics3D() {
     this.platform = Platform3D.createInstance();
     this.platform.allocateBuffers(42, 42, true);
+    this.zbuf = platform.zBuffer;
     this.line3d = new Line3D(this);
     this.circle3d = new Circle3D(this);
     this.sphere3d = new Sphere3D(this);
@@ -2500,7 +2501,7 @@ final public class Graphics3D implements JmolRendererInterface {
    * normals and normal indexes -- normix **************************************************************
    */
 
-  public static final short NORMIX_NULL =0;
+  public static final short NORMIX_NULL = 0;
 
   public static short getInverseNormix(short normix) {
     return NORMIX_NULL;
