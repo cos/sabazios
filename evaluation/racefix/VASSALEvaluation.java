@@ -1,4 +1,4 @@
-package sabazios.tests.evaluation;
+package racefix;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.propagation.AbstractFieldPointerKey;
+import com.ibm.wala.ipa.callgraph.propagation.InstanceFieldKey;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
@@ -56,7 +57,7 @@ public class VASSALEvaluation extends DataRaceAnalysisTest {
     for (InstanceKey instanceKey : instances) {
       strings.add(instanceKey.toString());
     }
-    final LinkedHashSet<PointerKey> pointers = trace.getPointers();
+    final LinkedHashSet<InstanceFieldKey> pointers = trace.getPointers();
     for (PointerKey pointerKey : pointers) {
       strings.add(pointerKey.toString());
     }
