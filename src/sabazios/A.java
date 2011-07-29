@@ -19,6 +19,7 @@ import sabazios.domains.Loops;
 import sabazios.domains.PointerForValue;
 import sabazios.lockset.Locks;
 import sabazios.util.Log;
+import sabazios.util.wala.viz.CGNodeDecorator;
 import sabazios.util.wala.viz.DotUtil;
 import sabazios.util.wala.viz.NodeDecorator;
 import sabazios.util.wala.viz.PDFViewUtil;

@@ -1,6 +1,5 @@
-package sabazios;
+package sabazios.util.wala.viz;
 
-import sabazios.util.wala.viz.NodeDecorator;
 
 import com.ibm.wala.analysis.pointers.HeapGraph;
 import com.ibm.wala.ipa.callgraph.propagation.AbstractFieldPointerKey;

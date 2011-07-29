@@ -1,4 +1,4 @@
-package sabazios;
+package sabazios.util.wala.viz;
 
 import com.ibm.wala.util.collections.Filter;
 import com.ibm.wala.util.graph.Graph;

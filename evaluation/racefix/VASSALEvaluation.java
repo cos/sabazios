@@ -22,10 +22,10 @@ import com.ibm.wala.util.warnings.WalaException;
 
 import racefix.AccessTrace;
 import sabazios.A;
-import sabazios.ColoredHeapGraphNodeDecorator;
-import sabazios.HeapGraphNodeDecorator;
 import sabazios.tests.DataRaceAnalysisTest;
 import sabazios.util.U;
+import sabazios.util.wala.viz.ColoredHeapGraphNodeDecorator;
+import sabazios.util.wala.viz.HeapGraphNodeDecorator;
 import sabazios.util.wala.viz.NodeDecorator;
 
 public class VASSALEvaluation extends DataRaceAnalysisTest {

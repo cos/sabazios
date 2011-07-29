@@ -15,10 +15,10 @@ import racefix.jmol.util.JmolCallGraphFilter;
 import racefix.jmol.util.JmolHeapGraphFilter;
 import racefix.util.AccessTraceFilter;
 import sabazios.A;
-import sabazios.CGNodeDecorator;
-import sabazios.ColoredHeapGraphNodeDecorator;
 import sabazios.tests.DataRaceAnalysisTest;
 import sabazios.util.U;
+import sabazios.util.wala.viz.CGNodeDecorator;
+import sabazios.util.wala.viz.ColoredHeapGraphNodeDecorator;
 
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
