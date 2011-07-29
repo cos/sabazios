@@ -45,6 +45,7 @@ public class A {
 	public AlphaAccesses alphaAccesses;
 	public BetaAccesses betaAccesses;
 	public final Loops loops;
+  public ConcurrentFieldAccesses deepRaces;
 
 	public A(CallGraph callGraph, PointerAnalysis pointerAnalysis) {
 		this.callGraph = callGraph;
@@ -111,7 +112,7 @@ public class A {
 		// LockIdentity li = new LockIdentity(this);
 		// li.compute();
 		FilterSafe.filter(this, potentialRaces);
-		ConcurrentFieldAccesses deepRaces = potentialRaces;
+		deepRaces = potentialRaces;
 		System.out.println(deepRaces.toString());
 		System.out.println();
 		int noRaces = deepRaces.getNoPairs();
@@ -144,7 +145,7 @@ public class A {
 		System.out.println("-------------------------------------------------------- \n");
 		
 		
-		interactiveDebug();
+//		interactiveDebug();
 		
 		return shallowRaces;
 	}

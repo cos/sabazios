@@ -30,6 +30,7 @@ public abstract class DataRaceAnalysisTest extends WalaAnalysis {
 	@Rule
 	public TestName name = new TestName();
 	protected String projectName;
+  protected A a;
 
 	public DataRaceAnalysisTest() {
 		Log.start();
@@ -63,7 +64,7 @@ public abstract class DataRaceAnalysisTest extends WalaAnalysis {
 		Log.log("Pointer analysis done");
 		Log.reportTime(":pointer_analysis_time");
 
-		A a = new A(callGraph, pointerAnalysis);
+		a = new A(callGraph, pointerAnalysis);
 
 		foundCA = a.compute();
 		Log.log("New Race analysis done");
