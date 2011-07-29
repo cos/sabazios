@@ -1,72 +1,79 @@
 package racefix;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
+import junit.framework.TestCase;
+
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 
 import sabazios.A;
+import sabazios.domains.ConcurrentAccess;
 import sabazios.domains.ConcurrentAccesses;
 import sabazios.domains.ConcurrentFieldAccess;
-import sabazios.domains.ConcurrentFieldAccesses;
 import sabazios.domains.FieldAccess;
 import sabazios.domains.Loop;
+import sabazios.domains.Loops;
 import sabazios.tests.DataRaceAnalysisTest;
 
-import com.google.common.collect.Sets;
+import com.ibm.wala.classLoader.IField;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSAPutInstruction;
+import com.ibm.wala.ssa.SSAReturnInstruction;
 import com.ibm.wala.util.CancelException;
 
 public class PrivatizerTest extends DataRaceAnalysisTest {
 
   @Rule
   public TestName name = new TestName();
+  private Privatizer privatizer;
+  private String startNodeName = "coordX";
 
   public PrivatizerTest() {
     this.addBinaryDependency("racefix");
     this.addBinaryDependency("../lib/parallelArray.mock");
   }
 
-  public void runTest(String startNodeName) throws ClassHierarchyException, IllegalArgumentException, CancelException,
-      IOException {
-    setup("Lracefix/PrivatizerSubject", name.getMethodName() + "()V");
+  @Before
+  public void beforeTest() throws ClassHierarchyException, IllegalArgumentException, CancelException, IOException {
+    foundCA = findCA("Lracefix/PrivatizerSubject", name.getMethodName() + "()V");
+    Set<Loop> keySet = foundCA.keySet();
+    Loop outer = null;
+    for (Loop loop : keySet) {
+      outer = loop;
+    }
 
-    A a = new A(callGraph, pointerAnalysis);
-    a.precompute();
+    Set<ConcurrentFieldAccess> accesses = (Set<ConcurrentFieldAccess>) foundCA.get(outer);
 
-    List<CGNode> startNodes = a.findNodes(".*" + "op" + ".*");
-    SSAPutInstruction startInstr = findInstructionForName(startNodeName, startNodes);
-
-    // int value = U.getValueForVariableName(startNodes.get(0), startNodeName);
-    // LocalPointerKey lpk = a.pointerForValue.get(startNodes.get(0), value);
-    // Iterator<Object> succNodes = a.heapGraph.getSuccNodes(lpk);
-
-    FieldAccess o1 = new FieldAccess(a, startNodes.get(0), startInstr, null, null);
-
-    // value = U.getValueForVariableName(startNodes.get(0), startNodeName);
-    FieldAccess o2 = new FieldAccess(a, startNodes.get(1), startInstr, null, null);
-
-    ConcurrentFieldAccess access = new ConcurrentFieldAccess(null, null, null);
-    access.alphaAccesses.add(o1);
-    access.betaAccesses.add(o2);
-
+    privatizer = new Privatizer(a, accesses);
+    privatizer.compute();
   }
-  
+
   private SSAPutInstruction findInstructionForName(String string, List<CGNode> startNodes) {
     SSAPutInstruction startInstr = null;
 
-    SSAInstruction[] instructions = startNodes.get(0).getIR().getInstructions();
-    for (SSAInstruction ssaInstruction : instructions) {
-      if (ssaInstruction instanceof SSAPutInstruction) {
-        SSAPutInstruction put = (SSAPutInstruction) ssaInstruction;
-        if (put.getDeclaredField().getName().toString().contains(string)) {
-          startInstr = put;
-          break;
+    for (CGNode cgNode : startNodes) {
+
+      System.out.println("\n" + cgNode + "\n");
+
+      SSAInstruction[] instructions = cgNode.getIR().getInstructions();// startNodes.get(0).getIR().getInstructions();
+      for (SSAInstruction ssaInstruction : instructions) {
+        System.out.println(ssaInstruction);
+        if (ssaInstruction instanceof SSAPutInstruction) {
+          SSAPutInstruction put = (SSAPutInstruction) ssaInstruction;
+          if (put.getDeclaredField().getName().toString().contains(string)) {
+            startInstr = put;
+            break;
+          }
         }
       }
     }
@@ -75,7 +82,38 @@ public class PrivatizerTest extends DataRaceAnalysisTest {
 
   @Test
   public void simpleRace() throws Exception {
-    runTest("coordX");
+    String expectedLCD = "";
+    String expectedNoLCD = "Object : racefix.PrivatizerSubject.simpleRace(PrivatizerSubject.java:22) new PrivatizerSubject$PrivatizableParticle\n"
+        + "   Alpha accesses:\n"
+        + "     Write racefix.PrivatizerSubject$1.op(PrivatizerSubject.java:27) - .coordX\n"
+        + "   Beta accesses:\n" + "     Write racefix.PrivatizerSubject$1.op(PrivatizerSubject.java:27) - .coordX\n";
+    TestCase.assertEquals(expectedLCD, privatizer.getAccessesInLCDTestString());
+    TestCase.assertEquals(expectedNoLCD, privatizer.getAccessesNotInLCDTestString());
   }
 
+  @Test
+  public void writeReadRace() throws Exception {
+    String expectedLCD = "";
+    String expectedNoLCD = "Object : racefix.PrivatizerSubject.writeReadRace(PrivatizerSubject.java:36) new PrivatizerSubject$PrivatizableParticle\n"
+        + "   Alpha accesses:\n"
+        + "     Write racefix.PrivatizerSubject$2.op(PrivatizerSubject.java:41) - .coordX\n"
+        + "   Beta accesses:\n"
+        + "     Read racefix.PrivatizerSubject$2.op(PrivatizerSubject.java:42) - .coordX\n"
+        + "     Write racefix.PrivatizerSubject$2.op(PrivatizerSubject.java:41) - .coordX\n";
+    TestCase.assertEquals(expectedLCD, privatizer.getAccessesInLCDTestString());
+    TestCase.assertEquals(expectedNoLCD, privatizer.getAccessesNotInLCDTestString());
+  }
+
+  @Test
+  public void readWriteRace() throws Exception {
+    String expectedLCD = "Object : racefix.PrivatizerSubject.writeReadRace(PrivatizerSubject.java:36) new PrivatizerSubject$PrivatizableParticle\n"
+        + "   Alpha accesses:\n"
+        + "     Write racefix.PrivatizerSubject$2.op(PrivatizerSubject.java:41) - .coordX\n"
+        + "   Beta accesses:\n"
+        + "     Read racefix.PrivatizerSubject$2.op(PrivatizerSubject.java:42) - .coordX\n"
+        + "     Write racefix.PrivatizerSubject$2.op(PrivatizerSubject.java:41) - .coordX\n";
+    String expectedNoLCD = "";
+    TestCase.assertEquals(expectedLCD, privatizer.getAccessesInLCDTestString());
+    TestCase.assertEquals(expectedNoLCD, privatizer.getAccessesNotInLCDTestString());
+  }
 }

@@ -98,8 +98,10 @@ public class Privatizer {
    */
   private boolean isLCD(ConcurrentFieldAccess access) {
     LinkedHashSet<FieldAccess> betaAccesses = access.betaAccesses;
+    boolean existsRead = false;;
     for (FieldAccess readFieldAccess : betaAccesses)
       if (readFieldAccess instanceof ReadFieldAccess) {
+        existsRead = true;
         boolean ok = false;
         for (FieldAccess writeFieldAccess : betaAccesses) {
           if (writeFieldAccess instanceof WriteFieldAccess) {
@@ -116,6 +118,26 @@ public class Privatizer {
         if (!ok)
           return false;
       }
-    return true;
+    return existsRead;
+  }
+  
+  private void getStared() {
+    
+  }
+  
+  String getAccessesInLCDTestString() {
+    String s = "";
+    for (ConcurrentFieldAccess access : accessesLCD) {
+      s += access.toString() + "\n";
+    }
+    return s;
+  }
+  
+  String getAccessesNotInLCDTestString() {
+    String s = "";
+    for (ConcurrentFieldAccess access : accessesNotLCD) {
+      s += access.toString() + "\n";
+    }
+    return s;
   }
 }
