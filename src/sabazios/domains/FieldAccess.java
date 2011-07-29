@@ -18,6 +18,8 @@ import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
+import com.ibm.wala.ssa.SSAArrayReferenceInstruction;
+import com.ibm.wala.ssa.SSAFieldAccessInstruction;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSAInvokeInstruction;
 
@@ -46,7 +48,15 @@ public class FieldAccess extends ObjectAccess {
 		FieldAccess other = (FieldAccess) obj;
 		return f.equals(other.f);
 	}
-
+	
+	public int getRef() {
+	  if(i instanceof SSAFieldAccessInstruction)
+	    return ((SSAFieldAccessInstruction)i).getRef();
+	  if(i instanceof SSAArrayReferenceInstruction)
+	    return ((SSAArrayReferenceInstruction)i).getArrayRef();
+    return -1;
+	}
+	
 	@Override
 	public String toString(boolean withObj) {
 		withObj = false;

@@ -2,15 +2,18 @@ package racefix;
 
 import racefix.TraceSubject.Cat;
 
-
 public class TraceSubject {
 
-  public static class Dog {
+  public static class Animal {
+    public Object food;
+  }
+
+  public static class Dog extends Animal {
     public Cat chases;
     public Cat loves;
   }
 
-  public static class Cat {
+  public static class Cat extends Animal {
     public int lives;
     public Cat follows = null;
 
@@ -106,21 +109,21 @@ public class TraceSubject {
     Cat pufi = rex.chases;
     pufi.lives = 10;
   }
-  
-//doesn't work on context insensitive
- public void simpleCalls3() {
-   Cat mumu = new Cat();
 
-   Dog rex = new Dog();
-   rex.chases = mumu;
-   rex.loves = mumu;
-   writeField(rex);
+  // doesn't work on context insensitive
+  public void simpleCalls3() {
+    Cat mumu = new Cat();
 
-   Dog lassie = new Dog();
-   lassie.chases = mumu;
-   writeField(lassie);
- }
-  
+    Dog rex = new Dog();
+    rex.chases = mumu;
+    rex.loves = mumu;
+    writeField(rex);
+
+    Dog lassie = new Dog();
+    lassie.chases = mumu;
+    writeField(lassie);
+  }
+
   public void simpleCalls4() {
     Cat mumu = new Cat();
 
@@ -158,7 +161,7 @@ public class TraceSubject {
     Cat pufi = rex.chases;
     pufi.lives = 10;
   }
-  
+
   public void simpleWithReturn3() {
     Dog rex = new Dog();
     Cat mumu = new Cat();
@@ -170,7 +173,7 @@ public class TraceSubject {
     rex.chases = mumu;
     return rex.chases;
   }
-  
+
   public void simpleRecursiveInternal() {
     Cat mumu = new Cat();
 
@@ -196,10 +199,10 @@ public class TraceSubject {
 
     pufi.lives = 10;
   }
-  
+
   public void simpleRecursiveExternal() {
     Cat mumu = new Cat();
-    
+
     Cat pufi = recurse(mumu);
     pufi.lives--;
   }
@@ -209,7 +212,7 @@ public class TraceSubject {
     d.chases = mumu;
     if (mumu.lives > 321)
       return recurse(mumu);
-    
+
     return d.chases;
   }
 
@@ -230,7 +233,7 @@ public class TraceSubject {
     Dog rex = new Dog();
     Cat cici = new Cat();
     cici.follows = mumu;
-    Cat bibi = new Cat(); //noise
+    Cat bibi = new Cat(); // noise
     Cat mimi = cici.follows;
     rex.chases = mimi;
     Cat pufi = rex.chases;
@@ -250,7 +253,7 @@ public class TraceSubject {
     Cat pufi = mimi.follows;
     pufi.lives -= 1;
   }
-  
+
   public void simpleFilter() {
     Dog rex = new Dog();
     rex.chases = new Cat();
@@ -262,5 +265,12 @@ public class TraceSubject {
   private void blablabla(Cat mumu) {
     Cat pufi = mumu.follows;
     pufi.lives = 1;
+  }
+
+  public void simpleInheritance() {
+    Dog rex = new Dog();
+    rex.food = new Object();
+
+    Object food = rex.food;
   }
 }

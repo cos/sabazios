@@ -5,10 +5,13 @@ import sabazios.util.wala.viz.NodeDecorator;
 import com.ibm.wala.analysis.pointers.HeapGraph;
 import com.ibm.wala.ipa.callgraph.propagation.AbstractFieldPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.AllocationSiteInNode;
+import com.ibm.wala.ipa.callgraph.propagation.ArrayContentsKey;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceFieldKey;
 import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
 import com.ibm.wala.ipa.callgraph.propagation.ReturnValueKey;
+import com.ibm.wala.ipa.callgraph.propagation.StaticFieldKey;
+import com.ibm.wala.ipa.modref.ArrayLengthKey;
 import com.ibm.wala.util.graph.Graph;
 import com.ibm.wala.util.warnings.WalaException;
 
@@ -26,10 +29,21 @@ public class HeapGraphNodeDecorator implements NodeDecorator {
 			AllocationSiteInNode o = (AllocationSiteInNode) obj;
 			return o.getSite().getDeclaredType().getName().getClassName() + " [ "+o.getNode().getMethod().getName().toString() +  "@" + o.getSite().getProgramCounter()+" ]";
 		}
-		if(obj instanceof AbstractFieldPointerKey) {
-			InstanceFieldKey f = (InstanceFieldKey) obj;
+		if(obj instanceof StaticFieldKey){
+		  return "STATIC: " +  ((StaticFieldKey)obj).getField().getName();
+		}
+		if(obj instanceof InstanceFieldKey) {
+		  InstanceFieldKey f = (InstanceFieldKey) obj;
 			return f.getField().getName().toString();
 		}
+		if(obj instanceof ArrayContentsKey) {
+		  ArrayContentsKey f = (ArrayContentsKey) obj;
+		  return "[]";
+    }
+		if(obj instanceof ArrayLengthKey) {
+		  ArrayLengthKey f = (ArrayLengthKey) obj;
+      return "ARR_LENGTH";
+    }
 		if(obj instanceof LocalPointerKey) {
 			LocalPointerKey p = (LocalPointerKey) obj;
 			return p.getNode().getMethod().getName().toString() + "-v" + p.getValueNumber();

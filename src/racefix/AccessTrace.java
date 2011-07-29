@@ -11,6 +11,7 @@ import sabazios.domains.PointerForValue;
 import sabazios.util.CodeLocation;
 
 import com.ibm.wala.classLoader.CallSiteReference;
+import com.ibm.wala.classLoader.IField;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.propagation.AllocationSiteInNode;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceFieldKey;
@@ -32,16 +33,21 @@ import com.ibm.wala.util.collections.Filter;
  * @author caius
  * 
  */
+@SuppressWarnings("deprecation")
 public class AccessTrace {
   private final CGNode n;
   private final int v;
   private final A a;
   private final Filter<CGNode> f;
-  private LinkedHashSet<PointerKey> pointers = new LinkedHashSet<PointerKey>();
+  private LinkedHashSet<InstanceFieldKey> pointers = new LinkedHashSet<InstanceFieldKey>();
   private LinkedHashSet<InstanceKey> instances = new LinkedHashSet<InstanceKey>();
   private HashMap<CGNode, Set<Integer>> visited = new HashMap<CGNode, Set<Integer>>();
   private PointerForValue pv;
 
+  public AccessTrace(A a, CGNode n, int v) {
+    this(a, n, v, null);
+  }
+  
   public AccessTrace(A a, CGNode n, int v, Filter<CGNode> f) {
     this.a = a;
     this.n = n;
@@ -57,7 +63,7 @@ public class AccessTrace {
   }
 
   private void solveNV(CGNode node, int value) {
-    if (!f.accepts(node))
+    if (f != null && !f.accepts(node))
       return;
 
     Set<Integer> set = visited.get(node);
@@ -75,9 +81,6 @@ public class AccessTrace {
     while (succNodes.hasNext()) {
       InstanceKey o = (InstanceKey) succNodes.next();
       instances.add(o);
-
-      DefUse du = node.getDU();
-      SSAInstruction def = du.getDef(value);
 
       if (node.getMethod().getNumberOfParameters() >= value) {
         Iterator<CGNode> predNodes = a.callGraph.getPredNodes(node);
@@ -109,6 +112,9 @@ public class AccessTrace {
 
       // SSAReturnInstruction ssaRI;
       // ssaRI.getUse(j);
+
+      DefUse du = node.getDU();
+      SSAInstruction def = du.getDef(value);
 
       if (def instanceof SSAInvokeInstruction) {
         SSAInvokeInstruction invoke = (SSAInvokeInstruction) def;
@@ -144,8 +150,9 @@ public class AccessTrace {
           Object prev = (Object) pred.next();
           if (prev instanceof InstanceFieldKey) {
             InstanceFieldKey field = (InstanceFieldKey) prev;
-
-            if (field.getField().getReference().equals(declaredField)) {
+            IField ifield = field.getField();
+            if (ifield.getName().equals(declaredField.getName())
+                && a.cha.resolveField(ifield.getDeclaringClass(), declaredField).equals(ifield)) {
               Iterator<Object> predNodes2 = a.heapGraph.getPredNodes(field);
               while (predNodes2.hasNext()) {
                 Object object = (Object) predNodes2.next();
@@ -213,5 +220,13 @@ public class AccessTrace {
       }
     }
     return s;
+  }
+
+  public LinkedHashSet<InstanceFieldKey> getPointers() {
+    return pointers;
+  }
+
+  public LinkedHashSet<InstanceKey> getinstances() {
+    return instances;
   }
 }
