@@ -18,7 +18,7 @@ public class HeapGraphNodeDecorator implements NodeDecorator {
 
 	private final Graph<Object> heapGraph;
 
-	public HeapGraphNodeDecorator(Graph<Object> heapGraph) {
+	public HeapGraphNodeDecorator(Graph heapGraph) {
 		this.heapGraph = heapGraph;
 	}
 	
