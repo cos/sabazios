@@ -100,8 +100,8 @@ public class A {
 		potentialRaces.compute(this.alphaAccesses, this.betaAccesses);  
 		// Distribute locks
 		potentialRaces.distributeLocks(this);
-		System.out.println(potentialRaces.toString());
-		System.out.println();
+//		System.out.println(potentialRaces.toString());
+//		System.out.println();
 		int noPotentialRaces = potentialRaces.getNoPairs();
 		Log.log("Potential races. # = " + noPotentialRaces);
 		Log.reportTime(":potential_races_time");
@@ -114,8 +114,8 @@ public class A {
 		// li.compute();
 		FilterSafe.filter(this, potentialRaces);
 		deepRaces = potentialRaces;
-		System.out.println(deepRaces.toString());
-		System.out.println();
+//		System.out.println(deepRaces.toString());
+//		System.out.println();
 		int noRaces = deepRaces.getNoPairs();
 		Log.log("Deep races done. # = " + noRaces);
 		Log.reportTime(":races_time");
@@ -127,8 +127,8 @@ public class A {
 		ConcurrentAccesses<ConcurrentAccess<?>> shallowRaces = ConcurrentShallowAccesses.rippleUp(deepRaces);
 		Log.log("Rippleup up races in libraries");
 		shallowRaces.reduceNonConcurrent();
-		System.out.println("---- Shallow races ---- ");
-		System.out.println(shallowRaces.toString());
+//		System.out.println("---- Shallow races ---- ");
+//		System.out.println(shallowRaces.toString());
 		int noAtomicityViolations = shallowRaces.getNoPairs();
 		Log.log("Shallow races done. # = " + noAtomicityViolations);
 		int noPrintedAtomicityViolations = shallowRaces.getNoUniquePrintedPairs();
