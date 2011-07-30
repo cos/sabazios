@@ -3,6 +3,9 @@ package racefix;
 import java.util.Set;
 
 public class ClassChangeSet {
-  public Set<String> threadLocal;
-  public Set<PrivatizeMethod> privatizeMethods;
+	public class PrivatizeMethod {
+		public Set<String> privatizedFields;
+	}
+	public Set<String> threadLocal;
+	public Set<PrivatizeMethod> privatizeMethods;
 }
