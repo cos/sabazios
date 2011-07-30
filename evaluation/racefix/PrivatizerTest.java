@@ -56,7 +56,7 @@ public class PrivatizerTest extends DataRaceAnalysisTest {
   @After
   public void afterTest() throws Exception {
     HeapGraph heapGraph = a.heapGraph;
-    a.dotGraph(heapGraph, testClassName, new ColoredHeapGraphNodeDecorator(heapGraph, new Filter<Object>() {
+    a.dotGraph(heapGraph, name.getMethodName(), new ColoredHeapGraphNodeDecorator(heapGraph, new Filter<Object>() {
 
       @Override
       public boolean accepts(Object o) {
