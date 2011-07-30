@@ -28,9 +28,9 @@ import sabazios.wala.CS;
 public class JMolEvaluation extends DataRaceAnalysisTest {
   public JMolEvaluation() {
     super();
-    this.addBinaryDependency("../evaluation/Jmol/bin");
+	this.addBinaryDependency("../evaluation/jmol/bin");
     this.addBinaryDependency("../lib/parallelArray.mock");
-    this.addJarFolderDependency("../lib/Jmol");
+    this.addJarFolderDependency("../evaluation/jmol/lib");
   }
 
   @Test
