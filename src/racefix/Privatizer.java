@@ -1,143 +1,180 @@
 package racefix;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import com.ibm.wala.classLoader.IField;
-import com.ibm.wala.ipa.callgraph.propagation.AbstractFieldPointerKey;
-import com.ibm.wala.ipa.callgraph.propagation.ArrayContentsKey;
-import com.ibm.wala.ipa.callgraph.propagation.InstanceFieldKey;
-import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
-import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
-import com.ibm.wala.util.collections.IndiscriminateFilter;
-
 import sabazios.A;
-import sabazios.domains.ConcurrentAccess;
-import sabazios.domains.ConcurrentAccesses;
 import sabazios.domains.ConcurrentFieldAccess;
 import sabazios.domains.FieldAccess;
-import sabazios.domains.Loop;
 import sabazios.domains.ReadFieldAccess;
 import sabazios.domains.WriteFieldAccess;
+import sabazios.util.FlexibleContext;
+import sabazios.wala.CS;
+
+import com.ibm.wala.classLoader.IClass;
+import com.ibm.wala.classLoader.IField;
+import com.ibm.wala.ipa.callgraph.CGNode;
+import com.ibm.wala.ipa.callgraph.Context;
+import com.ibm.wala.ipa.callgraph.propagation.InstanceFieldKey;
+import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 
 public class Privatizer {
 
-  private final A a;
-  private final Set<ConcurrentFieldAccess> accesses;
+	private final A a;
+	private final Set<ConcurrentFieldAccess> accesses;
 
-  private final Set<ConcurrentFieldAccess> accessesNotLCD = new LinkedHashSet<ConcurrentFieldAccess>();
-  private final Set<ConcurrentFieldAccess> accessesLCD = new LinkedHashSet<ConcurrentFieldAccess>();
+	private final Set<ConcurrentFieldAccess> accessesNotLCD = new LinkedHashSet<ConcurrentFieldAccess>();
+	private final Set<ConcurrentFieldAccess> accessesLCD = new LinkedHashSet<ConcurrentFieldAccess>();
 
-  private final Set<InstanceFieldKey> fieldNodesToPrivatize = new LinkedHashSet<InstanceFieldKey>();
-  private final Set<InstanceKey> instancesToPrivatize = new LinkedHashSet<InstanceKey>();
-  
-  private final Set<IField> fieldsToPrivatize = new LinkedHashSet<IField>();
+	private final Set<InstanceFieldKey> fieldNodesToPrivatize = new LinkedHashSet<InstanceFieldKey>();
+	private final Set<InstanceKey> instancesToPrivatize = new LinkedHashSet<InstanceKey>();
 
-  private final Set<IField> mustNotPrivatize = new LinkedHashSet<IField>();
+	private final Set<IField> fieldsToPrivatize = new LinkedHashSet<IField>();
 
-  public Privatizer(A a, Set<ConcurrentFieldAccess> accesses) {
-    this.a = a;
-    this.accesses = accesses;
-  }
+	private final Set<IField> mustNotPrivatize = new LinkedHashSet<IField>();
 
-  public Set<Object> compute() {
-    markLCDAccesses();
-    gatherAllPrivatizableHeapNodes();
-    gatherAllMustNotPrivatizeFields();
-    gatherPrivatizableFields();
-    markStarredFields();
-    return null;
-  }
+	private final Set<IField> starredFields = new HashSet<IField>();
+	private IClass classWithComputation;
 
-  private void markStarredFields() {
-    // TODO Auto-generated method stub
-  }
+	public Privatizer(A a, Set<ConcurrentFieldAccess> accesses) {
+		this.a = a;
+		this.accesses = accesses;
+	}
 
-  private void gatherPrivatizableFields() {
-    for (InstanceFieldKey pointerKey : fieldNodesToPrivatize) {
-        fieldsToPrivatize.add(pointerKey.getField());
-    }
-  }
+	public Set<Object> compute() {
+		markLCDAccesses();
+		gatherAllPrivatizableHeapNodes();
+		gatherAllMustNotPrivatizeFields();
+		gatherPrivatizableFields();
+		markStarredFields();
+		markClassWithComputation();
+		return null;
+	}
 
-  private void markLCDAccesses() {
-    for (ConcurrentFieldAccess access : accesses) {
-      if (!isLCD(access)) {
-        accessesNotLCD.add(access);
-      } else {
-        accessesLCD.add(access);
-      }
-    }
-  }
+	private void markClassWithComputation() {
+		CGNode someNodeInsideTheLoop = accesses.iterator().next().alphaAccesses.iterator().next().n;
+		FlexibleContext context = (FlexibleContext) someNodeInsideTheLoop.getContext();
+		CGNode theMethodThatCallsTheParallelComputation = (CGNode) context.getItem(CS.OPERATOR_CALLER);
+		classWithComputation = theMethodThatCallsTheParallelComputation.getMethod().getDeclaringClass();
+	}
+	
+	private boolean shouldBeThreadLocal(IField f) {
+		return f.isStatic() || f.getDeclaringClass().equals(classWithComputation);
+	}
 
-  private void gatherAllMustNotPrivatizeFields() {
-    for (ConcurrentFieldAccess access : accessesLCD) {
-      for (FieldAccess fieldAccess : access.betaAccesses) {
-        mustNotPrivatize.add(fieldAccess.f);
-      }
-    }
-  }
+	private void markStarredFields() {
+		for (InstanceKey instanceKey : this.instancesToPrivatize) {
+			Iterator<Object> predNodes = a.heapGraph.getPredNodes(instanceKey);
+			Set<IField> fieldsSeenSoFar = new HashSet<IField>();
+			while (predNodes.hasNext()) {
+				Object object = (Object) predNodes.next();
+				if (object instanceof InstanceFieldKey) {
+					InstanceFieldKey f = (InstanceFieldKey) object;
+					IField iField = f.getField();
+					if (fieldsSeenSoFar.contains(iField)) {
+						starredFields.add(iField);
+					} else
+						fieldsSeenSoFar.add(iField);
+				}
+			}
+		}
+	}
 
-  private void gatherAllPrivatizableHeapNodes() {
-    for (ConcurrentFieldAccess access : accessesNotLCD) {
-      for (FieldAccess fieldAccess : access.betaAccesses) {
-        AccessTrace accessTrace = new AccessTrace(a, fieldAccess.n, fieldAccess.getRef());
-        accessTrace.compute();
-        instancesToPrivatize.addAll(accessTrace.getinstances());
-        fieldNodesToPrivatize.addAll(accessTrace.getPointers());
-      }
-    }
-  }
+	private void gatherPrivatizableFields() {
+		for (InstanceFieldKey pointerKey : fieldNodesToPrivatize) {
+			fieldsToPrivatize.add(pointerKey.getField());
+		}
+	}
 
-  /**
-   * we check that for this ConccurrentFieldAcceess, \forall r \exists w .
-   * happensBefore(w,r) \land !happensBefore(r,w)
-   * 
-   * @param access
-   * @return
-   */
-  private boolean isLCD(ConcurrentFieldAccess access) {
-    LinkedHashSet<FieldAccess> betaAccesses = access.betaAccesses;
-    boolean existsRead = false;;
-    for (FieldAccess readFieldAccess : betaAccesses)
-      if (readFieldAccess instanceof ReadFieldAccess) {
-        existsRead = true;
-        boolean ok = false;
-        for (FieldAccess writeFieldAccess : betaAccesses) {
-          if (writeFieldAccess instanceof WriteFieldAccess) {
-            StatementOrder writeBeforeRead = new StatementOrder(a.callGraph, writeFieldAccess.n, writeFieldAccess.i,
-                readFieldAccess.n, readFieldAccess.i);
-            StatementOrder readBeforeWrite = new StatementOrder(a.callGraph, writeFieldAccess.n, writeFieldAccess.i,
-                readFieldAccess.n, readFieldAccess.i);
-            if (writeBeforeRead.happensBefore() && !readBeforeWrite.happensBefore()) {
-              ok = true;
-              break;
-            }
-          }
-        }
-        if (!ok)
-          return false;
-      }
-    return existsRead;
-  }
-  
-  private void getStared() {
-    
-  }
-  
-  String getAccessesInLCDTestString() {
-    String s = "";
-    for (ConcurrentFieldAccess access : accessesLCD) {
-      s += access.toString() + "\n";
-    }
-    return s;
-  }
-  
-  String getAccessesNotInLCDTestString() {
-    String s = "";
-    for (ConcurrentFieldAccess access : accessesNotLCD) {
-      s += access.toString() + "\n";
-    }
-    return s;
-  }
+	private void markLCDAccesses() {
+		for (ConcurrentFieldAccess access : accesses) {
+			if (!isLCD(access)) {
+				accessesNotLCD.add(access);
+			} else {
+				accessesLCD.add(access);
+			}
+		}
+	}
+
+	private void gatherAllMustNotPrivatizeFields() {
+		for (ConcurrentFieldAccess access : accessesLCD) {
+			for (FieldAccess fieldAccess : access.betaAccesses) {
+				mustNotPrivatize.add(fieldAccess.f);
+			}
+		}
+	}
+
+	private void gatherAllPrivatizableHeapNodes() {
+		for (ConcurrentFieldAccess access : accessesNotLCD) {
+			for (FieldAccess fieldAccess : access.betaAccesses) {
+				AccessTrace accessTrace = new AccessTrace(a, fieldAccess.n,
+						fieldAccess.getRef());
+				accessTrace.compute();
+				instancesToPrivatize.addAll(accessTrace.getinstances());
+				fieldNodesToPrivatize.addAll(accessTrace.getPointers());
+			}
+		}
+	}
+
+	private boolean isLCD(ConcurrentFieldAccess access) {
+		return !noLCD(access);
+	}
+
+	/**
+	 * we check that for this ConccurrentFieldAcceess, \forall r \exists w .
+	 * happensBefore(w,r) \land !happensBefore(r,w)
+	 * 
+	 * @param access
+	 * @return
+	 */
+	private boolean noLCD(ConcurrentFieldAccess access) {
+		LinkedHashSet<FieldAccess> betaAccesses = access.betaAccesses;
+		for (FieldAccess readFieldAccess : betaAccesses)
+			if (readFieldAccess instanceof ReadFieldAccess) {
+				boolean ok = false;
+				for (FieldAccess writeFieldAccess : betaAccesses) {
+					if (writeFieldAccess instanceof WriteFieldAccess) {
+						StatementOrder writeBeforeRead = new StatementOrder(
+								a.callGraph, writeFieldAccess.n,
+								writeFieldAccess.i, readFieldAccess.n,
+								readFieldAccess.i);
+						StatementOrder readBeforeWrite = new StatementOrder(
+								a.callGraph, readFieldAccess.n,
+								readFieldAccess.i, writeFieldAccess.n,
+								writeFieldAccess.i);
+						boolean wBr = writeBeforeRead.happensBefore();
+						boolean rBw = readBeforeWrite.happensBefore();
+						if (wBr && !rBw) {
+							ok = true;
+							break;
+						}
+					}
+				}
+				if (!ok)
+					return false;
+			}
+		return true;
+	}
+
+	String getAccessesInLCDTestString() {
+		String s = "";
+		for (ConcurrentFieldAccess access : accessesLCD) {
+			s += access.toString() + "\n";
+		}
+		return s;
+	}
+
+	String getAccessesNotInLCDTestString() {
+		String s = "";
+		for (ConcurrentFieldAccess access : accessesNotLCD) {
+			s += access.toString() + "\n";
+		}
+		return s;
+	}
+
+	String getStarredFields() {
+		return starredFields.toString();
+	}
 }
