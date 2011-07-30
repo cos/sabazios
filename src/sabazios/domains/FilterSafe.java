@@ -12,6 +12,7 @@ import sabazios.util.FlexibleContext;
 import sabazios.wala.CS;
 
 import com.ibm.wala.ipa.callgraph.CGNode;
+import com.ibm.wala.ipa.callgraph.Context;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 import com.ibm.wala.ipa.callgraph.propagation.LocalPointerKey;
 
@@ -39,7 +40,14 @@ public class FilterSafe {
 	}	
 
 	private static boolean noWritesToOurBelovedObjects(A a, DerefRep derefRep) {
-		FlexibleContext context = (FlexibleContext)derefRep.peek().n.getContext();
+		Context c = derefRep.peek().n.getContext();
+		if(!(c instanceof FlexibleContext)) {
+			//TODO
+//			System.out.println("PROBLEM HERE! this context should be flexible "+c);
+			return false;
+		}
+			
+		FlexibleContext context = (FlexibleContext)c;
 		CGNode cgn = (CGNode) context.getItem(CS.OPERATOR_CALLER);
 		for (Deref d : derefRep) {
 			LocalPointerKey pk = a.pointerForValue.get(d.n, d.v);
