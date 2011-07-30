@@ -6,6 +6,7 @@ import java.util.Set;
 
 import static junit.framework.TestCase.*;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -14,12 +15,17 @@ import org.junit.rules.TestName;
 import sabazios.domains.ConcurrentFieldAccess;
 import sabazios.domains.Loop;
 import sabazios.tests.DataRaceAnalysisTest;
+import sabazios.util.wala.viz.ColoredHeapGraphNodeDecorator;
 
+import com.ibm.wala.analysis.pointers.HeapGraph;
 import com.ibm.wala.ipa.callgraph.CGNode;
+import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
+import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSAPutInstruction;
 import com.ibm.wala.util.CancelException;
+import com.ibm.wala.util.collections.Filter;
 
 public class PrivatizerTest extends DataRaceAnalysisTest {
 
@@ -45,6 +51,20 @@ public class PrivatizerTest extends DataRaceAnalysisTest {
 
     privatizer = new Privatizer(a, accesses);
     privatizer.compute();
+  }
+
+  @After
+  public void afterTest() throws Exception {
+    HeapGraph heapGraph = a.heapGraph;
+    a.dotGraph(heapGraph, testClassName, new ColoredHeapGraphNodeDecorator(heapGraph, new Filter<Object>() {
+
+      @Override
+      public boolean accepts(Object o) {
+        return privatizer.getFieldNodesToPrivatize().contains(o) || privatizer.getInstancesToPrivatize().contains(o);
+      }
+
+    }));
+
   }
 
   private SSAPutInstruction findInstructionForName(String string, List<CGNode> startNodes) {
@@ -95,19 +115,21 @@ public class PrivatizerTest extends DataRaceAnalysisTest {
 
   @Test
   public void readWriteRace() throws Exception {
-    String expectedLCD = "Object : racefix.PrivatizerSubject.readWriteRace(PrivatizerSubject.java:56) new PrivatizerSubject$Particle\n" + 
-    		"   Alpha accesses:\n" + 
-    		"     Write racefix.PrivatizerSubject$3.op(PrivatizerSubject.java:62) - .coordX\n" + 
-    		"   Beta accesses:\n" + 
-    		"     Write racefix.PrivatizerSubject$3.op(PrivatizerSubject.java:62) - .coordX\n" + 
-    		"     Read racefix.PrivatizerSubject$3.op(PrivatizerSubject.java:61) - .coordX\n";
+    String expectedLCD = "Object : racefix.PrivatizerSubject.readWriteRace(PrivatizerSubject.java:56) new PrivatizerSubject$Particle\n"
+        + "   Alpha accesses:\n"
+        + "     Write racefix.PrivatizerSubject$3.op(PrivatizerSubject.java:62) - .coordX\n"
+        + "   Beta accesses:\n"
+        + "     Write racefix.PrivatizerSubject$3.op(PrivatizerSubject.java:62) - .coordX\n"
+        + "     Read racefix.PrivatizerSubject$3.op(PrivatizerSubject.java:61) - .coordX\n";
     String expectedNoLCD = "";
     assertEquals(expectedLCD, privatizer.getAccessesInLCDTestString());
     assertEquals(expectedNoLCD, privatizer.getAccessesNotInLCDTestString());
   }
-  
+
   @Test
   public void fieldSuperstar() throws Exception {
-    assertEquals("[< Application, Lracefix/PrivatizerSubject$Particle, next, <Application,Lracefix/PrivatizerSubject$Particle> >]", privatizer.getStarredFields());
+    assertEquals(
+        "[< Application, Lracefix/PrivatizerSubject$Particle, next, <Application,Lracefix/PrivatizerSubject$Particle> >]",
+        privatizer.getStarredFields());
   }
 }
