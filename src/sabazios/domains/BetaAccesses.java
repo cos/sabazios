@@ -33,6 +33,8 @@ public class BetaAccesses extends ObjectAccesses<FieldAccess> {
 						return;
 					if (!pi.isStatic()) {
 						LocalPointerKey pk = a.pointerForValue.get(n, pi.getRef());
+						if(pk == null)
+							return;
 						Iterator<Object> succNodes = a.heapGraph.getSuccNodes(pk);
 						while (succNodes.hasNext()) {
 							InstanceKey o = (InstanceKey) succNodes.next();
@@ -78,8 +80,6 @@ public class BetaAccesses extends ObjectAccesses<FieldAccess> {
 			}
 		};
 	}
-
-	
 
 	@Override
 	protected boolean rightIteration(FlexibleContext c) {
