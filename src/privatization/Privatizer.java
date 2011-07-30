@@ -5,47 +5,55 @@ import java.util.IdentityHashMap;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class Privatizer {
-	private static  IdentityHashMap[] data = new IdentityHashMap[10000];
-	
-	public static <T extends Privatizable<T>> T get(Privatizable<T> o) {
-		if(o == null) return null;
-		
-		IdentityHashMap objectContainer = privateObjectsContainer();
-		T x = (T) objectContainer.get(o);
-		if(x == null) {
-			x = o.privatize();
-			objectContainer.put(o, x);
-			return x;
-		} else
-			return x;
-	}
+	private static IdentityHashMap[] data = new IdentityHashMap[10000];
+
 
 	private static IdentityHashMap privateObjectsContainer() {
 		int threadId = (int) Thread.currentThread().getId();
 		IdentityHashMap identityHashMap = data[threadId];
 		return identityHashMap;
 	}
-	
-	public static Object get(Object o) {
-		if(o == null) return null;
-		
+
+	static Object get(Object o) {
+		if (o == null)
+			return null;
+
 		IdentityHashMap objectContainer = privateObjectsContainer();
 		Object obj = objectContainer.get(o);
-		if(obj != null) return obj;
+		if (obj != null)
+			return obj;
+
+		Object p = null;
+
+		if(o instanceof Privatizable)
+			p = privatizePrivatizable(objectContainer, (Privatizable) o);
 		
-		if(o instanceof HashSet) { 
-			Object privateO = privatizeHashSet(o);
-			objectContainer.put(o, privateO);
-			return privateO;
-		}
-		
-		throw new RuntimeException("Couldn't recognize object type "+o.getClass());
+		if (o instanceof HashSet)
+			p = privatizeHashSet(o);
+
+		if (p == null)
+			throw new RuntimeException("Couldn't recognize object type "
+					+ o.getClass());
+
+		objectContainer.put(o, p);
+		return p;
 	}
 
+	
+	
+	
+	// Methods that know how to privatize objects of different classes
+	private static <T extends Privatizable<T>> T privatizePrivatizable(
+			IdentityHashMap objectContainer, Privatizable<T> o) {
+		T p = o.createPrivate();
+		objectContainer.put(o, p);
+		o.populatePrivate(p);
+		return p;
+	}
 	private static Object privatizeHashSet(Object o) {
 		HashSet ho = (HashSet) o;
 		HashSet x = new HashSet();
-		for (Object object : ho) 
+		for (Object object : ho)
 			x.add(get(object));
 		return x;
 	}

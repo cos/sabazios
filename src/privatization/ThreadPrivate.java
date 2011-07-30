@@ -1,6 +1,6 @@
 package privatization;
 
-public class ThreadPrivate<T extends Privatizable<T>> extends ThreadLocal<T> {
+public class ThreadPrivate<T> extends ThreadLocal<T> {
 
 	private static long mainThreadId = Thread.currentThread().getId();
 	private T mainThreadObject;

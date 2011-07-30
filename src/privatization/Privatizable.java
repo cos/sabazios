@@ -1,5 +1,6 @@
 package privatization;
 
 public interface Privatizable<T extends Privatizable<T>> {
-	public T privatize();
+	public T createPrivate();
+	public void populatePrivate(T t);
 }
