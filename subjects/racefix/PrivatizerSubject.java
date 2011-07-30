@@ -1,5 +1,6 @@
 package racefix;
 
+import racefix.PrivatizerSubject.Particle;
 import extra166y.Ops;
 import extra166y.ParallelArray;
 
@@ -83,6 +84,22 @@ public class PrivatizerSubject {
 				Particle theSharedGuyAgain = anotherGuy.next;
 				theSharedGuy.coordX = 10;
 				theSharedGuyAgain.coordX = 12;
+			}
+		});
+	}
+	
+	public void threadLocalOfClassWithComputationTest() {
+		ParallelArray<Particle> particles = ParallelArray
+				.createUsingHandoff(new Particle[10],
+						ParallelArray.defaultExecutor());
+
+		origin = new Particle();
+
+		particles.apply(new Ops.Procedure<Particle>() {
+			@Override
+			public void op(Particle b) {
+				Particle theOrigin = origin;
+				theOrigin.coordX = 10;
 			}
 		});
 	}
