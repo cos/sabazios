@@ -177,4 +177,12 @@ public class Privatizer {
 	String getStarredFields() {
 		return starredFields.toString();
 	}
+
+  public Set<InstanceFieldKey> getFieldNodesToPrivatize() {
+    return fieldNodesToPrivatize;
+  }
+
+  public Set<InstanceKey> getInstancesToPrivatize() {
+    return instancesToPrivatize;
+  }
 }
