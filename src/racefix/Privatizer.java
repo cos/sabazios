@@ -60,7 +60,7 @@ public class Privatizer {
 		classWithComputation = theMethodThatCallsTheParallelComputation.getMethod().getDeclaringClass();
 	}
 	
-	private boolean shouldBeThreadLocal(IField f) {
+	public boolean shouldBeThreadLocal(IField f) {
 		return f.isStatic() || f.getDeclaringClass().equals(classWithComputation);
 	}
 
