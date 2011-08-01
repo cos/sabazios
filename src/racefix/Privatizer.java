@@ -63,6 +63,8 @@ public class Privatizer {
 			String className = instanceFieldKey.getField().getDeclaringClass().getName().getClassName().toString();
 			String fieldName = instanceFieldKey.getField().getName().toString();
 			String qualifiedFieldName = packageName + "." + className + "." + fieldName;
+			
+			changeSet.threadLocal = new LinkedHashSet<String>();
 			changeSet.threadLocal.add(qualifiedFieldName);
 		}
 		
