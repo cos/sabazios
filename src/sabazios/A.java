@@ -114,12 +114,13 @@ public class A {
 		// li.compute();
 		FilterSafe.filter(this, potentialRaces);
 		deepRaces = potentialRaces;
-//		System.out.println(deepRaces.toString());
-//		System.out.println();
+		System.out.println(deepRaces.toString());
+		System.out.println();
 		int noRaces = deepRaces.getNoPairs();
 		Log.log("Deep races done. # = " + noRaces);
 		Log.reportTime(":races_time");
 		Log.report(":races",noRaces);
+		Log.report(":printed_races",deepRaces.getNoUniquePrintedPairs());
 		System.out.println("-------------------------------------------------------- \n");
 
 		System.out.println("---- Shallow races ------------------------------------- ");
@@ -127,8 +128,8 @@ public class A {
 		ConcurrentAccesses<ConcurrentAccess<?>> shallowRaces = ConcurrentShallowAccesses.rippleUp(deepRaces);
 		Log.log("Rippleup up races in libraries");
 		shallowRaces.reduceNonConcurrent();
-//		System.out.println("---- Shallow races ---- ");
-//		System.out.println(shallowRaces.toString());
+		System.out.println("---- Shallow races ---- ");
+		System.out.println(shallowRaces.toString());
 		int noAtomicityViolations = shallowRaces.getNoPairs();
 		Log.log("Shallow races done. # = " + noAtomicityViolations);
 		int noPrintedAtomicityViolations = shallowRaces.getNoUniquePrintedPairs();
