@@ -36,7 +36,7 @@ public class PrivatizerTest extends DataRaceAnalysisTest {
 	private Privatizer privatizer;
 
 	public PrivatizerTest() {
-		this.addBinaryDependency("racefix");
+		this.addBinaryDependency("bin/racefix");
 		this.addBinaryDependency("../lib/parallelArray.mock");
 	}
 
@@ -105,11 +105,11 @@ public class PrivatizerTest extends DataRaceAnalysisTest {
 	@Test
 	public void simpleRace() throws Exception {
 		String expectedLCD = "";
-		String expectedNoLCD = "Object : racefix.PrivatizerSubject.simpleRace(PrivatizerSubject.java:25) new PrivatizerSubject$Particle\n"
-				+ "   Alpha accesses:\n"
-				+ "     Write racefix.PrivatizerSubject$1.op(PrivatizerSubject.java:30) - .coordX\n"
-				+ "   Beta accesses:\n"
-				+ "     Write racefix.PrivatizerSubject$1.op(PrivatizerSubject.java:30) - .coordX\n";
+		String expectedNoLCD = "Object : racefix.PrivatizerSubject.simpleRace(PrivatizerSubject.java:26) new PrivatizerSubject$Particle\n" + 
+				"   Alpha accesses:\n" + 
+				"     Write racefix.PrivatizerSubject$1.op(PrivatizerSubject.java:31) - .coordX\n" + 
+				"   Beta accesses:\n" + 
+				"     Write racefix.PrivatizerSubject$1.op(PrivatizerSubject.java:31) - .coordX\n";
 		assertEquals(expectedLCD, privatizer.getAccessesInLCDTestString());
 		assertEquals(expectedNoLCD, privatizer.getAccessesNotInLCDTestString());
 	}
@@ -117,24 +117,24 @@ public class PrivatizerTest extends DataRaceAnalysisTest {
 	@Test
 	public void writeReadRace() throws Exception {
 		String expectedLCD = "";
-		String expectedNoLCD = "Object : racefix.PrivatizerSubject.writeReadRace(PrivatizerSubject.java:40) new PrivatizerSubject$Particle\n"
-				+ "   Alpha accesses:\n"
-				+ "     Write racefix.PrivatizerSubject$2.op(PrivatizerSubject.java:45) - .coordX\n"
-				+ "   Beta accesses:\n"
-				+ "     Read racefix.PrivatizerSubject$2.op(PrivatizerSubject.java:46) - .coordX\n"
-				+ "     Write racefix.PrivatizerSubject$2.op(PrivatizerSubject.java:45) - .coordX\n";
+		String expectedNoLCD = "Object : racefix.PrivatizerSubject.writeReadRace(PrivatizerSubject.java:41) new PrivatizerSubject$Particle\n" + 
+				"   Alpha accesses:\n" + 
+				"     Write racefix.PrivatizerSubject$2.op(PrivatizerSubject.java:46) - .coordX\n" + 
+				"   Beta accesses:\n" + 
+				"     Read racefix.PrivatizerSubject$2.op(PrivatizerSubject.java:47) - .coordX\n" + 
+				"     Write racefix.PrivatizerSubject$2.op(PrivatizerSubject.java:46) - .coordX\n";
 		assertEquals(expectedLCD, privatizer.getAccessesInLCDTestString());
 		assertEquals(expectedNoLCD, privatizer.getAccessesNotInLCDTestString());
 	}
 
 	@Test
 	public void readWriteRace() throws Exception {
-		String expectedLCD = "Object : racefix.PrivatizerSubject.readWriteRace(PrivatizerSubject.java:56) new PrivatizerSubject$Particle\n"
-				+ "   Alpha accesses:\n"
-				+ "     Write racefix.PrivatizerSubject$3.op(PrivatizerSubject.java:62) - .coordX\n"
-				+ "   Beta accesses:\n"
-				+ "     Write racefix.PrivatizerSubject$3.op(PrivatizerSubject.java:62) - .coordX\n"
-				+ "     Read racefix.PrivatizerSubject$3.op(PrivatizerSubject.java:61) - .coordX\n";
+		String expectedLCD = "Object : racefix.PrivatizerSubject.readWriteRace(PrivatizerSubject.java:57) new PrivatizerSubject$Particle\n" + 
+				"   Alpha accesses:\n" + 
+				"     Write racefix.PrivatizerSubject$3.op(PrivatizerSubject.java:63) - .coordX\n" + 
+				"   Beta accesses:\n" + 
+				"     Write racefix.PrivatizerSubject$3.op(PrivatizerSubject.java:63) - .coordX\n" + 
+				"     Read racefix.PrivatizerSubject$3.op(PrivatizerSubject.java:62) - .coordX\n";
 		String expectedNoLCD = "";
 		assertEquals(expectedLCD, privatizer.getAccessesInLCDTestString());
 		assertEquals(expectedNoLCD, privatizer.getAccessesNotInLCDTestString());
