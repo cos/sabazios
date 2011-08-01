@@ -41,8 +41,6 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
   public AccessTraceTest() {
     super();
     this.addBinaryDependency("racefix");
-    this.addBinaryDependency("racefix/jmol");
-    this.addBinaryDependency("racefix/jmol/mock");
     this.addBinaryDependency("../lib/parallelArray.mock");
   }
 
