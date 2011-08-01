@@ -5,6 +5,9 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import racefix.refactoring.ClassChangeSet;
+import racefix.refactoring.RefactoringEngine;
+
 import sabazios.A;
 import sabazios.domains.ConcurrentFieldAccess;
 import sabazios.domains.FieldAccess;
@@ -16,7 +19,6 @@ import sabazios.wala.CS;
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IField;
 import com.ibm.wala.ipa.callgraph.CGNode;
-import com.ibm.wala.ipa.callgraph.Context;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceFieldKey;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
 
@@ -50,7 +52,22 @@ public class Privatizer {
 		gatherPrivatizableFields();
 		markStarredFields();
 		markClassWithComputation();
+		refactor();
 		return null;
+	}
+
+	private void refactor() {
+		ClassChangeSet changeSet = new ClassChangeSet();
+		for (InstanceFieldKey instanceFieldKey : fieldNodesToPrivatize) {
+			String packageName = instanceFieldKey.getField().getDeclaringClass().getName().getPackage().toString();
+			String className = instanceFieldKey.getField().getDeclaringClass().getName().getClassName().toString();
+			String fieldName = instanceFieldKey.getField().getName().toString();
+			String qualifiedFieldName = packageName + "." + className + "." + fieldName;
+			changeSet.threadLocal.add(qualifiedFieldName);
+		}
+		
+		RefactoringEngine engine = new RefactoringEngine(changeSet);
+		engine.applyRefactorings();
 	}
 
 	private void markClassWithComputation() {
