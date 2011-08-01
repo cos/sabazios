@@ -20,6 +20,7 @@ import sabazios.util.Log;
 @RunWith(Suite.class)
 @Suite.SuiteClasses( { 
 	BarnesHutEvaluation.class,
+	BarnesHutEvaluation.class,
 	MonteCarloEvaluation.class,
 	OldEm3dEvaluation.class,
 	OldCorefEvaluation.class,
