@@ -1,7 +1,7 @@
-package sabazios;
+package sabazios.util.wala.viz;
 
+import sabazios.A;
 import sabazios.lockset.LockSet;
-import sabazios.util.wala.viz.NodeDecorator;
 
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.Context;
@@ -30,6 +30,16 @@ public class CGNodeDecorator implements NodeDecorator {
 		s += "\\n"+lock;
 		
 		return s.substring(1);
+	}
+
+	@Override
+	public String getDecoration(Object n) {
+		return "";
+	}
+
+	@Override
+	public boolean shouldDisplay(Object n) {
+		return true;
 	}
 
 }

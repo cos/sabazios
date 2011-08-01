@@ -22,12 +22,5 @@ public class OldCorefEvaluation extends DataRaceAnalysisTest {
 	@Test
 	public void test() throws CancelException {
 		findCA("LLBJ2/nlp/coref/ClusterMerger", "main([Ljava/lang/String;)V");
-		Log.report(":size_LOC", "41k+225k"); // javacup has 5.6k 
-		Log.report(":real_races", "102");
-		Log.report(":beningn_races", "0");
-		Log.report(":bugs", "1");
-		Log.report(":notes", "\\footnote{all but one of the races are real and due to a static field " +
-				". fixable by making the static field thread local. " +
-				"1 report on a correctly (probably) synchronized SAXParser initialization.}");
 	}
 }

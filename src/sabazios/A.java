@@ -19,6 +19,7 @@ import sabazios.domains.Loops;
 import sabazios.domains.PointerForValue;
 import sabazios.lockset.Locks;
 import sabazios.util.Log;
+import sabazios.util.wala.viz.CGNodeDecorator;
 import sabazios.util.wala.viz.DotUtil;
 import sabazios.util.wala.viz.NodeDecorator;
 import sabazios.util.wala.viz.PDFViewUtil;
@@ -45,6 +46,7 @@ public class A {
 	public AlphaAccesses alphaAccesses;
 	public BetaAccesses betaAccesses;
 	public final Loops loops;
+  public ConcurrentFieldAccesses deepRaces;
 
 	public A(CallGraph callGraph, PointerAnalysis pointerAnalysis) {
 		this.callGraph = callGraph;
@@ -68,11 +70,7 @@ public class A {
 		// }
 		// });
 
-		System.out.println("---- Compute map value -> PointerKey ------------------- ");
-		pointerForValue.compute(this.heapGraph);
-		Log.log("Function CGNode x SSAvalue -> Object precomputed");
-		Log.reportTime(":map_vars_to_pointers_time");
-		System.out.println("-------------------------------------------------------- \n");
+		precompute();
 
 		System.out.println("---- Reads and writes ---------------------------------- ");
 		alphaAccesses.compute(this);
@@ -115,13 +113,14 @@ public class A {
 		// LockIdentity li = new LockIdentity(this);
 		// li.compute();
 		FilterSafe.filter(this, potentialRaces);
-		ConcurrentFieldAccesses deepRaces = potentialRaces;
+		deepRaces = potentialRaces;
 		System.out.println(deepRaces.toString());
 		System.out.println();
 		int noRaces = deepRaces.getNoPairs();
 		Log.log("Deep races done. # = " + noRaces);
 		Log.reportTime(":races_time");
 		Log.report(":races",noRaces);
+		Log.report(":printed_races",deepRaces.getNoUniquePrintedPairs());
 		System.out.println("-------------------------------------------------------- \n");
 
 		System.out.println("---- Shallow races ------------------------------------- ");
@@ -148,9 +147,17 @@ public class A {
 		System.out.println("-------------------------------------------------------- \n");
 		
 		
-		interactiveDebug();
+//		interactiveDebug();
 		
 		return shallowRaces;
+	}
+
+	public void precompute() {
+		System.out.println("---- Compute map value -> PointerKey ------------------- ");
+		pointerForValue.compute(this.heapGraph);
+		Log.log("Function CGNode x SSAvalue -> Object precomputed");
+		Log.reportTime(":map_vars_to_pointers_time");
+		System.out.println("-------------------------------------------------------- \n");
 	}
 
 	private void interactiveDebug() {
@@ -217,7 +224,7 @@ public class A {
 					System.out.println("Generated: " + "debug/irPdf" + cgNode.getGraphNodeId());
 
 					PDFViewUtil.ghostviewIR(cha, cgNode, "debug/irPdf" + cgNode.getGraphNodeId(), "./debug/irDot"
-							+ cgNode.getGraphNodeId(), "/opt/local/bin/dot", "open");
+							+ cgNode.getGraphNodeId(), "dot", "open");
 				} catch (WalaException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -229,7 +236,7 @@ public class A {
 		String dotFile = "debug/" + name + ".dot";
 		String outputFile = "./debug/" + name + ".pdf";
 		try {
-			DotUtil.dotify(m, decorator, dotFile, outputFile, "/opt/local/bin/dot");
+			DotUtil.dotify(m, decorator, dotFile, outputFile, "dot");
 			PDFViewUtil.launchPDFView(outputFile, "open");
 		} catch (WalaException e) {
 			// TODO Auto-generated catch block
