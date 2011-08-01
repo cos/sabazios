@@ -34,9 +34,37 @@ public class JMolEvaluationWithRaceDetection extends DataRaceAnalysisTest {
 
   @Test
   public void test() throws CancelException {
-    findCA("Lorg/openscience/jmol/app/Jmol", MAIN_METHOD);
+    String entryClass = "Lorg/openscience/jmol/app/Jmol";
+    String entryMethod = MAIN_METHOD;
+    runTest(entryClass, entryMethod);
+  }
 
-     writeRacesToFile(a.deepRaces.values(),"mockVersionRaces.txt");
+  @Test
+  public void testMockVersion() throws Exception {
+    String entryClass = "Lracefix/jmol/JmolEntryClass";
+    String entryMethod = "testJmolEntryMethod()V";
+    runTest(entryClass, entryMethod);
+  }
+
+  private void writeRacesToFile(Collection<Set<ConcurrentFieldAccess>> collection, String fileName) {
+    try {
+      System.out.println("--------\nPrinting to file\n-----------");
+      FileWriter fstream = new FileWriter(fileName);
+      BufferedWriter out = new BufferedWriter(fstream);
+      for (Set<ConcurrentFieldAccess> set : collection) {
+        out.write("\n============================New SET===============================\n");
+        for (ConcurrentFieldAccess fieldAccess : set) {
+          out.write(fieldAccess.toString() + "\n");
+        }
+      }
+      out.close();
+      System.out.println("Done printing to file");
+    } catch (Exception e) {// Catch exception if any
+    }
+  }
+
+  private void runTest(String entryClass, String entryMethod) {
+    findCA(entryClass, entryMethod);
     Set<ConcurrentFieldAccess> next = a.deepRaces.values().iterator().next();
     final Privatizer privatizer = new Privatizer(a, next);
     privatizer.compute();
@@ -63,57 +91,4 @@ public class JMolEvaluationWithRaceDetection extends DataRaceAnalysisTest {
       }
     });
   }
-
-  @Test
-  public void testMockVersion() throws Exception{
-    String entryClass = "Lracefix/jmol/JmolEntryClass";
-    String entryMethod = "testJmolEntryMethod()V";
-    
-    findCA(entryClass, entryMethod);
-
-    writeRacesToFile(a.deepRaces.values(), "mockVersionRaces.txt");
-   Set<ConcurrentFieldAccess> next = a.deepRaces.values().iterator().next();
-   final Privatizer privatizer = new Privatizer(a, next);
-   privatizer.compute();
-
-   HeapGraph heapGraph = a.heapGraph;
-   @SuppressWarnings("deprecation")
-   Graph<Object> prunedGraph = GraphSlicer.prune(heapGraph, new Filter<Object>() {
-     @Override
-     public boolean accepts(Object o) {
-       return privatizer.getInstancesToPrivatize().contains(o) || privatizer.getFieldNodesToPrivatize().contains(o);
-     }
-   });
-   a.dotGraph(prunedGraph, name.getMethodName(), new HeapGraphNodeDecorator(heapGraph) {
-     @Override
-     public String getDecoration(Object obj) {
-       if (privatizer.getFieldNodesToPrivatize().contains(obj))
-         if (privatizer.shouldBeThreadLocal(((InstanceFieldKey) obj).getField()))
-           return super.getDecoration(obj) + ", style=filled, fillcolor=red";
-         else
-           return super.getDecoration(obj) + ", style=filled, fillcolor=darkseagreen1";
-       if (privatizer.getInstancesToPrivatize().contains(obj))
-         return super.getDecoration(obj) + ", style=filled, fillcolor=darkseagreen1";
-       return super.getDecoration(obj);
-     }
-   });
-  }
-  
-  private void writeRacesToFile(Collection<Set<ConcurrentFieldAccess>> collection, String fileName) {
-    try {
-      System.out.println("--------\nPrinting to file\n-----------");
-      FileWriter fstream = new FileWriter(fileName);
-      BufferedWriter out = new BufferedWriter(fstream);
-      for (Set<ConcurrentFieldAccess> set : collection) {
-        out.write("\n============================New SET===============================\n");
-        for (ConcurrentFieldAccess fieldAccess : set) {
-          out.write(fieldAccess.toString() + "\n");
-        }
-      }
-      out.close();
-      System.out.println("Done printing to file");
-    } catch (Exception e) {// Catch exception if any
-    }
-  }
-
 }
