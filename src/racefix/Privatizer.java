@@ -52,11 +52,10 @@ public class Privatizer {
 		gatherPrivatizableFields();
 		markStarredFields();
 		markClassWithComputation();
-		refactor();
 		return null;
 	}
 
-	private void refactor() {
+	public void refactor() {
 		ClassChangeSet changeSet = new ClassChangeSet();
 		for (InstanceFieldKey instanceFieldKey : fieldNodesToPrivatize) {
 			String packageName = instanceFieldKey.getField().getDeclaringClass().getName().getPackage().toString();
