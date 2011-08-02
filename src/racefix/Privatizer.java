@@ -185,4 +185,5 @@ public class Privatizer {
   public Set<InstanceKey> getInstancesToPrivatize() {
     return instancesToPrivatize;
   }
+
 }

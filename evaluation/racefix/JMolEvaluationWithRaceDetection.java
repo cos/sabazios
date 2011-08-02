@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.junit.Test;
 
+import racefix.util.PrintUtil;
 import sabazios.domains.ConcurrentFieldAccess;
 import sabazios.tests.DataRaceAnalysisTest;
 import sabazios.util.U;
@@ -36,38 +37,27 @@ public class JMolEvaluationWithRaceDetection extends DataRaceAnalysisTest {
   public void test() throws CancelException {
     String entryClass = "Lorg/openscience/jmol/app/Jmol";
     String entryMethod = MAIN_METHOD;
-    runTest(entryClass, entryMethod);
+    runTest(entryClass, entryMethod, true);
   }
 
   @Test
   public void testMockVersion() throws Exception {
     String entryClass = "Lracefix/jmol/JmolEntryClass";
     String entryMethod = "testJmolEntryMethod()V";
-    runTest(entryClass, entryMethod);
+    runTest(entryClass, entryMethod, true);
   }
 
-  private void writeRacesToFile(Collection<Set<ConcurrentFieldAccess>> collection, String fileName) {
-    try {
-      System.out.println("--------\nPrinting to file\n-----------");
-      FileWriter fstream = new FileWriter(fileName);
-      BufferedWriter out = new BufferedWriter(fstream);
-      for (Set<ConcurrentFieldAccess> set : collection) {
-        out.write("\n============================New SET===============================\n");
-        for (ConcurrentFieldAccess fieldAccess : set) {
-          out.write(fieldAccess.toString() + "\n");
-        }
-      }
-      out.close();
-      System.out.println("Done printing to file");
-    } catch (Exception e) {// Catch exception if any
-    }
-  }
-
-  private void runTest(String entryClass, String entryMethod) {
+  private void runTest(String entryClass, String entryMethod, boolean writeStuff) {
     findCA(entryClass, entryMethod);
     Set<ConcurrentFieldAccess> next = a.deepRaces.values().iterator().next();
+
     final Privatizer privatizer = new Privatizer(a, next);
     privatizer.compute();
+
+    if (writeStuff) {
+      PrintUtil.writeLCDs(privatizer.getAccessesInLCDTestString(), name.getMethodName() + "LCDs.txt");
+      PrintUtil.writeRacesToFile(a.deepRaces.values(), name.getMethodName() + "Races.txt");
+    }
 
     HeapGraph heapGraph = a.heapGraph;
     @SuppressWarnings("deprecation")
@@ -91,4 +81,5 @@ public class JMolEvaluationWithRaceDetection extends DataRaceAnalysisTest {
       }
     });
   }
+
 }
