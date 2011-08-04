@@ -61,8 +61,6 @@ public class PrivatizerTest extends DataRaceAnalysisTest {
 	private String className = null;;
 	private String methodName = null;
 
-	private IPath cuPath;
-
 	public PrivatizerTest() {
 		this.addBinaryDependency("bin/racefix");
 		this.addBinaryDependency("bin/dummies");
@@ -72,80 +70,7 @@ public class PrivatizerTest extends DataRaceAnalysisTest {
 	@Before
 	public void beforeTest() throws ClassHierarchyException, IllegalArgumentException, CancelException, IOException {
 		setupAnalysis();
-		setupWorkspace();
 		privatizer.compute();
-	}
-
-	private void setupWorkspace() {
-		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-		IProject project = root.getProject("Dummy");
-		try {
-			project.create(null);
-			project.open(null);
-
-			IProjectDescription description;
-			description = project.getDescription();
-			description.setNatureIds(new String[] { JavaCore.NATURE_ID });
-			project.setDescription(description, null);
-
-			IJavaProject javaProject = JavaCore.create(project);
-
-			IFolder binFolder = project.getFolder("bin"); // it does not need
-																										// creating...
-			javaProject.setOutputLocation(binFolder.getFullPath(), null);
-
-			List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
-			IVMInstall vmInstall = JavaRuntime.getDefaultVMInstall();
-			LibraryLocation[] locations = JavaRuntime.getLibraryLocations(vmInstall);
-			for (LibraryLocation element : locations) {
-				entries.add(JavaCore.newLibraryEntry(element.getSystemLibraryPath(), null, null));
-			}
-
-			IFolder sourceFolder = project.getFolder("src");
-			sourceFolder.create(false, true, null);
-			IFolder packageRootFolder = sourceFolder.getFolder("dummies");
-			packageRootFolder.create(false, true, null);
-
-			IPackageFragmentRoot rootPackage = javaProject.getPackageFragmentRoot(packageRootFolder);
-
-			IPackageFragment pack = rootPackage.createPackageFragment("", true, null);
-
-			String filePath = "dummies/dummies/" + name.getMethodName() + ".java";
-			String fileData = getFileContents(filePath);
-
-			ICompilationUnit cu = pack.createCompilationUnit(name.getMethodName() + ".java", fileData, true, null);
-			IType[] allTypes = null;
-
-			cuPath = cu.getPath();
-
-			IClasspathEntry[] oldEntries = javaProject.getRawClasspath();
-			IClasspathEntry[] newEntries = new IClasspathEntry[oldEntries.length + 1];
-			System.arraycopy(oldEntries, 0, newEntries, 0, oldEntries.length);
-			newEntries[oldEntries.length] = JavaCore.newSourceEntry(sourceFolder.getFullPath());
-
-			project.build(IncrementalProjectBuilder.FULL_BUILD, null);
-
-		} catch (Throwable e) {
-		}
-	}
-
-	private String getFileContents(String filePath) throws FileNotFoundException, IOException {
-		File f = new File(filePath);
-		return getFileContents(f);
-	}
-
-	private String getFileContents(File f) throws FileNotFoundException, IOException {
-		String fileData = "";
-		BufferedReader reader = new BufferedReader(new FileReader(f));
-		char[] buf = new char[1024];
-		int numRead = 0;
-		while ((numRead = reader.read(buf)) != -1) {
-			String readData = String.valueOf(buf, 0, numRead);
-			fileData += readData;
-			buf = new char[1024];
-		}
-		reader.close();
-		return fileData;
 	}
 
 	private void setupAnalysis() {
@@ -182,18 +107,8 @@ public class PrivatizerTest extends DataRaceAnalysisTest {
 				return super.getDecoration(obj);
 			}
 		});
-
-		destroyWorkspace();
 	}
-
-	private void destroyWorkspace() {
-		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-		IProject project = root.getProject("Dummy");
-		try {
-			project.delete(true, null);
-		} catch (CoreException e) {
-		}
-	}
+	
 
 	@Test
 	public void simpleRace() throws Exception {
@@ -251,44 +166,6 @@ public class PrivatizerTest extends DataRaceAnalysisTest {
 	@Test
 	public void threadLocalOfClassWithComputationTest() throws Exception {
 		// TODO
-	}
-
-	@Test
-	public void testWorkspaceCorrectness() throws Exception {
-		className = "Ldummies/testSimpleRefactoring";
-		methodName = "simpleRace";
-		setupWorkspace();
-
-		IField findField = RefactoringElement.findField("src.dummies.testWorkspaceCorrectness.shared");
-		assertNotNull(findField);
-		destroyWorkspace();
-	}
-
-	@Test
-	public void testSimpleRefactoring() throws FileNotFoundException, JavaModelException, IOException {
-		className = "Ldummies/testSimpleRefactoring";
-		methodName = "simpleRace";
-
-		privatizer.compute();
-		privatizer.refactor();
-		assertFinalAs("testSimpleRefactoring_final.java");
-		destroyWorkspace();
-	}
-
-	@Test
-	public void testVerySimpleRefactoring() throws Exception {
-		setupWorkspace();
-		RefactoringElement element = new RefactoringElement("src.dummies.testVerySimpleRefactoring.shared",
-				new ThreadPrivateRefactoring(RefactoringElement.findField("src.dummies.testVerySimpleRefactoring.shared")));
-		element.apply();
-		assertFinalAs("testVerySimpleRefactoring_final.java");
-	}
-
-	protected void assertFinalAs(String expectedFile) throws FileNotFoundException, IOException, JavaModelException {
-		String expected = getFileContents("dummies/dummies/" + expectedFile);
-		String filePath = cuPath.toOSString();
-		String actual = getFileContents("../../junit-workspace/" + filePath);
-		Assert.assertEquals(expected, actual);
 	}
 
 	@Test
