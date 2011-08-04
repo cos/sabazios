@@ -7,7 +7,6 @@ import java.util.Set;
 
 import racefix.refactoring.ClassChangeSet;
 import racefix.refactoring.RefactoringEngine;
-
 import sabazios.A;
 import sabazios.domains.ConcurrentFieldAccess;
 import sabazios.domains.FieldAccess;
@@ -56,15 +55,19 @@ public class Privatizer {
 		return null;
 	}
 
-	private void refactor() {
+	public void refactor() {
 		ClassChangeSet changeSet = new ClassChangeSet();
-		for (InstanceFieldKey instanceFieldKey : fieldNodesToPrivatize) {
+		changeSet.threadLocal = new LinkedHashSet<String>();
+		for (InstanceFieldKey instanceFieldKey : fieldNodesToPrivatize) {	
 			String packageName = instanceFieldKey.getField().getDeclaringClass().getName().getPackage().toString();
 			String className = instanceFieldKey.getField().getDeclaringClass().getName().getClassName().toString();
 			String fieldName = instanceFieldKey.getField().getName().toString();
-			String qualifiedFieldName = packageName + "." + className + "." + fieldName;
+			String qualifiedFieldName = "src." + packageName + "." + className + "." + fieldName;
 			
-			changeSet.threadLocal = new LinkedHashSet<String>();
+			//TODO something more clever than this
+			if (qualifiedFieldName.contains("this"))
+				continue;
+			
 			changeSet.threadLocal.add(qualifiedFieldName);
 		}
 		

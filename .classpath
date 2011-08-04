@@ -5,6 +5,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="evaluation"/>
 	<classpathentry kind="src" path="subjects"/>
+	<classpathentry kind="src" path="dummies"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/guava-r09.jar"/>
 	<classpathentry kind="lib" path="lib/commons-lang3-3.0-beta.jar"/>
