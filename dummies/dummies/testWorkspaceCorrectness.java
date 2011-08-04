@@ -3,7 +3,7 @@ package dummies;
 import extra166y.Ops;
 import extra166y.ParallelArray;
 
-public class testSimpleRefactoring {
+public class testWorkspaceCorrectness {
 	
 	private Particle shared = new Particle();
 	

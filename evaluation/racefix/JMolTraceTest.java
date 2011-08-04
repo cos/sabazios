@@ -28,11 +28,11 @@ import sabazios.wala.CS;
 public class JMolTraceTest extends DataRaceAnalysisTest {
   public JMolTraceTest() {
     super();
-    this.addBinaryDependency("../evaluation/jmol/bin");
+//    this.addBinaryDependency("../evaluation/jmol/bin");
     this.addBinaryDependency("../lib/parallelArray.mock");
     this.addBinaryDependency("racefix/jmol");
     this.addBinaryDependency("racefix/jmol/mock");
-    this.addJarFolderDependency("../evaluation/jmol/lib");
+//    this.addJarFolderDependency("../evaluation/jmol/lib");
   }
 
   @Test
@@ -51,6 +51,7 @@ public class JMolTraceTest extends DataRaceAnalysisTest {
 
   @Test
   public void testJmolStripped() throws Exception {
+  	CS.NCFA = 1;
     Map<String, String> start = new HashMap<String, String>();
     start.put("plotLine\\(", "this");
     start.put("Cylinder3D, render\\(", "this");
