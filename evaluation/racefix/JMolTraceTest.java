@@ -30,11 +30,11 @@ import sabazios.wala.CS;
 public class JMolTraceTest extends DataRaceAnalysisTest {
   public JMolTraceTest() {
     super();
-    this.addBinaryDependency("../evaluation/jmol/bin");
+//    this.addBinaryDependency("../evaluation/jmol/bin");
     this.addBinaryDependency("../lib/parallelArray.mock");
     this.addBinaryDependency("racefix/jmol");
     this.addBinaryDependency("racefix/jmol/mock");
-    this.addJarFolderDependency("../evaluation/jmol/lib");
+//    this.addJarFolderDependency("../evaluation/jmol/lib");
   }
 
   @Test

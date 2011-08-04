@@ -29,7 +29,7 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
 
   public AccessTraceTest() {
     super();
-    this.addBinaryDependency("racefix");
+    this.addBinaryDependency("bin/racefix");
     this.addBinaryDependency("../lib/parallelArray.mock");
   }
 
