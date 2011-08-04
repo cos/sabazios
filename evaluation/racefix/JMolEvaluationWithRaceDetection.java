@@ -3,15 +3,19 @@ package racefix;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.junit.Test;
 
+import racefix.util.ConcurrentAccessFilter;
+import racefix.util.DummyFilter;
 import racefix.util.PrintUtil;
 import sabazios.domains.ConcurrentFieldAccess;
 import sabazios.tests.DataRaceAnalysisTest;
 import sabazios.util.U;
 import sabazios.util.wala.viz.HeapGraphNodeDecorator;
+import sabazios.wala.CS;
 
 import com.ibm.wala.analysis.pointers.HeapGraph;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceFieldKey;
@@ -34,22 +38,43 @@ public class JMolEvaluationWithRaceDetection extends DataRaceAnalysisTest {
   }
 
   @Test
-  public void test() throws CancelException {
+  public void testWithEvaluation() throws CancelException {
+    CS.NCFA = 1;
     String entryClass = "Lorg/openscience/jmol/app/Jmol";
     String entryMethod = MAIN_METHOD;
-    runTest(entryClass, entryMethod, true);
+    ConcurrentAccessFilter filter = new DummyFilter();
+    Privatizer runTest = runTest(entryClass, entryMethod, filter, true);
   }
 
   @Test
-  public void testMockVersion() throws Exception {
+  public void testWithEvaluationMockVersion() throws Exception {
+    CS.NCFA = 10;
     String entryClass = "Lracefix/jmol/JmolEntryClass";
     String entryMethod = "testJmolEntryMethod()V";
-    runTest(entryClass, entryMethod, true);
+    ConcurrentAccessFilter filter = new ConcurrentAccessFilter() {
+      @Override
+      public Set<ConcurrentFieldAccess> filter(Set<ConcurrentFieldAccess> setOfAccesses) {
+        Set<ConcurrentFieldAccess> filteredAccesses = new LinkedHashSet<ConcurrentFieldAccess>();
+
+        String[] strings = { "width"};
+
+        for (ConcurrentFieldAccess concurrentFieldAccess : setOfAccesses) {
+          for (String s : strings)
+            if (concurrentFieldAccess.toString().contains(s))
+              filteredAccesses.add(concurrentFieldAccess);
+        }
+        return filteredAccesses;
+      }
+    };
+    
+    Privatizer runTest = runTest(entryClass, entryMethod, new DummyFilter(), true);
   }
 
-  private void runTest(String entryClass, String entryMethod, boolean writeStuff) {
+  private Privatizer runTest(String entryClass, String entryMethod, ConcurrentAccessFilter filter, boolean writeStuff) {
     findCA(entryClass, entryMethod);
     Set<ConcurrentFieldAccess> next = a.deepRaces.values().iterator().next();
+
+    next = filter.filter(next);
 
     final Privatizer privatizer = new Privatizer(a, next);
     privatizer.compute();
@@ -80,6 +105,8 @@ public class JMolEvaluationWithRaceDetection extends DataRaceAnalysisTest {
         return super.getDecoration(obj);
       }
     });
+
+    return privatizer;
   }
 
 }

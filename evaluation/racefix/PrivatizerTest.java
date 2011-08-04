@@ -1,13 +1,10 @@
 package racefix;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
+import static junit.framework.Assert.assertEquals;
+
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-
-import static junit.framework.TestCase.*;
 
 import org.junit.After;
 import org.junit.Before;
@@ -17,21 +14,16 @@ import org.junit.rules.TestName;
 
 import racefix.util.PrintUtil;
 import sabazios.domains.ConcurrentFieldAccess;
-import sabazios.domains.Loop;
 import sabazios.tests.DataRaceAnalysisTest;
-import sabazios.util.wala.viz.ColoredHeapGraphNodeDecorator;
 import sabazios.util.wala.viz.HeapGraphNodeDecorator;
 
 import com.ibm.wala.analysis.pointers.HeapGraph;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceFieldKey;
-import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
-import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSAPutInstruction;
 import com.ibm.wala.util.CancelException;
-import com.ibm.wala.util.collections.Filter;
 
 public class PrivatizerTest extends DataRaceAnalysisTest {
 
