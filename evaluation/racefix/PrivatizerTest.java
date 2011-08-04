@@ -34,6 +34,7 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.LibraryLocation;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -68,7 +69,7 @@ public class PrivatizerTest extends DataRaceAnalysisTest {
 		this.addBinaryDependency("../lib/parallelArray.mock");
 	}
 
-	// @Before
+	@Before
 	public void beforeTest() throws ClassHierarchyException, IllegalArgumentException, CancelException, IOException {
 		setupAnalysis();
 		setupWorkspace();
@@ -199,10 +200,11 @@ public class PrivatizerTest extends DataRaceAnalysisTest {
 		className = null;
 		methodName = null;
 		String expectedLCD = "";
-		String expectedNoLCD = "Object : racefix.PrivatizerSubject.simpleRace(PrivatizerSubject.java:26) new PrivatizerSubject$Particle\n"
-				+ "   Alpha accesses:\n"
-				+ "     Write racefix.PrivatizerSubject$1.op(PrivatizerSubject.java:31) - .coordX\n"
-				+ "   Beta accesses:\n" + "     Write racefix.PrivatizerSubject$1.op(PrivatizerSubject.java:31) - .coordX\n";
+		String expectedNoLCD = "Object : racefix.PrivatizerSubject.simpleRace(PrivatizerSubject.java:83) new PrivatizerSubject$Particle\n" + 
+				"   Alpha accesses:\n" + 
+				"     Write racefix.PrivatizerSubject$1.op(PrivatizerSubject.java:88) - .coordX\n" + 
+				"   Beta accesses:\n" + 
+				"     Write racefix.PrivatizerSubject$1.op(PrivatizerSubject.java:88) - .coordX\n";
 		assertEquals(expectedLCD, privatizer.getAccessesInLCDTestString());
 		assertEquals(expectedNoLCD, privatizer.getAccessesNotInLCDTestString());
 	}
@@ -212,12 +214,12 @@ public class PrivatizerTest extends DataRaceAnalysisTest {
 		className = null;
 		methodName = null;
 		String expectedLCD = "";
-		String expectedNoLCD = "Object : racefix.PrivatizerSubject.writeReadRace(PrivatizerSubject.java:41) new PrivatizerSubject$Particle\n"
-				+ "   Alpha accesses:\n"
-				+ "     Write racefix.PrivatizerSubject$2.op(PrivatizerSubject.java:46) - .coordX\n"
-				+ "   Beta accesses:\n"
-				+ "     Read racefix.PrivatizerSubject$2.op(PrivatizerSubject.java:47) - .coordX\n"
-				+ "     Write racefix.PrivatizerSubject$2.op(PrivatizerSubject.java:46) - .coordX\n";
+		String expectedNoLCD = "Object : racefix.PrivatizerSubject.writeReadRace(PrivatizerSubject.java:97) new PrivatizerSubject$Particle\n" + 
+				"   Alpha accesses:\n" + 
+				"     Write racefix.PrivatizerSubject$2.op(PrivatizerSubject.java:102) - .coordX\n" + 
+				"   Beta accesses:\n" + 
+				"     Read racefix.PrivatizerSubject$2.op(PrivatizerSubject.java:103) - .coordX\n" + 
+				"     Write racefix.PrivatizerSubject$2.op(PrivatizerSubject.java:102) - .coordX\n";
 		assertEquals(expectedLCD, privatizer.getAccessesInLCDTestString());
 		assertEquals(expectedNoLCD, privatizer.getAccessesNotInLCDTestString());
 	}
@@ -226,12 +228,12 @@ public class PrivatizerTest extends DataRaceAnalysisTest {
 	public void readWriteRace() throws Exception {
 		className = null;
 		methodName = null;
-		String expectedLCD = "Object : racefix.PrivatizerSubject.readWriteRace(PrivatizerSubject.java:57) new PrivatizerSubject$Particle\n"
-				+ "   Alpha accesses:\n"
-				+ "     Write racefix.PrivatizerSubject$3.op(PrivatizerSubject.java:63) - .coordX\n"
-				+ "   Beta accesses:\n"
-				+ "     Write racefix.PrivatizerSubject$3.op(PrivatizerSubject.java:63) - .coordX\n"
-				+ "     Read racefix.PrivatizerSubject$3.op(PrivatizerSubject.java:62) - .coordX\n";
+		String expectedLCD = "Object : racefix.PrivatizerSubject.readWriteRace(PrivatizerSubject.java:112) new PrivatizerSubject$Particle\n" + 
+				"   Alpha accesses:\n" + 
+				"     Write racefix.PrivatizerSubject$3.op(PrivatizerSubject.java:118) - .coordX\n" + 
+				"   Beta accesses:\n" + 
+				"     Write racefix.PrivatizerSubject$3.op(PrivatizerSubject.java:118) - .coordX\n" + 
+				"     Read racefix.PrivatizerSubject$3.op(PrivatizerSubject.java:117) - .coordX\n";
 		String expectedNoLCD = "";
 		assertEquals(expectedLCD, privatizer.getAccessesInLCDTestString());
 		assertEquals(expectedNoLCD, privatizer.getAccessesNotInLCDTestString());
@@ -266,8 +268,6 @@ public class PrivatizerTest extends DataRaceAnalysisTest {
 	public void testSimpleRefactoring() throws FileNotFoundException, JavaModelException, IOException {
 		className = "Ldummies/testSimpleRefactoring";
 		methodName = "simpleRace";
-		setupAnalysis();
-		setupWorkspace();
 
 		privatizer.compute();
 		privatizer.refactor();

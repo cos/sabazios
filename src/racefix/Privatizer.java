@@ -51,7 +51,6 @@ public class Privatizer {
 		gatherPrivatizableFields();
 		markStarredFields();
 		markClassWithComputation();
-		refactor();
 		return null;
 	}
 
