@@ -50,7 +50,7 @@ public class Privatizer {
 		gatherAllMustNotPrivatizeFields();
 		gatherPrivatizableFields();
 		markStarredFields();
-//		markClassWithComputation();
+		markClassWithComputation();
 		return null;
 	}
 

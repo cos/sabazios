@@ -168,7 +168,7 @@ final public class Graphics3D implements JmolRendererInterface {
   int xLast, yLast;
   int[] pbuf;
   int[] pbufT;
-  int[] zbuf;
+  public int[] zbuf;
   int[] zbufT;
   int bufferSize;
 

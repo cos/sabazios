@@ -55,6 +55,10 @@ public class PrivatizerTest {
       int threadId = (int) Thread.currentThread().getId();
       PrivatizableObject fromThread = (PrivatizableObject) Privatizer.get(fromMainThread);
       System.out.println(threadId + "");
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+      }
       // different references;
       assertTrue(fromMainThread != fromThread);
       // equal semantically;
@@ -69,7 +73,7 @@ public class PrivatizerTest {
   public void testSimple() throws Exception {
     final PrivatizableObject obj = new PrivatizableObject(42);
     Thread thread = new Thread(new RunnableForTest(obj));
-    thread.run();
+    thread.start();
   }
 
   @Test
@@ -82,8 +86,7 @@ public class PrivatizerTest {
     }
 
     for (Thread t : threads)
-      t.run();
-
+      t.start();
   }
 
 }

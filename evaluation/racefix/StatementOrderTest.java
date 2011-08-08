@@ -27,20 +27,26 @@ public class StatementOrderTest extends DataRaceAnalysisTest {
     this.addBinaryDependency("racefix");
   }
 
-  public void runTest(String startNodeName, String endNodeName, boolean expected) throws ClassHierarchyException,
+  private void runTest(String startNodeName, String endNodeName, boolean expected) throws ClassHierarchyException,
       IllegalArgumentException, CancelException, IOException {
+    runTest("Lracefix/StatementOrderSubject", startNodeName, endNodeName, "age", "gender", expected);
+  }
+
+  private void runTest(String entryClassName, String startNodeName, String endNodeName, String firstInstructionName,
+      String secondInstructionName, boolean expectedResult) throws ClassHierarchyException, IllegalArgumentException,
+      CancelException, IOException {
     String methodName = name.getMethodName();
     SSAPutInstruction startInstr = null;
 
-    setup("Lracefix/StatementOrderSubject", methodName + "()V");
+    setup(entryClassName, methodName + "()V");
     A a = new A(callGraph, pointerAnalysis);
     List<CGNode> startNodes = a.findNodes(".*" + startNodeName + ".*");
-    startInstr = findInstructionForName("age", startNodes);
+    startInstr = findInstructionForName(firstInstructionName, startNodes);
 
     List<CGNode> endNodes = a.findNodes(".*" + endNodeName + ".*");
-    SSAPutInstruction endInstr = findInstructionForName("gender", endNodes);
+    SSAPutInstruction endInstr = findInstructionForName(secondInstructionName, endNodes);
     StatementOrder order = new StatementOrder(callGraph, startNodes.get(0), startInstr, endNodes.get(0), endInstr);
-    Assert.assertEquals(expected, order.happensBefore());
+    Assert.assertEquals(expectedResult, order.happensBefore());
   }
 
   private SSAPutInstruction findInstructionForName(String string, List<CGNode> startNodes) {
@@ -58,45 +64,51 @@ public class StatementOrderTest extends DataRaceAnalysisTest {
     }
     return startInstr;
   }
-  
+
   @Test
   public void testTrueIntraprocedural() throws Exception {
     runTest(name.getMethodName(), name.getMethodName(), true);
   }
-  
+
   @Test
   public void testFalseIntraprocedural() throws Exception {
     runTest(name.getMethodName(), name.getMethodName(), false);
   }
-  
+
   @Test
   public void testTrueInterprocedural() throws Exception {
     runTest(name.getMethodName(), "setGender", true);
   }
-  
+
   @Test
   public void testFalseInterprocedural() throws Exception {
     runTest(name.getMethodName(), "setGender", false);
   }
-  
+
   @Test
   public void testTrueOnReturnPath() throws Exception {
     runTest("setAge", "setGender", true);
   }
-  
+
   @Test
   public void testFalseOnReturnPath() throws Exception {
     runTest("setAge", "setGender", false);
   }
-  
+
   @Test
   public void testRecursiveIntraprocedural() throws Exception {
     runTest(name.getMethodName(), "setGender", true);
   }
-  
+
   @Test
   public void testRecursiveInterprocedural() throws Exception {
     runTest(name.getMethodName(), "recursiveGenderSet", true);
+  }
+
+  @Test
+  public void testRunSphere3D() throws Exception {
+    runTest("Lracefix/StatementOrderSphere3D", name.getMethodName(), "uniqueSecondMethodName", "fakeLCDField",
+        "uniqueFakeLCDInstructionName", true);
   }
 
 }
