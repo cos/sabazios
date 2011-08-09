@@ -3,4 +3,5 @@
 /debug/
 /.settings/
 /walaExclusions.txt
-*.txt
+falseLCDInRenderMethodDespiteClearWriteBeforeReadLCDs.txt
+falseLCDInRenderMethodDespiteClearWriteBeforeReadRaces.txt

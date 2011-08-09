@@ -1,8 +1,16 @@
 package racefix;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import racefix.refactoring.ClassChangeSet;
@@ -38,6 +46,7 @@ public class Privatizer {
 
 	private final Set<IField> starredFields = new HashSet<IField>();
 	private IClass classWithComputation;
+	private List<String> okInstances = new ArrayList<String>();
 
 	public Privatizer(A a, Set<ConcurrentFieldAccess> accesses) {
 		this.a = a;
@@ -45,6 +54,7 @@ public class Privatizer {
 	}
 
 	public Set<Object> compute() {
+		getSafeInstances();
 		markLCDAccesses();
 		gatherAllPrivatizableHeapNodes();
 		gatherAllMustNotPrivatizeFields();
@@ -54,22 +64,37 @@ public class Privatizer {
 		return null;
 	}
 
+	private void getSafeInstances() {
+		File file = new File("validInstances.txt");
+		BufferedReader reader = null;
+		try {
+			reader = new BufferedReader(new FileReader(file));
+		} catch (FileNotFoundException e) {
+		}
+
+		try {
+			while (reader.ready())
+				okInstances.add(reader.readLine());
+		} catch (IOException e) {
+		}
+	}
+
 	public void refactor() {
 		ClassChangeSet changeSet = new ClassChangeSet();
 		changeSet.threadLocal = new LinkedHashSet<String>();
-		for (InstanceFieldKey instanceFieldKey : fieldNodesToPrivatize) {	
+		for (InstanceFieldKey instanceFieldKey : fieldNodesToPrivatize) {
 			String packageName = instanceFieldKey.getField().getDeclaringClass().getName().getPackage().toString();
 			String className = instanceFieldKey.getField().getDeclaringClass().getName().getClassName().toString();
 			String fieldName = instanceFieldKey.getField().getName().toString();
 			String qualifiedFieldName = "src." + packageName + "." + className + "." + fieldName;
-			
-			//TODO something more clever than this
+
+			// TODO something more clever than this
 			if (qualifiedFieldName.contains("this"))
 				continue;
-			
+
 			changeSet.threadLocal.add(qualifiedFieldName);
 		}
-		
+
 		RefactoringEngine engine = new RefactoringEngine(changeSet);
 		engine.applyRefactorings();
 	}
@@ -80,7 +105,7 @@ public class Privatizer {
 		CGNode theMethodThatCallsTheParallelComputation = (CGNode) context.getItem(CS.OPERATOR_CALLER);
 		classWithComputation = theMethodThatCallsTheParallelComputation.getMethod().getDeclaringClass();
 	}
-	
+
 	public boolean shouldBeThreadLocal(IField f) {
 		return f.isStatic() || f.getDeclaringClass().equals(classWithComputation);
 	}
@@ -111,6 +136,13 @@ public class Privatizer {
 
 	private void markLCDAccesses() {
 		for (ConcurrentFieldAccess access : accesses) {
+			String className = access.f.getDeclaringClass().getName().getClassName().toString();
+			String fieldName = access.f.getName().toString();
+			if (okInstances.contains(className + "." + fieldName)) {
+				accessesNotLCD.add(access);
+				return;
+			}
+			
 			if (!isLCD(access)) {
 				accessesNotLCD.add(access);
 			} else {
@@ -130,8 +162,7 @@ public class Privatizer {
 	private void gatherAllPrivatizableHeapNodes() {
 		for (ConcurrentFieldAccess access : accessesNotLCD) {
 			for (FieldAccess fieldAccess : access.betaAccesses) {
-				AccessTrace accessTrace = new AccessTrace(a, fieldAccess.n,
-						fieldAccess.getRef());
+				AccessTrace accessTrace = new AccessTrace(a, fieldAccess.n, fieldAccess.getRef());
 				accessTrace.compute();
 				instancesToPrivatize.addAll(accessTrace.getinstances());
 				fieldNodesToPrivatize.addAll(accessTrace.getPointers());
@@ -157,14 +188,10 @@ public class Privatizer {
 				boolean ok = false;
 				for (FieldAccess writeFieldAccess : betaAccesses) {
 					if (writeFieldAccess instanceof WriteFieldAccess) {
-						StatementOrder writeBeforeRead = new StatementOrder(
-								a.callGraph, writeFieldAccess.n,
-								writeFieldAccess.i, readFieldAccess.n,
-								readFieldAccess.i);
-						StatementOrder readBeforeWrite = new StatementOrder(
-								a.callGraph, readFieldAccess.n,
-								readFieldAccess.i, writeFieldAccess.n,
-								writeFieldAccess.i);
+						StatementOrder writeBeforeRead = new StatementOrder(a.callGraph, writeFieldAccess.n, writeFieldAccess.i,
+								readFieldAccess.n, readFieldAccess.i);
+						StatementOrder readBeforeWrite = new StatementOrder(a.callGraph, readFieldAccess.n, readFieldAccess.i,
+								writeFieldAccess.n, writeFieldAccess.i);
 						boolean wBr = writeBeforeRead.happensBefore();
 						boolean rBw = readBeforeWrite.happensBefore();
 						if (wBr && !rBw) {
@@ -199,12 +226,12 @@ public class Privatizer {
 		return starredFields.toString();
 	}
 
-  public Set<InstanceFieldKey> getFieldNodesToPrivatize() {
-    return fieldNodesToPrivatize;
-  }
+	public Set<InstanceFieldKey> getFieldNodesToPrivatize() {
+		return fieldNodesToPrivatize;
+	}
 
-  public Set<InstanceKey> getInstancesToPrivatize() {
-    return instancesToPrivatize;
-  }
+	public Set<InstanceKey> getInstancesToPrivatize() {
+		return instancesToPrivatize;
+	}
 
 }

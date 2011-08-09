@@ -169,4 +169,19 @@ public class PrivatizerSubject {
       }
     });
   }
+  
+  private void lcdConsideredsafe() {
+  	ParallelArray<Particle> particles = ParallelArray.createUsingHandoff(new Particle[10],
+        ParallelArray.defaultExecutor());
+
+    final Particle shared = new Particle();
+
+    particles.apply(new Ops.Procedure<Particle>() {
+      @Override
+      public void op(Particle b) {
+        double y = shared.coordX;
+        shared.coordX = 10;
+      }
+    });
+  }
 }
