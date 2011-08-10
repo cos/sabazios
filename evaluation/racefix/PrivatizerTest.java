@@ -77,18 +77,16 @@ public class PrivatizerTest extends DataRaceAnalysisTest {
 			}
 		});
 	}
-	
 
 	@Test
 	public void simpleRace() throws Exception {
 		className = null;
 		methodName = null;
 		String expectedLCD = "";
-		String expectedNoLCD = "Object : racefix.PrivatizerSubject.simpleRace(PrivatizerSubject.java:83) new PrivatizerSubject$Particle\n" + 
-				"   Alpha accesses:\n" + 
-				"     Write racefix.PrivatizerSubject$1.op(PrivatizerSubject.java:88) - .coordX\n" + 
-				"   Beta accesses:\n" + 
-				"     Write racefix.PrivatizerSubject$1.op(PrivatizerSubject.java:88) - .coordX\n";
+		String expectedNoLCD = "Object : racefix.PrivatizerSubject.simpleRace(PrivatizerSubject.java:83) new PrivatizerSubject$Particle\n"
+				+ "   Alpha accesses:\n"
+				+ "     Write racefix.PrivatizerSubject$1.op(PrivatizerSubject.java:88) - .coordX\n"
+				+ "   Beta accesses:\n" + "     Write racefix.PrivatizerSubject$1.op(PrivatizerSubject.java:88) - .coordX\n";
 		assertEquals(expectedLCD, privatizer.getAccessesInLCDTestString());
 		assertEquals(expectedNoLCD, privatizer.getAccessesNotInLCDTestString());
 	}
@@ -98,12 +96,12 @@ public class PrivatizerTest extends DataRaceAnalysisTest {
 		className = null;
 		methodName = null;
 		String expectedLCD = "";
-		String expectedNoLCD = "Object : racefix.PrivatizerSubject.writeReadRace(PrivatizerSubject.java:97) new PrivatizerSubject$Particle\n" + 
-				"   Alpha accesses:\n" + 
-				"     Write racefix.PrivatizerSubject$2.op(PrivatizerSubject.java:102) - .coordX\n" + 
-				"   Beta accesses:\n" + 
-				"     Read racefix.PrivatizerSubject$2.op(PrivatizerSubject.java:103) - .coordX\n" + 
-				"     Write racefix.PrivatizerSubject$2.op(PrivatizerSubject.java:102) - .coordX\n";
+		String expectedNoLCD = "Object : racefix.PrivatizerSubject.writeReadRace(PrivatizerSubject.java:97) new PrivatizerSubject$Particle\n"
+				+ "   Alpha accesses:\n"
+				+ "     Write racefix.PrivatizerSubject$2.op(PrivatizerSubject.java:102) - .coordX\n"
+				+ "   Beta accesses:\n"
+				+ "     Read racefix.PrivatizerSubject$2.op(PrivatizerSubject.java:103) - .coordX\n"
+				+ "     Write racefix.PrivatizerSubject$2.op(PrivatizerSubject.java:102) - .coordX\n";
 		assertEquals(expectedLCD, privatizer.getAccessesInLCDTestString());
 		assertEquals(expectedNoLCD, privatizer.getAccessesNotInLCDTestString());
 	}
@@ -112,12 +110,12 @@ public class PrivatizerTest extends DataRaceAnalysisTest {
 	public void readWriteRace() throws Exception {
 		className = null;
 		methodName = null;
-		String expectedLCD = "Object : racefix.PrivatizerSubject.readWriteRace(PrivatizerSubject.java:112) new PrivatizerSubject$Particle\n" + 
-				"   Alpha accesses:\n" + 
-				"     Write racefix.PrivatizerSubject$3.op(PrivatizerSubject.java:118) - .coordX\n" + 
-				"   Beta accesses:\n" + 
-				"     Write racefix.PrivatizerSubject$3.op(PrivatizerSubject.java:118) - .coordX\n" + 
-				"     Read racefix.PrivatizerSubject$3.op(PrivatizerSubject.java:117) - .coordX\n";
+		String expectedLCD = "Object : racefix.PrivatizerSubject.readWriteRace(PrivatizerSubject.java:112) new PrivatizerSubject$Particle\n"
+				+ "   Alpha accesses:\n"
+				+ "     Write racefix.PrivatizerSubject$3.op(PrivatizerSubject.java:118) - .coordX\n"
+				+ "   Beta accesses:\n"
+				+ "     Write racefix.PrivatizerSubject$3.op(PrivatizerSubject.java:118) - .coordX\n"
+				+ "     Read racefix.PrivatizerSubject$3.op(PrivatizerSubject.java:117) - .coordX\n";
 		String expectedNoLCD = "";
 		assertEquals(expectedLCD, privatizer.getAccessesInLCDTestString());
 		assertEquals(expectedNoLCD, privatizer.getAccessesNotInLCDTestString());
@@ -148,11 +146,11 @@ public class PrivatizerTest extends DataRaceAnalysisTest {
 		// assertEquals(expectedLCD, privatizer.getAccessesInLCDTestString());
 		// assertEquals(expectedNoLCD, privatizer.getAccessesNotInLCDTestString());
 	}
-	
+
 	@Test
 	public void lcdConsideredsafe() throws Exception {
 		className = null;
 		methodName = null;
-		assertEquals("",privatizer.getAccessesInLCDTestString());
+		assertEquals("", privatizer.getAccessesInLCDTestString());
 	}
 }

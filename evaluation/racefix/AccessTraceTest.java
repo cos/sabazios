@@ -1,34 +1,23 @@
 package racefix;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-import junit.framework.Assert;
+import static junit.framework.Assert.*;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 
-import racefix.jmol.util.JmolCallGraphFilter;
-import racefix.jmol.util.JmolHeapGraphFilter;
-import racefix.util.AccessTraceFilter;
 import sabazios.A;
 import sabazios.tests.DataRaceAnalysisTest;
 import sabazios.util.U;
-import sabazios.util.wala.viz.CGNodeDecorator;
 import sabazios.util.wala.viz.ColoredHeapGraphNodeDecorator;
 
 import com.ibm.wala.ipa.callgraph.CGNode;
-import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
-import com.ibm.wala.ipa.callgraph.propagation.PointerKey;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.util.CancelException;
 import com.ibm.wala.util.collections.Filter;
 import com.ibm.wala.util.collections.IndiscriminateFilter;
-import com.ibm.wala.util.graph.Graph;
-import com.ibm.wala.util.graph.GraphSlicer;
 
 @SuppressWarnings("deprecation")
 public class AccessTraceTest extends DataRaceAnalysisTest {
@@ -70,43 +59,23 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
     testString = trace.getTestString();
 
     if (printGraphs) {
-
-      // Graph<Object> prunedHP = GraphSlicer.prune(a.heapGraph, new Filter<Object>() {
-      // @Override
-      // public boolean accepts(Object o) {
-      // return o.toString().contains("TraceSubject");
-      // }
-      //
-      // });
-
-      // Graph<CGNode> prunedCG = GraphSlicer.prune(a.callGraph, new Filter<CGNode>() {
-      //
-      // @Override
-      // public boolean accepts(CGNode o) {
-      // return o.toString().contains("TraceSubject");
-      // }
-      // });
-
       a.dotGraph(a.heapGraph, methodName + "_HP", new ColoredHeapGraphNodeDecorator(a.heapGraph, new Filter<Object>() {
 
         @Override
         public boolean accepts(Object o) {
-          if (o instanceof InstanceKey)
-            if (trace.getinstances().contains(o))
-              return true;
+          if (trace.getinstances().contains(o))
+            return true;
 
-          if (o instanceof PointerKey)
-            if (trace.getPointers().contains(o))
-              return true;
+          if (trace.getPointers().contains(o))
+            return true;
 
           return false;
         }
 
       }));
-      // a.dotGraph(prunedCG, methodName + "_CG", null);
     }
 
-    Assert.assertEquals(expected, testString);
+    assertEquals(expected, testString);
   }
 
   @Test

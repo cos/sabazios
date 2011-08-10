@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+import org.junit.rules.TestName;
 
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
@@ -17,6 +18,7 @@ import racefix.AccessTrace;
 import racefix.jmol.util.JmolCallGraphFilter;
 import racefix.jmol.util.JmolHeapGraphFilter;
 import racefix.util.AccessTraceFilter;
+import racefix.util.PrintUtil;
 import sabazios.A;
 import sabazios.tests.DataRaceAnalysisTest;
 import sabazios.util.U;
@@ -36,34 +38,36 @@ public class JMolTraceTest extends DataRaceAnalysisTest {
   }
 
   @Test
-  public void testJmolFull() throws Exception {
+  public void testTrace() throws Exception {
     CS.NCFA = 0;
     Map<String, String> start = new HashMap<String, String>();
     start.put("plotLine\\(", "this");
     start.put("Cylinder3D, render\\(", "this");
     start.put("plotLineClipped\\(I", "zbuf");
+    // start.put("SticksRenderer.*render.*", "this");
 
     String entryClass = "Lorg/openscience/jmol/app/Jmol";
     String mainMethod = MAIN_METHOD;
 
-    runJmol(start, entryClass, mainMethod, true, "Jmol");
+    runJmol(start, entryClass, mainMethod, true);
   }
 
   @Test
-  public void testJmolStripped() throws Exception {
-  	CS.NCFA = 1;
+  public void testTraceMock() throws Exception {
+    CS.NCFA = 1;
     Map<String, String> start = new HashMap<String, String>();
     start.put("plotLine\\(", "this");
     start.put("Cylinder3D, render\\(", "this");
     start.put("plotLineClipped\\(I", "zbuf");
+    // start.put("SticksRenderer.*render.*", "this");
 
     String entryClass = "Lracefix/jmol/JmolEntryClass";
     String entryMethod = "testJmolEntryMethod()V";
-    runJmol(start, entryClass, entryMethod, true, "Jmol_mock");
+    runJmol(start, entryClass, entryMethod, true);
   }
 
   private void runJmol(Map<String, String> traceStartingPoint, String entryClass, String entryMethod,
-      boolean printGraphs, String graphNames) throws Exception {
+      boolean printGraphs) throws Exception {
     setup(entryClass, entryMethod);
     A a = new A(callGraph, pointerAnalysis);
     a.precompute();
@@ -87,26 +91,26 @@ public class JMolTraceTest extends DataRaceAnalysisTest {
       traces[i++] = accessTrace;
     }
 
+    printAccessTraces(traces, name.getMethodName());
+
     if (printGraphs) {
       Graph<Object> prunedHeapGraph = GraphSlicer.prune(a.heapGraph, new JmolHeapGraphFilter(traces));
       Graph<CGNode> prunedCallGraph = GraphSlicer.prune(a.callGraph, new JmolCallGraphFilter());
       ColoredHeapGraphNodeDecorator color = new ColoredHeapGraphNodeDecorator(prunedHeapGraph, new AccessTraceFilter(
           traces));
-      a.dotGraph(prunedHeapGraph, graphNames + "_heapGraph", color);
-      a.dotGraph(prunedCallGraph, graphNames + "_callGraph", new CGNodeDecorator(a));
+      a.dotGraph(prunedHeapGraph, name.getMethodName() + "_heapGraph", color);
+      // a.dotGraph(prunedCallGraph, name.getMethodName() + "_callGraph", new CGNodeDecorator(a));
     }
   }
 
-  @SuppressWarnings("unused")
-  private static void printAccessTraces(AccessTrace[] traces) {
-    for (AccessTrace trace : traces) {
-      System.out.println("instanceKeys:");
-      for (InstanceKey instKey : trace.getinstances())
-        System.out.println(instKey.toString());
-      System.out.println("pointerKeys:");
-      for (PointerKey pointKey : trace.getPointers())
-        System.out.println(pointKey);
-      System.out.println("--------");
+  private static void printAccessTraces(AccessTrace[] traces, String fileName) {
+    try {
+      for (AccessTrace trace : traces) {
+        PrintUtil.writeLCDs(trace.getTestString(), fileName + "TestString.txt");
+        PrintUtil.writeLCDs(trace.getinstances().toString(), fileName + "Instances.txt");
+        PrintUtil.writeLCDs(trace.getPointers().toString(), fileName + "Pointers.txt");
+      }
+    } catch (Exception e) {
     }
   }
 
