@@ -31,15 +31,15 @@ import racefix.jmol.mock.*;
  * Implements high performance rendering of shaded spheres.
  * </p>
  * <p>
- * Drawing spheres quickly is critically important to Jmol. These routines implement high performance rendering of
- * spheres in 3D.
+ * Drawing spheres quickly is critically important to Jmol. These routines
+ * implement high performance rendering of spheres in 3D.
  * </p>
  * <p>
  * If you can think of a faster way to implement this, please let us know.
  * </p>
  * <p>
- * There is a lot of bit-twiddling going on here, which may make the code difficult to understand for non-systems
- * programmers.
+ * There is a lot of bit-twiddling going on here, which may make the code
+ * difficult to understand for non-systems programmers.
  * </p>
  * Ellipsoid code added 4/2008 -- Bob Hanson hansonr@stolaf.edu
  * 
@@ -181,7 +181,8 @@ public class Sphere3D {
     }
     this.shades = null;
     this.zbuf = null;
-    // System.out.println("sphere3d " + nIn + " " + nOut + " " + (1.0 * nIn / (nIn + nOut)));
+    // System.out.println("sphere3d " + nIn + " " + nOut + " " + (1.0 * nIn /
+    // (nIn + nOut)));
   }
 
   private void renderShapeUnclipped(int[] sphereShape) {
@@ -550,6 +551,7 @@ public class Sphere3D {
   final private static int SLIM = 20;
   final private static int SDIM = SLIM * 2;
 
+  // TODO FAILS Miserably
   private static void createEllipsoidShades() {
 
     // we don't need to cache rear-directed normals (kk < 0)

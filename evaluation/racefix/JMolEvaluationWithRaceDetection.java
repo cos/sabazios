@@ -39,7 +39,7 @@ public class JMolEvaluationWithRaceDetection extends DataRaceAnalysisTest {
 
   @Test
   public void testWithEvaluation() throws CancelException {
-    CS.NCFA = 1;
+    CS.NCFA = 0;
     String entryClass = "Lorg/openscience/jmol/app/Jmol";
     String entryMethod = MAIN_METHOD;
     ConcurrentAccessFilter filter = new DummyFilter();
@@ -48,7 +48,7 @@ public class JMolEvaluationWithRaceDetection extends DataRaceAnalysisTest {
 
   @Test
   public void testWithEvaluationMockVersion() throws Exception {
-    CS.NCFA = 10;
+    CS.NCFA = 1;
     String entryClass = "Lracefix/jmol/JmolEntryClass";
     String entryMethod = "testJmolEntryMethod()V";
     ConcurrentAccessFilter filter = new ConcurrentAccessFilter() {
@@ -72,11 +72,11 @@ public class JMolEvaluationWithRaceDetection extends DataRaceAnalysisTest {
 
   private Privatizer runTest(String entryClass, String entryMethod, ConcurrentAccessFilter filter, boolean writeStuff) {
     findCA(entryClass, entryMethod);
-    Set<ConcurrentFieldAccess> next = a.deepRaces.values().iterator().next();
+    Set<ConcurrentFieldAccess> races = a.deepRaces.values().iterator().next();
 
-    next = filter.filter(next);
+    races = filter.filter(races);
 
-    final Privatizer privatizer = new Privatizer(a, next);
+    final Privatizer privatizer = new Privatizer(a, races);
     privatizer.compute();
 
     if (writeStuff) {
