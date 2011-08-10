@@ -2,6 +2,7 @@
 /chord_output/
 /debug/
 /.settings/
+/concurrentAccessFiles/
 /walaExclusions.txt
 falseLCDInRenderMethodDespiteClearWriteBeforeReadLCDs.txt
 falseLCDInRenderMethodDespiteClearWriteBeforeReadRaces.txt
