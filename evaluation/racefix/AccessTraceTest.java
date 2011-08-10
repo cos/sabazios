@@ -283,4 +283,11 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
     runTest(startVariableName, expected);
   }
 
+  @Test
+  public void simpleStaticField() throws Exception {
+    String startVariableName = "numberOfDog";
+    String expected = "";
+    runTest(startVariableName, expected);
+  }
+
 }
