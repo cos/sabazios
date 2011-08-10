@@ -5,3 +5,4 @@
 /walaExclusions.txt
 falseLCDInRenderMethodDespiteClearWriteBeforeReadLCDs.txt
 falseLCDInRenderMethodDespiteClearWriteBeforeReadRaces.txt
+*.launch

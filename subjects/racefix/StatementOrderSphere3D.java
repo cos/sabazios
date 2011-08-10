@@ -64,10 +64,10 @@ public class StatementOrderSphere3D {
   private int[] shades;
 
   public void testRunSphere3D() {
-    render(null, true, 42, 42, 42, 42, new Matrix3f(), null, new Matrix4f(), 42, null);
+    uniqueStartMethodName(null, true, 42, 42, 42, 42, new Matrix3f(), null, new Matrix4f(), 42, null);
   }
 
-  public void render(int[] shades, boolean tScreened, int diameter, int x, int y, int z, Matrix3f mat, double[] coef,
+  public void uniqueStartMethodName(int[] shades, boolean tScreened, int diameter, int x, int y, int z, Matrix3f mat, double[] coef,
       Matrix4f mDeriv, int selectedOctant, Point3i[] octantPoints) {
     if (z == 1)
       return;

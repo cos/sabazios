@@ -3,7 +3,7 @@ package racefix;
 import java.io.IOException;
 import java.util.List;
 
-import junit.framework.Assert;
+import static junit.framework.Assert.*;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -36,17 +36,19 @@ public class StatementOrderTest extends DataRaceAnalysisTest {
       String secondInstructionName, boolean expectedResult) throws ClassHierarchyException, IllegalArgumentException,
       CancelException, IOException {
     String methodName = name.getMethodName();
-    SSAPutInstruction startInstr = null;
 
     setup(entryClassName, methodName + "()V");
     A a = new A(callGraph, pointerAnalysis);
     List<CGNode> startNodes = a.findNodes(".*" + startNodeName + ".*");
-    startInstr = findInstructionForName(firstInstructionName, startNodes);
+    SSAPutInstruction startInstr = findInstructionForName(firstInstructionName, startNodes);
 
     List<CGNode> endNodes = a.findNodes(".*" + endNodeName + ".*");
     SSAPutInstruction endInstr = findInstructionForName(secondInstructionName, endNodes);
     StatementOrder order = new StatementOrder(callGraph, startNodes.get(0), startInstr, endNodes.get(0), endInstr);
-    Assert.assertEquals(expectedResult, order.happensBefore());
+    assertEquals(expectedResult, order.happensBefore());
+    StatementOrder reverseOrder = new StatementOrder(callGraph, endNodes.get(0), endInstr, startNodes.get(0),
+        startInstr);
+    assertEquals(!expectedResult, reverseOrder.happensBefore());
   }
 
   private SSAPutInstruction findInstructionForName(String string, List<CGNode> startNodes) {
@@ -107,7 +109,7 @@ public class StatementOrderTest extends DataRaceAnalysisTest {
 
   @Test
   public void testRunSphere3D() throws Exception {
-    runTest("Lracefix/StatementOrderSphere3D", name.getMethodName(), "uniqueSecondMethodName", "fakeLCDField",
+    runTest("Lracefix/StatementOrderSphere3D", "uniqueStartMethodName", "uniqueSecondMethodName", "fakeLCDField",
         "uniqueFakeLCDInstructionName", true);
   }
 
