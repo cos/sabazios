@@ -14,6 +14,7 @@ import sabazios.tests.DataRaceAnalysisTest;
 
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
+import com.ibm.wala.ssa.SSAGetInstruction;
 import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SSAPutInstruction;
 import com.ibm.wala.util.CancelException;
@@ -40,10 +41,10 @@ public class StatementOrderTest extends DataRaceAnalysisTest {
     setup(entryClassName, methodName + "()V");
     A a = new A(callGraph, pointerAnalysis);
     List<CGNode> startNodes = a.findNodes(".*" + startNodeName + ".*");
-    SSAPutInstruction startInstr = findInstructionForName(firstInstructionName, startNodes);
+    SSAInstruction startInstr = findInstructionForName(firstInstructionName, startNodes);
 
     List<CGNode> endNodes = a.findNodes(".*" + endNodeName + ".*");
-    SSAPutInstruction endInstr = findInstructionForName(secondInstructionName, endNodes);
+    SSAInstruction endInstr = findInstructionForName(secondInstructionName, endNodes);
     StatementOrder order = new StatementOrder(callGraph, startNodes.get(0), startInstr, endNodes.get(0), endInstr);
     assertEquals(expectedResult, order.happensBefore());
     StatementOrder reverseOrder = new StatementOrder(callGraph, endNodes.get(0), endInstr, startNodes.get(0),
@@ -51,18 +52,13 @@ public class StatementOrderTest extends DataRaceAnalysisTest {
     assertEquals(!expectedResult, reverseOrder.happensBefore());
   }
 
-  private SSAPutInstruction findInstructionForName(String string, List<CGNode> startNodes) {
-    SSAPutInstruction startInstr = null;
+  private SSAInstruction findInstructionForName(String string, List<CGNode> startNodes) {
+    SSAInstruction startInstr = null;
 
     SSAInstruction[] instructions = startNodes.get(0).getIR().getInstructions();
     for (SSAInstruction ssaInstruction : instructions) {
-      if (ssaInstruction instanceof SSAPutInstruction) {
-        SSAPutInstruction put = (SSAPutInstruction) ssaInstruction;
-        if (put.getDeclaredField().getName().toString().contains(string)) {
-          startInstr = put;
-          break;
-        }
-      }
+      if (ssaInstruction != null && ssaInstruction.toString().contains(string))
+        return ssaInstruction;
     }
     return startInstr;
   }
@@ -110,7 +106,7 @@ public class StatementOrderTest extends DataRaceAnalysisTest {
   @Test
   public void testRunSphere3D() throws Exception {
     runTest("Lracefix/StatementOrderSphere3D", "uniqueStartMethodName", "uniqueSecondMethodName", "fakeLCDField",
-        "uniqueFakeLCDInstructionName", true);
+        "fakeLCDField", true);
   }
 
 }

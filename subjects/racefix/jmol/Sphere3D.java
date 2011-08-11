@@ -556,11 +556,11 @@ public class Sphere3D {
 
     // we don't need to cache rear-directed normals (kk < 0)
 
-    ellipsoidShades = new byte[SDIM][SDIM][SDIM];
-    for (int ii = 0; ii < SDIM; ii++)
-      for (int jj = 0; jj < SDIM; jj++)
-        for (int kk = 0; kk < SDIM; kk++)
-          ellipsoidShades[ii][jj][kk] = (byte) 42;
+//    ellipsoidShades = new byte[SDIM][SDIM][SDIM];
+//    for (int ii = 0; ii < SDIM; ii++)
+//      for (int jj = 0; jj < SDIM; jj++)
+//        for (int kk = 0; kk < SDIM; kk++)
+//          ellipsoidShades[ii][jj][kk] = (byte) 42;
   }
 
   private static int getEllipsoidShade(float x, float y, float z, int radius, Matrix4f mDeriv) {

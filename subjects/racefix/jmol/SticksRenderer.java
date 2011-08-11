@@ -123,7 +123,6 @@ public class SticksRenderer extends ShapeRenderer {
     }
   }
 
-
   private void stepAxisCoordinates() {
   }
 

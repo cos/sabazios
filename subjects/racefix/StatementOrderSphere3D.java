@@ -67,8 +67,8 @@ public class StatementOrderSphere3D {
     uniqueStartMethodName(null, true, 42, 42, 42, 42, new Matrix3f(), null, new Matrix4f(), 42, null);
   }
 
-  public void uniqueStartMethodName(int[] shades, boolean tScreened, int diameter, int x, int y, int z, Matrix3f mat, double[] coef,
-      Matrix4f mDeriv, int selectedOctant, Point3i[] octantPoints) {
+  public void uniqueStartMethodName(int[] shades, boolean tScreened, int diameter, int x, int y, int z, Matrix3f mat,
+      double[] coef, Matrix4f mDeriv, int selectedOctant, Point3i[] octantPoints) {
     if (z == 1)
       return;
     fakeLCDField = 42;
@@ -119,16 +119,20 @@ public class StatementOrderSphere3D {
     }
     this.shades = null;
     this.zbuf = null;
-    // System.out.println("sphere3d " + nIn + " " + nOut + " " + (1.0 * nIn / (nIn + nOut)));
+    // System.out.println("sphere3d " + nIn + " " + nOut + " " + (1.0 * nIn /
+    // (nIn + nOut)));
   }
 
   private void uniqueSecondMethodName(int[] sphereShape) {
-    int uniqueFakeLCDInstructionName = fakeLCDField;
+    int uniqueFakeLCDInstructionName;
     int offsetSphere = 0;
     int evenSizeCorrection = 1 - (diameter & 1);
     int offsetSouthCenter = offsetPbufBeginLine;
-    int offsetNorthCenter = offsetSouthCenter - evenSizeCorrection * uniqueFakeLCDInstructionName;
+    int offsetNorthCenter = offsetSouthCenter - evenSizeCorrection;
     int nLines = (diameter + 1) / 2;
+
+    uniqueFakeLCDInstructionName = fakeLCDField;
+    nLines = uniqueFakeLCDInstructionName;
     if (!tScreened) {
       do {
         int offsetSE = offsetSouthCenter;
