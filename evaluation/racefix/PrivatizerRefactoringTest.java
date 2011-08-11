@@ -42,156 +42,162 @@ import sabazios.domains.Loop;
 import sabazios.tests.DataRaceAnalysisTest;
 
 public class PrivatizerRefactoringTest extends DataRaceAnalysisTest {
-	
-	private IPath cuPath;
-	private String className;
-	private String methodName;
-	
-	private Privatizer privatizer;
-	
-	public PrivatizerRefactoringTest() {
-		this.addBinaryDependency("bin/racefix");
-		this.addBinaryDependency("bin/dummies");
-		this.addBinaryDependency("../lib/parallelArray.mock");
-	}
-	
-	private void setupAnalysis() {
-		if (className == null)
-			className = "Lracefix/PrivatizerSubject";
-		if (methodName == null)
-			methodName = name.getMethodName();
 
-		foundCA = findCA(className, methodName + "()V");
-		Set<Loop> keySet = foundCA.keySet();
-		Loop outer = null;
-		for (Loop loop : keySet) {
-			outer = loop;
-		}
+  private IPath cuPath;
+  private String className;
+  private String methodName;
 
-		Set<ConcurrentFieldAccess> accesses = (Set<ConcurrentFieldAccess>) foundCA.get(outer);
+  private Privatizer privatizer;
 
-		privatizer = new Privatizer(a, accesses);
-	}
-	
-	private void setupWorkspace() {
-		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-		IProject project = root.getProject("Dummy");
-		try {
-			project.create(null);
-			project.open(null);
+  public PrivatizerRefactoringTest() {
+    this.addBinaryDependency("bin/racefix");
+    this.addBinaryDependency("bin/dummies");
+    this.addBinaryDependency("../lib/parallelArray.mock");
 
-			IProjectDescription description;
-			description = project.getDescription();
-			description.setNatureIds(new String[] { JavaCore.NATURE_ID });
-			project.setDescription(description, null);
+    this.addBinaryDependency("../evaluation/jmol/bin");
+    this.addBinaryDependency("../lib/parallelArray.mock");
+    this.addJarFolderDependency("../evaluation/jmol/lib");
+    this.addBinaryDependency("racefix/jmol");
+    this.addBinaryDependency("racefix/jmol/mock");
+  }
 
-			IJavaProject javaProject = JavaCore.create(project);
+  private void setupAnalysis() {
+    if (className == null)
+      className = "Lracefix/PrivatizerSubject";
+    if (methodName == null)
+      methodName = name.getMethodName();
 
-			IFolder binFolder = project.getFolder("bin"); // it does not need
-																										// creating...
-			javaProject.setOutputLocation(binFolder.getFullPath(), null);
+    foundCA = findCA(className, methodName + "()V");
+    Set<Loop> keySet = foundCA.keySet();
+    Loop outer = null;
+    for (Loop loop : keySet) {
+      outer = loop;
+    }
 
-			List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
-			IVMInstall vmInstall = JavaRuntime.getDefaultVMInstall();
-			LibraryLocation[] locations = JavaRuntime.getLibraryLocations(vmInstall);
-			for (LibraryLocation element : locations) {
-				entries.add(JavaCore.newLibraryEntry(element.getSystemLibraryPath(), null, null));
-			}
+    Set<ConcurrentFieldAccess> accesses = (Set<ConcurrentFieldAccess>) foundCA.get(outer);
 
-			IFolder sourceFolder = project.getFolder("src");
-			sourceFolder.create(false, true, null);
-			IFolder packageRootFolder = sourceFolder.getFolder("dummies");
-			packageRootFolder.create(false, true, null);
+    privatizer = new Privatizer(a, accesses);
+  }
 
-			IPackageFragmentRoot rootPackage = javaProject.getPackageFragmentRoot(packageRootFolder);
+  private void setupWorkspace() {
+    IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+    IProject project = root.getProject("Dummy");
+    try {
+      project.create(null);
+      project.open(null);
 
-			IPackageFragment pack = rootPackage.createPackageFragment("", true, null);
+      IProjectDescription description;
+      description = project.getDescription();
+      description.setNatureIds(new String[] { JavaCore.NATURE_ID });
+      project.setDescription(description, null);
 
-			String filePath = "dummies/dummies/" + name.getMethodName() + ".java";
-			String fileData = getFileContents(filePath);
+      IJavaProject javaProject = JavaCore.create(project);
 
-			ICompilationUnit cu = pack.createCompilationUnit(name.getMethodName() + ".java", fileData, true, null);
-			IType[] allTypes = null;
+      IFolder binFolder = project.getFolder("bin"); // it does not need
+                                                    // creating...
+      javaProject.setOutputLocation(binFolder.getFullPath(), null);
 
-			cuPath = cu.getPath();
+      List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
+      IVMInstall vmInstall = JavaRuntime.getDefaultVMInstall();
+      LibraryLocation[] locations = JavaRuntime.getLibraryLocations(vmInstall);
+      for (LibraryLocation element : locations) {
+        entries.add(JavaCore.newLibraryEntry(element.getSystemLibraryPath(), null, null));
+      }
 
-			IClasspathEntry[] oldEntries = javaProject.getRawClasspath();
-			IClasspathEntry[] newEntries = new IClasspathEntry[oldEntries.length + 1];
-			System.arraycopy(oldEntries, 0, newEntries, 0, oldEntries.length);
-			newEntries[oldEntries.length] = JavaCore.newSourceEntry(sourceFolder.getFullPath());
+      IFolder sourceFolder = project.getFolder("src");
+      sourceFolder.create(false, true, null);
+      IFolder packageRootFolder = sourceFolder.getFolder("dummies");
+      packageRootFolder.create(false, true, null);
 
-			project.build(IncrementalProjectBuilder.FULL_BUILD, null);
+      IPackageFragmentRoot rootPackage = javaProject.getPackageFragmentRoot(packageRootFolder);
 
-		} catch (Throwable e) {
-		}
-	}
-	
-	private void destroyWorkspace() {
-		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-		IProject project = root.getProject("Dummy");
-		try {
-			project.delete(true, null);
-		} catch (CoreException e) {
-		}
-	}
+      IPackageFragment pack = rootPackage.createPackageFragment("", true, null);
 
-	private String getFileContents(String filePath) throws FileNotFoundException, IOException {
-		File f = new File(filePath);
-		return getFileContents(f);
-	}
+      String filePath = "dummies/dummies/" + name.getMethodName() + ".java";
+      String fileData = getFileContents(filePath);
 
-	private String getFileContents(File f) throws FileNotFoundException, IOException {
-		String fileData = "";
-		BufferedReader reader = new BufferedReader(new FileReader(f));
-		char[] buf = new char[1024];
-		int numRead = 0;
-		while ((numRead = reader.read(buf)) != -1) {
-			String readData = String.valueOf(buf, 0, numRead);
-			fileData += readData;
-			buf = new char[1024];
-		}
-		reader.close();
-		return fileData;
-	}
-	
-	@Test
-	public void testWorkspaceCorrectness() throws Exception {
-		className = "Ldummies/testSimpleRefactoring";
-		methodName = "simpleRace";
-		setupWorkspace();
+      ICompilationUnit cu = pack.createCompilationUnit(name.getMethodName() + ".java", fileData, true, null);
+      IType[] allTypes = null;
 
-		IField findField = RefactoringElement.findField("src.dummies.testWorkspaceCorrectness.shared");
-		assertNotNull(findField);
-		destroyWorkspace();
-	}
+      cuPath = cu.getPath();
 
-	@Test
-	public void testSimpleRefactoring() throws FileNotFoundException, JavaModelException, IOException {
-		className = "Ldummies/testSimpleRefactoring";
-		methodName = "simpleRace";
-		
-		setupAnalysis();
-		setupWorkspace();
+      IClasspathEntry[] oldEntries = javaProject.getRawClasspath();
+      IClasspathEntry[] newEntries = new IClasspathEntry[oldEntries.length + 1];
+      System.arraycopy(oldEntries, 0, newEntries, 0, oldEntries.length);
+      newEntries[oldEntries.length] = JavaCore.newSourceEntry(sourceFolder.getFullPath());
 
-		privatizer.compute();
-		privatizer.refactor();
-		assertFinalAs("testSimpleRefactoring_final.java");
-		destroyWorkspace();
-	}
+      project.build(IncrementalProjectBuilder.FULL_BUILD, null);
 
-	@Test
-	public void testVerySimpleRefactoring() throws Exception {
-		setupWorkspace();
-		RefactoringElement element = new RefactoringElement("src.dummies.testVerySimpleRefactoring.shared",
-				new ThreadPrivateRefactoring(RefactoringElement.findField("src.dummies.testVerySimpleRefactoring.shared")));
-		element.apply();
-		assertFinalAs("testVerySimpleRefactoring_final.java");
-	}
+    } catch (Throwable e) {
+    }
+  }
 
-	protected void assertFinalAs(String expectedFile) throws FileNotFoundException, IOException, JavaModelException {
-		String expected = getFileContents("dummies/dummies/" + expectedFile);
-		String filePath = cuPath.toOSString();
-		String actual = getFileContents("../../junit-workspace/" + filePath);
-		Assert.assertEquals(expected, actual);
-	}
+  private void destroyWorkspace() {
+    IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+    IProject project = root.getProject("Dummy");
+    try {
+      project.delete(true, null);
+    } catch (CoreException e) {
+    }
+  }
+
+  private String getFileContents(String filePath) throws FileNotFoundException, IOException {
+    File f = new File(filePath);
+    return getFileContents(f);
+  }
+
+  private String getFileContents(File f) throws FileNotFoundException, IOException {
+    String fileData = "";
+    BufferedReader reader = new BufferedReader(new FileReader(f));
+    char[] buf = new char[1024];
+    int numRead = 0;
+    while ((numRead = reader.read(buf)) != -1) {
+      String readData = String.valueOf(buf, 0, numRead);
+      fileData += readData;
+      buf = new char[1024];
+    }
+    reader.close();
+    return fileData;
+  }
+
+  @Test
+  public void testWorkspaceCorrectness() throws Exception {
+    className = "Ldummies/testSimpleRefactoring";
+    methodName = "simpleRace";
+    setupWorkspace();
+
+    IField findField = RefactoringElement.findField("src.dummies.testWorkspaceCorrectness.shared");
+    assertNotNull(findField);
+    destroyWorkspace();
+  }
+
+  @Test
+  public void testSimpleRefactoring() throws FileNotFoundException, JavaModelException, IOException {
+    className = "Ldummies/testSimpleRefactoring";
+    methodName = "simpleRace";
+
+    setupAnalysis();
+    setupWorkspace();
+
+    privatizer.compute();
+    privatizer.refactor();
+    assertFinalAs("testSimpleRefactoring_final.java");
+    destroyWorkspace();
+  }
+
+  @Test
+  public void testVerySimpleRefactoring() throws Exception {
+    setupWorkspace();
+    RefactoringElement element = new RefactoringElement("src.dummies.testVerySimpleRefactoring.shared",
+        new ThreadPrivateRefactoring(RefactoringElement.findField("src.dummies.testVerySimpleRefactoring.shared")));
+    element.apply();
+    assertFinalAs("testVerySimpleRefactoring_final.java");
+  }
+
+  protected void assertFinalAs(String expectedFile) throws FileNotFoundException, IOException, JavaModelException {
+    String expected = getFileContents("dummies/dummies/" + expectedFile);
+    String filePath = cuPath.toOSString();
+    String actual = getFileContents("../../junit-workspace/" + filePath);
+    Assert.assertEquals(expected, actual);
+  }
 }

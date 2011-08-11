@@ -56,7 +56,7 @@ public class JMolEvaluationWithRaceDetection extends DataRaceAnalysisTest {
       public Set<ConcurrentFieldAccess> filter(Set<ConcurrentFieldAccess> setOfAccesses) {
         Set<ConcurrentFieldAccess> filteredAccesses = new LinkedHashSet<ConcurrentFieldAccess>();
 
-        String[] strings = { "width"};
+        String[] strings = { "atomA" };
 
         for (ConcurrentFieldAccess concurrentFieldAccess : setOfAccesses) {
           for (String s : strings)
@@ -66,8 +66,9 @@ public class JMolEvaluationWithRaceDetection extends DataRaceAnalysisTest {
         return filteredAccesses;
       }
     };
-    
+
     Privatizer runTest = runTest(entryClass, entryMethod, new DummyFilter(), true);
+    // Privatizer runTest = runTest(entryClass, entryMethod, filter, true);
   }
 
   private Privatizer runTest(String entryClass, String entryMethod, ConcurrentAccessFilter filter, boolean writeStuff) {
@@ -80,8 +81,9 @@ public class JMolEvaluationWithRaceDetection extends DataRaceAnalysisTest {
     privatizer.compute();
 
     if (writeStuff) {
-      PrintUtil.writeLCDs(privatizer.getAccessesInLCDTestString(), name.getMethodName() + "LCDs.txt");
-      PrintUtil.writeRacesToFile(a.deepRaces.values(), name.getMethodName() + "Races.txt");
+      PrintUtil.writeLCDs(privatizer.getAccessesInLCDTestString(), "concurrentAccessFiles/" + name.getMethodName()
+          + "LCDs.txt");
+      PrintUtil.writeRacesToFile(a.deepRaces.values(), "concurrentAccessFiles/" + name.getMethodName() + "Races.txt");
     }
 
     HeapGraph heapGraph = a.heapGraph;
