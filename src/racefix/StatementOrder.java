@@ -36,6 +36,9 @@ public class StatementOrder {
     this.i2 = i2;
   }
 
+  // TODO if it doesn't find the second node it also returns false;
+  // TODO the reason it doesn't find the second node is that it never goes
+  // through the methods down the call graph.
   public boolean happensBefore() {
     return visit(n1, i1);
   }
@@ -48,9 +51,9 @@ public class StatementOrder {
     List<SSAInstruction> allInstructions = block.getAllInstructions();
     List<SSAInstruction> instructionsAfter = new ArrayList<SSAInstruction>();
     boolean sw = false;
-    for (Iterator iterator = allInstructions.iterator(); iterator.hasNext();) {
+    for (Iterator<SSAInstruction> iterator = allInstructions.iterator(); iterator.hasNext();) {
       SSAInstruction ssaInstruction = (SSAInstruction) iterator.next();
-      if(sw)
+      if (sw)
         instructionsAfter.add(i);
       if (ssaInstruction.equals(i))
         sw = true;
@@ -76,15 +79,15 @@ public class StatementOrder {
     return false;
   }
 
-  private Map<CGNode, Set<BasicBlock>> map = new HashMap<CGNode, Set<BasicBlock>>();
+  private Map<CGNode, Set<BasicBlock>> nodeToContainedBlocksMap = new HashMap<CGNode, Set<BasicBlock>>();
 
   private boolean visit(CGNode n, BasicBlock block) {
 
-    Set<BasicBlock> blockSet = map.get(n);
+    Set<BasicBlock> blockSet = nodeToContainedBlocksMap.get(n);
     if (blockSet == null) {
       blockSet = new LinkedHashSet<BasicBlock>();
       blockSet.add(block);
-      map.put(n, blockSet);
+      nodeToContainedBlocksMap.put(n, blockSet);
     } else if (!blockSet.contains(block))
       blockSet.add(block);
     else
@@ -104,7 +107,7 @@ public class StatementOrder {
     }
     return false;
   }
-  
+
   private boolean visitInstructions(CGNode n, List<SSAInstruction> allInstructions) {
     return visitInstructions(n, allInstructions.toArray(new SSAInstruction[0]));
   }
@@ -115,12 +118,14 @@ public class StatementOrder {
         return true;
       }
 
+      // TODO when we encounter InvokeInstructions there is no point in visiting
+      // the places from where it is called from only the method itself
       if (ssaInstruction instanceof SSAInvokeInstruction) {
         SSAInvokeInstruction invoke = (SSAInvokeInstruction) ssaInstruction;
         CallSiteReference callSite = invoke.getCallSite();
         Set<CGNode> possibleTargets = callGraph.getPossibleTargets(n, callSite);
         for (CGNode cgNode : possibleTargets) {
-          if(cgNode.getIR() == null)
+          if (cgNode.getIR() == null)
             continue;
           BasicBlock entryBlock = cgNode.getIR().getControlFlowGraph().entry();
           if (visit(cgNode, entryBlock))

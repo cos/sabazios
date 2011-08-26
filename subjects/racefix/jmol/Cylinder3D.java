@@ -89,6 +89,9 @@ class Cylinder3D {
     dxB = xB - xA;
     dyB = yB - yA;
     dzB = zB - zA;
+    line3d.plotLineDelta(g3d.getColorArgbOrGray(colixA), isScreenedA, g3d
+        .getColorArgbOrGray(colixB), isScreenedB, xA, yA, zA, dxB, dyB, dzB,
+        clipped);
     if (diameter <= 1) {
       line3d.plotLineDelta(g3d.getColorArgbOrGray(colixA), isScreenedA, g3d
           .getColorArgbOrGray(colixB), isScreenedB, xA, yA, zA, dxB, dyB, dzB,

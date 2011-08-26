@@ -27,24 +27,27 @@ package racefix.jmol.mock;
 
 public class Bond {
 
+  private Atom atom1;
+  private Atom atom2;
+
+  public Bond() {
+    this.atom1 = new Atom();
+    this.atom2 = new Atom();
+  }
+
   public int getShapeVisibilityFlags() {
-    // TODO Auto-generated method stub
     return 0;
   }
 
   public Atom getAtom1() {
-    // TODO Auto-generated method stub
-    return null;
+    return this.atom1;
   }
 
   public Atom getAtom2() {
-    // TODO Auto-generated method stub
-    return null;
+    return this.atom2;
   }
 
   public short getMad() {
-    // TODO Auto-generated method stub
     return 0;
   }
 }
-

@@ -1,63 +1,48 @@
-/* $RCSfile$
- * $Author: hansonr $
- * $Date: 2009-12-25 08:18:12 -0600 (Fri, 25 Dec 2009) $
- * $Revision: 12004 $
- *
- * Copyright (C) 2003-2005  Miguel, Jmol Development, www.jmol.org
- *
- * Contact: jmol-developers@lists.sf.net
- *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
- *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
- *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
- */
+package racefix;
 
-package racefix.jmol;
-
-import racefix.jmol.mock.*;
-
-/**
- * <p>
- * Implements high performance rendering of shaded spheres.
- * </p>
- * <p>
- * Drawing spheres quickly is critically important to Jmol. These routines
- * implement high performance rendering of spheres in 3D.
- * </p>
- * <p>
- * If you can think of a faster way to implement this, please let us know.
- * </p>
- * <p>
- * There is a lot of bit-twiddling going on here, which may make the code
- * difficult to understand for non-systems programmers.
- * </p>
- * Ellipsoid code added 4/2008 -- Bob Hanson hansonr@stolaf.edu
- * 
- * @author Miguel, miguel@jmol.org
- */
-public class Sphere3D {
-
+public class StatementOrderSphere3D {
   Graphics3D g3d;
 
-  Sphere3D(Graphics3D g3d) {
+  private static class Graphics3D {
+    public int[] zbuf;
+
+    public boolean isClippedXY(int diameter, int x, int y) {
+      return false;
+    }
+
+  }
+
+  private static class Matrix3f {
+
+    public void transform(Point3f ptTemp) {
+    }
+  }
+
+  private static class Matrix4f {
+  }
+
+  private static class Point3i {
+
+    public int x;
+    public int y;
+  }
+
+  private static class Point3f {
+
+    public void set(int i, int j, int k) {
+    }
+  }
+
+  StatementOrderSphere3D(Graphics3D g3d) {
     this.g3d = g3d;
   }
+
+  private int fakeLCDField;
 
   private final static int maxSphereCache = 128;
   private final static int maxOddSizeSphere = 49;
   final static int maxSphereDiameter = 1000;
   final static int maxSphereDiameter2 = maxSphereDiameter * 2;
-  private final static int[][] sphereShapeCache = new int[maxSphereCache][];
 
   private double[] zroot = new double[2];
   private Matrix3f mat;
@@ -66,74 +51,28 @@ public class Sphere3D {
   private Point3i[] octantPoints;
   private int planeShade;
   private int[] zbuf;
-  private int width;
   private int height;
   private int depth;
   private int slab;
   private int offsetPbufBeginLine;
   private boolean addAllPixels;
-
-  static synchronized void flushSphereCache() {
-    for (int i = maxSphereCache; --i >= 0;)
-      sphereShapeCache[i] = null;
-    ellipsoidShades = null;
-  }
-
-  private static int[] getSphereShape(int diameter) {
-    int[] ss;
-    return ((ss = sphereShapeCache[diameter - 1]) == null ? createSphereShape(diameter) : ss);
-  }
-
-  private synchronized static int[] createSphereShape(int diameter) {
-    int countSE = 0;
-    boolean oddDiameter = (diameter & 1) != 0;
-    float radiusF = diameter / 2.0f;
-    float radiusF2 = radiusF * radiusF;
-    int radius = (diameter + 1) / 2;
-
-    float y = oddDiameter ? 0 : 0.5f;
-    for (int i = 0; i < radius; ++i, ++y) {
-      float y2 = y * y;
-      float x = oddDiameter ? 0 : 0.5f;
-      for (int j = 0; j < radius; ++j, ++x) {
-        float x2 = x * x;
-        float z2 = radiusF2 - y2 - x2;
-        if (z2 >= 0)
-          ++countSE;
-      }
-    }
-
-    int[] sphereShape = new int[countSE];
-    int offset = 0;
-
-    y = oddDiameter ? 0 : 0.5f;
-    for (int i = 0; i < radius; ++i, ++y) {
-      float y2 = y * y;
-      float x = oddDiameter ? 0 : 0.5f;
-      for (int j = 0; j < radius; ++j, ++x) {
-        float x2 = x * x;
-        float z2 = radiusF2 - y2 - x2;
-        if (z2 >= 0) {
-          int packed = 0;
-          sphereShape[offset++] = packed;
-        }
-      }
-      sphereShape[offset - 1] |= 0x80000000;
-    }
-    return sphereShapeCache[diameter - 1] = sphereShape;
-  }
+  private int countSE;
 
   private int minX, maxX, minY, maxY, minZ, maxZ;
   private int x, y, z, diameter;
   private boolean tScreened;
   private int[] shades;
 
-  void render(int[] shades, boolean tScreened, int diameter, int x, int y, int z, Matrix3f mat, double[] coef,
-      Matrix4f mDeriv, int selectedOctant, Point3i[] octantPoints) {
+  public void testRunSphere3D() {
+    uniqueStartMethodName(null, true, 42, 42, 42, 42, new Matrix3f(), null, new Matrix4f(), 42, null);
+  }
+
+  public void uniqueStartMethodName(int[] shades, boolean tScreened, int diameter, int x, int y, int z, Matrix3f mat,
+      double[] coef, Matrix4f mDeriv, int selectedOctant, Point3i[] octantPoints) {
     if (z == 1)
       return;
-    width = g3d.width;
-    height = g3d.height;
+    fakeLCDField = 42;
+    height = 42;
     if (diameter > maxOddSizeSphere)
       diameter &= ~1;
     if (g3d.isClippedXY(diameter, x, y))
@@ -143,16 +82,15 @@ public class Sphere3D {
     maxX = x + radius;
     minY = y - radius;
     maxY = y + radius;
-    slab = g3d.slab;
-    depth = g3d.depth;
+    depth = maxY;
     minZ = z - radius;
     maxZ = z + radius;
     if (maxZ < slab || minZ > depth)
       return;
 
     zbuf = g3d.zbuf;
-    addAllPixels = g3d.addAllPixels;
-    offsetPbufBeginLine = width * y + x;
+    addAllPixels = true;
+    offsetPbufBeginLine = fakeLCDField * y + x;
     this.x = x;
     this.y = y;
     this.z = z;
@@ -173,11 +111,11 @@ public class Sphere3D {
         this.octantPoints = null;
       }
     } else {
-      int[] ss = getSphereShape(diameter);
-      if (minX < 0 || maxX >= width || minY < 0 || maxY >= height || minZ < slab || z > depth)
+      int[] ss = new int[22];
+      if (minX < 0 || maxX >= fakeLCDField || minY < 0 || maxY >= height || minZ < slab || z > depth)
         renderShapeClipped(ss);
       else
-        renderShapeUnclipped(ss);
+        uniqueSecondMethodName(ss);
     }
     this.shades = null;
     this.zbuf = null;
@@ -185,12 +123,16 @@ public class Sphere3D {
     // (nIn + nOut)));
   }
 
-  private void renderShapeUnclipped(int[] sphereShape) {
+  private void uniqueSecondMethodName(int[] sphereShape) {
+    int uniqueFakeLCDInstructionName;
     int offsetSphere = 0;
     int evenSizeCorrection = 1 - (diameter & 1);
     int offsetSouthCenter = offsetPbufBeginLine;
-    int offsetNorthCenter = offsetSouthCenter - evenSizeCorrection * width;
+    int offsetNorthCenter = offsetSouthCenter - evenSizeCorrection;
     int nLines = (diameter + 1) / 2;
+
+    uniqueFakeLCDInstructionName = fakeLCDField;
+    nLines = uniqueFakeLCDInstructionName;
     if (!tScreened) {
       do {
         int offsetSE = offsetSouthCenter;
@@ -202,20 +144,13 @@ public class Sphere3D {
           packed = sphereShape[offsetSphere++];
           int zPixel = z - (packed & 0x7F);
           if (zPixel < zbuf[offsetSE])
-            g3d.addPixel(offsetSE, zPixel, shades[((packed >> 7) & 0x3F)]);
-          if (zPixel < zbuf[offsetSW])
-            g3d.addPixel(offsetSW, zPixel, shades[((packed >> 13) & 0x3F)]);
-          if (zPixel < zbuf[offsetNE])
-            g3d.addPixel(offsetNE, zPixel, shades[((packed >> 19) & 0x3F)]);
-          if (zPixel < zbuf[offsetNW])
-            g3d.addPixel(offsetNW, zPixel, shades[((packed >> 25) & 0x3F)]);
-          ++offsetSE;
+            ++offsetSE;
           --offsetSW;
           ++offsetNE;
           --offsetNW;
         } while (packed >= 0);
-        offsetSouthCenter += width;
-        offsetNorthCenter -= width;
+        offsetSouthCenter += fakeLCDField;
+        offsetNorthCenter -= fakeLCDField;
       } while (--nLines > 0);
       return;
     }
@@ -237,21 +172,14 @@ public class Sphere3D {
         packed = sphereShape[offsetSphere++];
         int zPixel = z - (packed & 0x7F);
         if ((flipflops & 1) != 0 && zPixel < zbuf[offsetSE])
-          g3d.addPixel(offsetSE, zPixel, shades[((packed >> 7) & 0x3F)]);
-        if ((flipflops & 2) != 0 && zPixel < zbuf[offsetSW])
-          g3d.addPixel(offsetSW, zPixel, shades[((packed >> 13) & 0x3F)]);
-        if ((flipflops & 4) != 0 && zPixel < zbuf[offsetNE])
-          g3d.addPixel(offsetNE, zPixel, shades[((packed >> 19) & 0x3F)]);
-        if ((flipflops & 8) != 0 && zPixel < zbuf[offsetNW])
-          g3d.addPixel(offsetNW, zPixel, shades[((packed >> 25) & 0x3F)]);
-        ++offsetSE;
+          ++offsetSE;
         --offsetSW;
         ++offsetNE;
         --offsetNW;
         flipflops = ~flipflops;
       } while (packed >= 0);
-      offsetSouthCenter += width;
-      offsetNorthCenter -= width;
+      offsetSouthCenter += fakeLCDField;
+      offsetNorthCenter -= fakeLCDField;
     } while (--nLines > 0);
   }
 
@@ -261,7 +189,7 @@ public class Sphere3D {
     int offsetSphere = 0;
     int evenSizeCorrection = 1 - (diameter & 1);
     int offsetSouthCenter = offsetPbufBeginLine;
-    int offsetNorthCenter = offsetSouthCenter - evenSizeCorrection * width;
+    int offsetNorthCenter = offsetSouthCenter - evenSizeCorrection * fakeLCDField;
     int nLines = (diameter + 1) / 2;
     int ySouth = y;
     int yNorth = y - evenSizeCorrection;
@@ -285,8 +213,8 @@ public class Sphere3D {
       int xEast = x;
       int xWest = x - evenSizeCorrection;
       do {
-        boolean tWestVisible = xWest >= 0 && xWest < width;
-        boolean tEastVisible = xEast >= 0 && xEast < width;
+        boolean tWestVisible = xWest >= 0 && xWest < fakeLCDField;
+        boolean tEastVisible = xEast >= 0 && xEast < fakeLCDField;
         packed = sphereShape[offsetSphere++];
         boolean isCore;
         int zOffset = packed & 0x7F;
@@ -306,21 +234,17 @@ public class Sphere3D {
           if (tSouthVisible) {
             if (tEastVisible && (addAllPixels || (flipflops & 1) != 0) && zPixel < zbuf[offsetSE]) {
               int i = (isCore ? SHADE_SLAB_CLIPPED - 3 + ((randu >> 7) & 0x07) : (packed >> 7) & 0x3F);
-              g3d.addPixel(offsetSE, zPixel, shades[i]);
             }
             if (tWestVisible && (addAllPixels || (flipflops & 2) != 0) && zPixel < zbuf[offsetSW]) {
               int i = (isCore ? SHADE_SLAB_CLIPPED - 3 + ((randu >> 13) & 0x07) : (packed >> 13) & 0x3F);
-              g3d.addPixel(offsetSW, zPixel, shades[i]);
             }
           }
           if (tNorthVisible) {
             if (tEastVisible && (!tScreened || (flipflops & 4) != 0) && zPixel < zbuf[offsetNE]) {
               int i = (isCore ? SHADE_SLAB_CLIPPED - 3 + ((randu >> 19) & 0x07) : (packed >> 19) & 0x3F);
-              g3d.addPixel(offsetNE, zPixel, shades[i]);
             }
             if (tWestVisible && (!tScreened || (flipflops & 8) != 0) && zPixel < zbuf[offsetNW]) {
               int i = (isCore ? SHADE_SLAB_CLIPPED - 3 + ((randu >> 25) & 0x07) : (packed >> 25) & 0x3F);
-              g3d.addPixel(offsetNW, zPixel, shades[i]);
             }
           }
         }
@@ -334,8 +258,8 @@ public class Sphere3D {
         if (isCore)
           randu = ((randu << 16) + (randu << 1) + randu) & 0x7FFFFFFF;
       } while (packed >= 0);
-      offsetSouthCenter += width;
-      offsetNorthCenter -= width;
+      offsetSouthCenter += fakeLCDField;
+      offsetNorthCenter -= fakeLCDField;
       ++ySouth;
       --yNorth;
     } while (--nLines > 0);
@@ -343,6 +267,7 @@ public class Sphere3D {
 
   private void renderLarge() {
     if (mat != null) {
+      Object ellipsoidShades = null;
       if (ellipsoidShades == null)
         createEllipsoidShades();
       if (octantPoints != null)
@@ -354,10 +279,14 @@ public class Sphere3D {
     renderQuadrant(1, 1);
   }
 
+  private void createEllipsoidShades() {
+
+  }
+
   private void renderQuadrant(int xSign, int ySign) {
     int radius = diameter / 2;
     int t = x + radius * xSign;
-    int xStatus = (x < 0 ? -1 : x < width ? 0 : 1) + (t < 0 ? -2 : t < width ? 0 : 2);
+    int xStatus = (x < 0 ? -1 : x < fakeLCDField ? 0 : 1) + (t < 0 ? -2 : t < fakeLCDField ? 0 : 2);
     if (xStatus == -3 || xStatus == 3)
       return;
 
@@ -379,7 +308,7 @@ public class Sphere3D {
     // it will get flipped twice before use
     // so initialize it to true if it is at an even coordinate
     boolean flipflopBeginLine = ((x ^ y) & 1) == 0;
-    int lineIncrement = (ySign < 0 ? -width : width);
+    int lineIncrement = (ySign < 0 ? -fakeLCDField : fakeLCDField);
     int ptLine = offsetPbufBeginLine;
     for (int i = 0, i2 = 0; i2 <= r2; i2 += i + (++i), ptLine += lineIncrement) {
       int offset = ptLine;
@@ -395,7 +324,6 @@ public class Sphere3D {
           if (zbuf[offset] <= z0)
             continue;
           int x8 = ((j * xSign + radius) << 8) / dDivisor;
-          g3d.addPixel(offset, z0, shades[x8]);
         }
       }
     }
@@ -409,7 +337,7 @@ public class Sphere3D {
     boolean isEllipsoid = (mat != null);
     boolean checkOctant = (selectedOctant >= 0);
     int r2 = radius * radius;
-    int lineIncrement = (ySign < 0 ? -width : width);
+    int lineIncrement = (ySign < 0 ? -fakeLCDField : fakeLCDField);
     int ptLine = offsetPbufBeginLine;
     int randu = (x << 16) + (y << 1) ^ 0x33333333;
     int yCurrent = y;
@@ -439,7 +367,7 @@ public class Sphere3D {
             break;
           continue;
         }
-        if (xCurrent >= width) {
+        if (xCurrent >= fakeLCDField) {
           if (xSign > 0)
             break;
           continue;
@@ -488,7 +416,6 @@ public class Sphere3D {
           mode = 1;
           break;
         case 2: // ellipsoid
-          iShade = getEllipsoidShade(xCurrent, yCurrent, (float) zroot[iRoot], radius, mDeriv);
           break;
         case 3: // ellipsoid fill
           break;
@@ -496,7 +423,6 @@ public class Sphere3D {
           iShade = 42;
           break;
         }
-        g3d.addPixel(offset, zPixel, shades[iShade]);
       }
       // randu is failing me and generating moire patterns :-(
       // so throw in a little more salt
@@ -544,45 +470,6 @@ public class Sphere3D {
     }
     zroot[0] = zMin;
     return planeShades[iMin];
-  }
-
-  private static byte[][][] ellipsoidShades;
-
-  final private static int SLIM = 20;
-  final private static int SDIM = SLIM * 2;
-
-  // TODO FAILS Miserably
-  private static void createEllipsoidShades() {
-
-    // we don't need to cache rear-directed normals (kk < 0)
-
-//    ellipsoidShades = new byte[SDIM][SDIM][SDIM];
-//    for (int ii = 0; ii < SDIM; ii++)
-//      for (int jj = 0; jj < SDIM; jj++)
-//        for (int kk = 0; kk < SDIM; kk++)
-//          ellipsoidShades[ii][jj][kk] = (byte) 42;
-  }
-
-  private static int getEllipsoidShade(float x, float y, float z, int radius, Matrix4f mDeriv) {
-    float tx = 42;
-    float ty = 42;
-    float tz = 42;
-    float f = Math.min(radius / 2f, 45) / (float) Math.sqrt(tx * tx + ty * ty + tz * tz);
-    // optimized for about 30-100% inclusion
-    int i = (int) (-tx * f);
-    int j = (int) (-ty * f);
-    int k = (int) (tz * f);
-    boolean outside = i < -SLIM || i >= SLIM || j < -SLIM || j >= SLIM || k < 0 || k >= SDIM;
-    if (outside) {
-      while (i % 2 == 0 && j % 2 == 0 && k % 2 == 0 && i + j + k > 0) {
-        i >>= 1;
-        j >>= 1;
-        k >>= 1;
-      }
-      outside = i < -SLIM || i >= SLIM || j < -SLIM || j >= SLIM || k < 0 || k >= SDIM;
-    }
-
-    return 42;
   }
 
 }

@@ -1,7 +1,5 @@
 package racefix;
 
-import com.ibm.wala.demandpa.alg.ContextSensitiveStateMachine.RecursionHandler;
-
 public class StatementOrderSubject {
   
   public class Dog {

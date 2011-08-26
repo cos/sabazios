@@ -1,7 +1,5 @@
 package racefix;
 
-import racefix.TraceSubject.Cat;
-
 public class TraceSubject {
 
   public static class Animal {
@@ -11,6 +9,7 @@ public class TraceSubject {
   public static class Dog extends Animal {
     public Cat chases;
     public Cat loves;
+    public static int numberOfDogs = 0;
   }
 
   public static class Cat extends Animal {
@@ -272,5 +271,10 @@ public class TraceSubject {
     rex.food = new Object();
 
     Object food = rex.food;
+  }
+
+  public void simpleStaticField() {
+    Cat pufi = new Cat();
+    Dog.numberOfDogs = pufi.lives;
   }
 }

@@ -47,7 +47,7 @@ public class AccessTrace {
   public AccessTrace(A a, CGNode n, int v) {
     this(a, n, v, null);
   }
-  
+
   public AccessTrace(A a, CGNode n, int v, Filter<CGNode> f) {
     this.a = a;
     this.n = n;
@@ -162,7 +162,7 @@ public class AccessTrace {
                 }
               }
             }
-          }
+          }           
         }
         solveNV(node, get.getRef());
       }
