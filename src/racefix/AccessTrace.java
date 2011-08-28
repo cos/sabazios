@@ -152,7 +152,9 @@ public class AccessTrace {
 					solveNV(node, get.getRef());
 				} else {
 					addStaticFieldKeysForInstructionInNode(node, o, get);
-					InstanceKey classInstanceKey = a.heapGraph.getHeapModel().getInstanceKeyForClassObject(get.getDeclaredField().getDeclaringClass());
+					InstanceKey classInstanceKey = a.heapGraph.getHeapModel()
+							.getInstanceKeyForClassObject(
+									get.getDeclaredField().getDeclaringClass());
 					instances.add(classInstanceKey);
 				}
 			}
@@ -174,9 +176,10 @@ public class AccessTrace {
 		Iterator<Object> predNodes = a.heapGraph.getPredNodes(o);
 		while (predNodes.hasNext()) {
 			PointerKey pointer = (PointerKey) predNodes.next();
-			if(pointer instanceof StaticFieldKey) {
+			if (pointer instanceof StaticFieldKey) {
 				StaticFieldKey sField = (StaticFieldKey) pointer;
-				if(sField.getField().equals(a.cha.resolveField(get.getDeclaredField()))) {
+				if (sField.getField().equals(
+						a.cha.resolveField(get.getDeclaredField()))) {
 					pointers.add(sField);
 				}
 			}
@@ -185,7 +188,8 @@ public class AccessTrace {
 
 	private void addInstanceFieldKeysForInstructionInNode(CGNode node,
 			InstanceKey o, SSAGetInstruction get) {
-		int v1 = get.getRef(); // the ssa value for the object from which the current object is obtained
+		int v1 = get.getRef(); // the ssa value for the object from which the
+								// current object is obtained
 		LocalPointerKey lpc = pv.get(node, v1);
 		Iterator<Object> predNodes = a.heapGraph.getSuccNodes(lpc);
 		Set<InstanceKey> objs = new HashSet<InstanceKey>();
@@ -201,10 +205,8 @@ public class AccessTrace {
 			if (prev instanceof InstanceFieldKey) {
 				InstanceFieldKey field = (InstanceFieldKey) prev;
 				IField ifield = field.getField();
-				if (ifield.getName()
-						.equals(declaredField.getName())
-						&& a.cha.resolveField(
-								ifield.getDeclaringClass(),
+				if (ifield.getName().equals(declaredField.getName())
+						&& a.cha.resolveField(ifield.getDeclaringClass(),
 								declaredField).equals(ifield)) {
 					Iterator<Object> predNodes2 = a.heapGraph
 							.getPredNodes(field);
@@ -238,9 +240,13 @@ public class AccessTrace {
 				if (variableName != null)
 					s += "-" + variableName;
 				s += "\n";
-			}
-
-			if (o instanceof InstanceFieldKey) {
+			} else if (o instanceof StaticFieldKey) {
+				s += "SFK:";
+				s += ((StaticFieldKey) o).getField().getDeclaringClass().getName().getClassName().toString();
+				s += ".";
+				s += ((StaticFieldKey) o).getField().getName().toString();
+				s += "\n";
+			} else if (o instanceof InstanceFieldKey) {
 				InstanceFieldKey p = (InstanceFieldKey) o;
 				s += "IFK:";
 				s += p.getField().getDeclaringClass().getName().getClassName()
@@ -248,7 +254,9 @@ public class AccessTrace {
 				s += ".";
 				s += p.getField().getName().toString();
 				s += "\n";
-			}
+			} else 
+				throw new RuntimeException("PointerKey type not recognized "
+						+ o.toString());
 		}
 
 		for (InstanceKey o : instances) {
@@ -264,17 +272,19 @@ public class AccessTrace {
 						.toString();
 				s += "\n";
 			} else {
-				if(o instanceof ConcreteTypeKey) {
+				if (o instanceof ConcreteTypeKey) {
 					IClass concreteType = o.getConcreteType();
 					s += "C:";
 					s += concreteType.getName().getClassName().toString();
 					s += "\n";
-				} else if(o instanceof ConstantKey) {
+				} else if (o instanceof ConstantKey) {
 					s += "C:";
-					s += ((IClass)(((ConstantKey) o).getValue())).getName().getClassName().toString();
+					s += ((IClass) (((ConstantKey) o).getValue())).getName()
+							.getClassName().toString();
 					s += "\n";
 				} else
-					throw new RuntimeException("Instance type not recognized "+o.toString());
+					throw new RuntimeException("Instance type not recognized "
+							+ o.toString());
 			}
 		}
 		return s;

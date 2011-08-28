@@ -286,7 +286,8 @@ public class AccessTraceTest extends DataRaceAnalysisTest {
   @Test
   public void simpleStaticField() throws Exception {
     String startVariableName = "pufi";
-    String expected = "O:TraceSubject.simpleStaticField-new TraceSubject$Cat\n" + 
+    String expected = "SFK:TraceSubject$Dog.catKing\n" + 
+    		"O:TraceSubject.simpleStaticField-new TraceSubject$Cat\n" + 
     		"C:TraceSubject$Dog\n";
     runTest(startVariableName, expected);
   }
