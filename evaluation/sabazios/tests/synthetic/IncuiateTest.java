@@ -56,42 +56,45 @@ public class IncuiateTest extends DataRaceAnalysisTest {
 	public void syncedOnChangedStatic() {
 		assertCAs("Loop: sabazios.synthetic.Incuiate.syncedOnChangedStatic(Incuiate.java:152)\n" + 
 				"   Object : null new Incuiate\n" + 
-				"      Write accesses:\n" + 
+				"      Alpha accesses:\n" + 
 				"        Write sabazios.synthetic.Incuiate$8.op(Incuiate.java:155) - .lacatStatic\n" + 
-				"      Other accesses:\n" + 
+				"      Beta accesses:\n" + 
 				"        Read sabazios.synthetic.Incuiate$8.op(Incuiate.java:156) - .lacatStatic\n" + 
 				"        Write sabazios.synthetic.Incuiate$8.op(Incuiate.java:155) - .lacatStatic\n" + 
 				"   Object : sabazios.synthetic.Incuiate.syncedOnChangedStatic(Incuiate.java:150) new Particle\n" + 
-				"      Write accesses:\n" + 
+				"      Alpha accesses:\n" + 
 				"        Write sabazios.synthetic.Incuiate$8.op(Incuiate.java:157) - .x [7: sabazios.synthetic.Incuiate$8.op(Incuiate.java:156)]\n" + 
-				"      Other accesses:\n" + 
-				"        Write sabazios.synthetic.Incuiate$8.op(Incuiate.java:157) - .x [7: sabazios.synthetic.Incuiate$8.op(Incuiate.java:156)]\n");
+				"      Beta accesses:\n" + 
+				"        Write sabazios.synthetic.Incuiate$8.op(Incuiate.java:157) - .x [7: sabazios.synthetic.Incuiate$8.op(Incuiate.java:156)]\n" + 
+				"");
 	}
 	
 	@Test
 	public void syncedOnSomeChangedField() {
 		assertCAs("Loop: sabazios.synthetic.Incuiate.syncedOnSomeChangedField(Incuiate.java:112)\n" + 
 				"   Object : sabazios.synthetic.Incuiate.syncedOnSomeChangedField(Incuiate.java:110) new Particle\n" + 
-				"      Write accesses:\n" + 
+				"      Alpha accesses:\n" + 
 				"        Write sabazios.synthetic.Incuiate$6.op(Incuiate.java:117) - .x [7: sabazios.synthetic.Incuiate$6.op(Incuiate.java:116)]\n" + 
-				"      Other accesses:\n" + 
+				"      Beta accesses:\n" + 
 				"        Write sabazios.synthetic.Incuiate$6.op(Incuiate.java:117) - .x [7: sabazios.synthetic.Incuiate$6.op(Incuiate.java:116)]\n" + 
 				"   Object : sabazios.synthetic.Incuiate.syncedOnSomeChangedField(Incuiate.java:110) new Particle\n" + 
-				"      Write accesses:\n" + 
+				"      Alpha accesses:\n" + 
 				"        Write sabazios.synthetic.Incuiate$6.op(Incuiate.java:115) - .origin\n" + 
-				"      Other accesses:\n" + 
+				"      Beta accesses:\n" + 
 				"        Read sabazios.synthetic.Incuiate$6.op(Incuiate.java:116) - .origin\n" + 
-				"        Write sabazios.synthetic.Incuiate$6.op(Incuiate.java:115) - .origin\n");
+				"        Write sabazios.synthetic.Incuiate$6.op(Incuiate.java:115) - .origin\n" + 
+				"");
 	}
 	
 	@Test
 	public void stillARace() {
 		assertCAs("Loop: sabazios.synthetic.Incuiate.stillARace(Incuiate.java:61)\n" + 
 				"   Object : sabazios.synthetic.Incuiate.stillARace(Incuiate.java:59) new Particle\n" + 
-				"      Write accesses:\n" + 
+				"      Alpha accesses:\n" + 
 				"        Write sabazios.synthetic.Incuiate$3.op(Incuiate.java:65) - .x [3: sabazios.synthetic.Incuiate$3.op(Incuiate.java:64)]\n" + 
-				"      Other accesses:\n" + 
-				"        Write sabazios.synthetic.Incuiate$3.op(Incuiate.java:65) - .x [3: sabazios.synthetic.Incuiate$3.op(Incuiate.java:64)]\n");
+				"      Beta accesses:\n" + 
+				"        Write sabazios.synthetic.Incuiate$3.op(Incuiate.java:65) - .x [3: sabazios.synthetic.Incuiate$3.op(Incuiate.java:64)]\n" + 
+				"");
 	}
 	
 	@Test
@@ -129,20 +132,22 @@ public class IncuiateTest extends DataRaceAnalysisTest {
 	public void lockPropagatedCircularly() {
 		assertCAs("Loop: sabazios.synthetic.Incuiate.lockPropagatedCircularly(Incuiate.java:242)\n" + 
 				"   Object : sabazios.synthetic.Incuiate.lockPropagatedCircularly(Incuiate.java:240) new Particle\n" + 
-				"      Write accesses:\n" + 
-				"        Write sabazios.synthetic.Incuiate.someMethod(Incuiate.java:258) - .x [3: sabazios.synthetic.Incuiate$14.op(Incuiate.java:245)]\n" + 
-				"      Other accesses:\n" + 
-				"        Write sabazios.synthetic.Incuiate.someMethod(Incuiate.java:258) - .x [3: sabazios.synthetic.Incuiate$14.op(Incuiate.java:245)]\n");
+				"      Alpha accesses:\n" + 
+				"        Write sabazios.synthetic.Incuiate.someMethod(Incuiate.java:258) - .x\n" + 
+				"      Beta accesses:\n" + 
+				"        Write sabazios.synthetic.Incuiate.someMethod(Incuiate.java:258) - .x\n" + 
+				"");
 	}
 	
 	@Test
 	public void lockPropagatedCircularlyButBroken() {
 		assertCAs("Loop: sabazios.synthetic.Incuiate.lockPropagatedCircularlyButBroken(Incuiate.java:267)\n" + 
 				"   Object : sabazios.synthetic.Incuiate.lockPropagatedCircularlyButBroken(Incuiate.java:265) new Particle\n" + 
-				"      Write accesses:\n" + 
+				"      Alpha accesses:\n" + 
 				"        Write sabazios.synthetic.Incuiate.someMethod(Incuiate.java:258) - .x\n" + 
-				"      Other accesses:\n" + 
-				"        Write sabazios.synthetic.Incuiate.someMethod(Incuiate.java:258) - .x\n");
+				"      Beta accesses:\n" + 
+				"        Write sabazios.synthetic.Incuiate.someMethod(Incuiate.java:258) - .x\n" + 
+				"");
 	}
 	
 	@Test
