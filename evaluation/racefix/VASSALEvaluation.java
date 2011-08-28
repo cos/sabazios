@@ -3,6 +3,7 @@ package racefix;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -57,7 +58,7 @@ public class VASSALEvaluation extends DataRaceAnalysisTest {
     for (InstanceKey instanceKey : instances) {
       strings.add(instanceKey.toString());
     }
-    final LinkedHashSet<InstanceFieldKey> pointers = trace.getPointers();
+    final Set<PointerKey> pointers = trace.getPointers();
     for (PointerKey pointerKey : pointers) {
       strings.add(pointerKey.toString());
     }

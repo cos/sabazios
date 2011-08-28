@@ -70,7 +70,8 @@ public class JMolEvaluationWithRaceDetection extends DataRaceAnalysisTest {
     Privatizer runTest = runTest(entryClass, entryMethod, new DummyFilter(), true);
     // Privatizer runTest = runTest(entryClass, entryMethod, filter, true);
   }
-
+  
+  
   private Privatizer runTest(String entryClass, String entryMethod, ConcurrentAccessFilter filter, boolean writeStuff) {
     findCA(entryClass, entryMethod);
     Set<ConcurrentFieldAccess> races = a.deepRaces.values().iterator().next();

@@ -9,7 +9,7 @@ public class TraceSubject {
   public static class Dog extends Animal {
     public Cat chases;
     public Cat loves;
-    public static int numberOfDogs = 0;
+    public static Cat catKing;
   }
 
   public static class Cat extends Animal {
@@ -274,7 +274,7 @@ public class TraceSubject {
   }
 
   public void simpleStaticField() {
-    Cat pufi = new Cat();
-    Dog.numberOfDogs = pufi.lives;
+    Dog.catKing = new Cat();
+    Cat pufi = Dog.catKing;
   }
 }
