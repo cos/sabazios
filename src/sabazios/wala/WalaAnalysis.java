@@ -156,10 +156,18 @@ public class WalaAnalysis {
 		ClassLoader loader = DataRaceAnalysisTest.class.getClassLoader();
 
 		// Add the the j2se jar files
-		String[] stdlibs = WalaProperties.getJ2SEJarFiles();
-		for (int i = 0; i < stdlibs.length; i++) {
-			scope.addToScope(scope.getLoader(AnalysisScope.PRIMORDIAL), new JarFile(stdlibs[i]));
-		}
+//		String[] stdlibs = WalaProperties.getJ2SEJarFiles();
+//		for (int i = 0; i < stdlibs.length; i++) {
+//			scope.addToScope(scope.getLoader(AnalysisScope.PRIMORDIAL), new JarFile(stdlibs[i]));
+//		}
+		
+		scope.addToScope(scope.getLoader(AnalysisScope.PRIMORDIAL), 
+				new JarFile(getJavaClassesJar()));
+//		C:/prog.../Java/jre6
+//		C:/prog.../Java/jre6/lib/rt.jar
+		
+//		/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home
+//		/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/classes.jar
 
 		for (String directory : binaryDependencies) {
 			File sd = FileProvider.getFile(directory, loader);
@@ -178,5 +186,18 @@ public class WalaAnalysis {
 		}
 
 		return scope;
+	}
+
+	private String getJavaClassesJar() {
+		String javaHome = System.getProperty("java.home");
+		String javaClasses;
+		if(javaHome.startsWith("/")) {
+			javaClasses = javaHome.substring(0, javaHome.length()-4);
+			javaClasses += "Classes/classes.jar";
+		} else {
+			javaClasses = javaHome.replace("\\", "/");
+			javaClasses += "/lib/rt.jar";
+		}
+		return javaClasses;
 	}
 }
