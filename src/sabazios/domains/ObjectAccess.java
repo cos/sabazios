@@ -5,6 +5,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import sabazios.A;
 import sabazios.lockset.LockSet;
+import sabazios.util.CodeLocation;
 
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.propagation.InstanceKey;
@@ -57,4 +58,7 @@ public abstract class ObjectAccess {
 	public void updateLock(A a) {
 		l = a.locks.get(n, i);
   }
+	public CodeLocation getCodeLocation() {
+		return CodeLocation.make(n, i);
+	}
 }

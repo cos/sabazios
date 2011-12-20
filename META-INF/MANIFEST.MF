@@ -25,3 +25,7 @@ Bundle-ClassPath: bin/,
  lib/commons-lang3-3.0-beta.jar,
  lib/guava-r09.jar,
  lib/lambdaj-2.3.3-with-dependencies.jar
+Export-Package: sabazios,
+ sabazios.domains,
+ sabazios.util,
+ sabazios.wala

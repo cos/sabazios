@@ -20,8 +20,8 @@ public class Loop implements Comparable<Loop> {
 	}
 
 	@Override
-	public int hashCode() {
-		return array.hashCode() + operatorCaller.hashCode() + operatorCallSite.hashCode();
+	public int compareTo(Loop o) {
+		return this.toString().compareTo(o.toString());
 	}
 
 	@Override
@@ -35,16 +35,21 @@ public class Loop implements Comparable<Loop> {
 				&& operatorCallSite.equals(other.operatorCallSite);
 	}
 
-	@Override
-	public String toString() {
-		if (U.detailedResults)
-			return CodeLocation.make(operatorCaller, operatorCaller.getIR().getCalls(operatorCallSite)[0]) .toString() + " Array: " + U.tos(array);
-		else
-			return CodeLocation.make(operatorCaller, operatorCaller.getIR().getCalls(operatorCallSite)[0]).toString();
+	public CodeLocation getCodeLocation() {
+		return CodeLocation.make(operatorCaller, operatorCaller.getIR().getCalls(operatorCallSite)[0]);
 	}
 
 	@Override
-	public int compareTo(Loop o) {
-		return this.toString().compareTo(o.toString());
+	public int hashCode() {
+		return array.hashCode() + operatorCaller.hashCode() + operatorCallSite.hashCode();
+	}
+	
+	@Override
+	public String toString() {
+		String result = getCodeLocation().toString();
+		if (U.detailedResults)
+			return result + " Array: " + U.tos(array);
+		else
+			return result;
 	}
 }
