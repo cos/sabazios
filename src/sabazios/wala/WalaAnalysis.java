@@ -51,8 +51,12 @@ public class WalaAnalysis {
 	protected final List<String> binaryDependencies = new ArrayList<String>();
 	protected final List<String> jarDependencies = new ArrayList<String>();
 	protected final List<String> extensionBinaryDependencies = new ArrayList<String>();
-	protected PropagationCallGraphBuilder builder;
+	protected PropagationCallGraphBuilder builder = null;
 	private AnalysisCache cache;
+	
+	public WalaAnalysis() {
+		
+	}
 
 	public static SSAPropagationCallGraphBuilder makeCFABuilder(AnalysisOptions options, AnalysisCache cache,
 	    IClassHierarchy cha, AnalysisScope scope) {

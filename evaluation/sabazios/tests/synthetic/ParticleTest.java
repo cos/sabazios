@@ -253,6 +253,8 @@ public class ParticleTest extends DataRaceAnalysisTest {
 				"        sabazios.synthetic.Particle$31.op(Particle.java:432)\n");
 	}
 
+	// continue transfer from here
+	
 	@Test
 	public void noRaceOnStringConcatenation() {
 		assertCAs("");

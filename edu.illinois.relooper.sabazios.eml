@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component>
+	<exclude-output/>
+	<contentEntry url="file://$MODULE_DIR$"/>
+	<lib name="bin/" scope="COMPILE">
+		<srcroot url="file://$MODULE_DIR$/src"/>
+		<relative-module-src project-related="file://$PROJECT_DIR$/relooper.sabazios/src"/>
+	</lib>
+	<lib name="guava-r09.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/relooper.sabazios/lib/guava-r09.jar!/"/>
+	</lib>
+	<lib name="commons-lang3-3.0-beta.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/relooper.sabazios/lib/commons-lang3-3.0-beta.jar!/"/>
+	</lib>
+	<lib name="lambdaj-2.3.3-with-dependencies.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/relooper.sabazios/lib/lambdaj-2.3.3-with-dependencies.jar!/"/>
+	</lib>
+</component>
