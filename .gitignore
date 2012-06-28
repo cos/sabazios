@@ -3,7 +3,7 @@
 /debug/
 /.settings/
 /concurrentAccessFiles/
-/walaExclusions.txt
+/results/
 falseLCDInRenderMethodDespiteClearWriteBeforeReadLCDs.txt
 falseLCDInRenderMethodDespiteClearWriteBeforeReadRaces.txt
 *.launch
